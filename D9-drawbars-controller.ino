@@ -190,7 +190,7 @@ void setup()
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
   preset = 1;
-  //old_preset_led = 1;
+  old_preset_led = 3;
 }
 
 
@@ -383,9 +383,10 @@ void getDigitalData() {
 
         if ( IS_PRESET == PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TOGGLE] ){
             // If this button is dedicated to switch the presets...
-               Serial.println (String("CHANGING preset") );
-             //  ledState[STATUS][old_preset_led] = 0;
-               //ledState[STATUS][btn_scanned +1] = btn_val;  
+               Serial.println (String("CHANGING preset") + STATUS );
+               btn_val = !btn_state[STATUS][btn_scanned];
+               ledState[STATUS][old_preset_led] = 0;
+               ledState[STATUS][btn_scanned +1] = btn_val;  
                old_preset_led = btn_scanned +1;
                preset = PRESETS[preset][btn_index][STATUS_IDX[STATUS] +MAX];  
                Serial.println (String("New preset is: ") + preset );
