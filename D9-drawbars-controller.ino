@@ -212,8 +212,8 @@ void loop() {
 }
 
 void getAltBtn(){
-  static long btnAlt_DownTime;
-  static long holdTime = 2000;
+  static unsigned long btnAlt_DownTime;
+  static unsigned long holdTime = 2000;
   // scansioniamo il pulsante "ALT"
   if (btn_alt.update()){
     if (btn_alt.fell()) {
@@ -246,7 +246,7 @@ void getAltBtn(){
       // se il suo stato è "premuto" ( cioè 0)... allora verifichiamo da quanto tempo è permuto
       if( btn_alt.read() == 0 ){
           // se è premuto da abbastanza tempo allora passiamo a allo Status ALT
-          if ((millis() - btnAlt_DownTime) > long(holdTime) && btnAlt_released == 1 ) {
+          if ((millis() - btnAlt_DownTime) > holdTime && btnAlt_released == 1 ) {
 
             Serial.println(String("ALT BTN LONG PRESS!!:") );
             OLD_STATUS = STATUS;
