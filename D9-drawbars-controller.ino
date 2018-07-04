@@ -208,7 +208,23 @@ void loop() {
   setLeds();
   
   // read and discard any incoming Midi messages
-  while (usbMIDI.read()); 
+  //while (usbMIDI.read()); 
+
+  // RX1 to TX1 
+if (MIDI.read()){
+  
+    MIDI.send(MIDI.getType(),
+              MIDI.getData1(),
+              MIDI.getData2(),
+              MIDI.getChannel());
+              
+    usbMIDI.send(MIDI.getType(),
+              MIDI.getData1(),
+              MIDI.getData2(),
+              MIDI.getChannel());                     
+  }
+
+
 }
 
 void getAltBtn(){
