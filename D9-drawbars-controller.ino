@@ -4,30 +4,16 @@
 #include <MIDI.h>
 #include <ResponsiveAnalogRead.h>
 
-/*****************************
- * PRESET TO BE USED
- * 1: Factory preset for Roland FA 06/07/07
- * 2: Factory preset for GSi Gemini expander 
- * 3: User preset A
- * 4: User preset B
- * 5: C
- * 6: D
- */
- 
- const byte ST_ALT  = 0;
- const byte ST_UP   = 1;
- const byte ST_LOW  = 2;
- const byte STATUS_IDX[] = 
- {
-  15, 1, 8
- };
+
  byte STATUS;
  byte OLD_STATUS;
  byte btnAlt_released;
 
-const byte LED = 13;       // LED pin on board
+//const byte LED = 13;       // LED pin on board
  
- const byte preset = 1;
+ byte preset;
+ byte old_preset_led;
+ 
  byte midi_channel = 1;
  
  const byte DWB16    = A8;
@@ -51,14 +37,15 @@ const byte LSL_FAST = 2;
 
 const byte LED_ALT = 0;
 
-const byte BTN_COUNT = 7; // configurable buttons number
-const byte DRWB_COUNT = 9; // number of analog input used
-const byte BTN_IDX_START = DRWB_COUNT;
-const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
+const byte BTN_COUNT = 7; // configurable buttons number (less the Alternate button, counted a part)
+const byte DRWB_COUNT = 9; // configurable number of drawbars used
+const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start the drawbars rows?
+const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT; 
 const byte IS_TOGGLE   = 1;
 const byte IS_VIBCHO = 2;
+const byte IS_PRESET = 3;
 const byte IS_GLOBAL = 1; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
-const byte SEND_ALL = 2; // if we have to send both the Lower and the Upper values at the same time both in Upper taht  in Lower state
+const byte SEND_ALL = 2; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
 // a data array and a lagged copy to tell when Midi changes are required
 byte data[DRWB_COUNT];
@@ -67,7 +54,7 @@ byte dataLag[DRWB_COUNT]; // when lag and new are not the same then update Midi 
 byte vibcho_lag; // 
 
 /*
-   The multidimensional Array int DRWB will contains in each row:
+   The multidimensional Array byte PRESETS will contains in each row:
    1) the pin to which the drawbar/button is attached to
    2) the type of midi message to send out:
       0 = Disabled
@@ -82,9 +69,11 @@ byte vibcho_lag; //
    3) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    4) the min value to send out
    5) the max value to sed out
-   6) does the button have to behave as a toggle one?
-   7) Upper/lower behaviour
+   6) does the button have to behave as a toggle one (IS_TOGGLE) or is used for switch presets (IS_PRESET, set the preset number in the MAX location) or is used to change the Vibrato/choorus type (IS_VIBCHO)?
+   7) Upper/lower behaviour.
 */
+
+/* Array index position labels */
 const byte TYPE = 0;
 const byte PARAM = 1;
 const byte MIN = 2;
@@ -93,6 +82,11 @@ const byte CHAN = 4;
 const byte TOGGLE = 5;
 const byte BEHAV = 6;
 
+/*****************************
+ * PRESETS
+ * 0: Factory preset for Roland FA 06/07/07
+ * 1: Factory preset for GSi Gemini expander 
+ */
 const byte PRESETS[2][PRESET_CONTROLS_NUM][22]=
 {//                 UPPER                                    LOWER                                  ALTERNATE
 {//PIN      Type Prm Min Max Ch Toggle    Behaviour  Type Prm Min Max Ch Toggle    Behaviour   Type Prm Min Max Ch Toggle    Behaviour
@@ -106,8 +100,8 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][22]=
   {DWB5_13,   8, 0x23, 0, 8, 1, 0,         0,          8, 0x23, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0,         0},
   {DWB16,     8, 0x22, 0, 8, 1, 0,         0,          8, 0x22, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0,         0},
   {CHOVIB_ON, 0, 0x00, 0, 0, 0, 0,         0,          0, 0x00, 0, 0, 0, 0,         0,           0, 0x00, 0, 0, 0, 0,         0}, 
-  {PERC_ON,   8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0,         0},
-  {PERC_SOFT, 8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0,         0},
+  {PERC_ON,   8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 0, 1, IS_PRESET, 0},
+  {PERC_SOFT, 8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, IS_PRESET, 0},
   {PERC_FAST, 8, 0x2D, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2D, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0,         0},
   {PERC_3RD,  8, 0x2C, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2C, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0,         0},
   {LSL_STOP,  4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL,   4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL,    4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL}, //leslie OFF
@@ -124,8 +118,8 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][22]=
   {DWB5_13,   4, 13, 0, 127, 1, 0,         0,          4, 22, 0, 127, 1, 0,         0,           4, 35, 0, 127, 1, 0,         0}, // PEDAL 8
   {DWB16,     4, 12, 0, 127, 1, 0,         0,          4, 21, 0, 127, 1, 0,         0,           4, 33, 0, 127, 1, 0,         0}, // PEDAL 16
   {CHOVIB_ON, 4, 31, 0, 127, 1, IS_TOGGLE, 0,          4, 30, 0, 127, 1, IS_TOGGLE, 0,           4, 55, 0, 127, 1, IS_TOGGLE, 0}, // PEDAL TO LOWER
-  {PERC_ON,   4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0,         0},
-  {PERC_SOFT, 4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0,         0},
+  {PERC_ON,   4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0,   0, 1, IS_PRESET, 0},
+  {PERC_SOFT, 4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0,   1, 1, IS_PRESET, 0},
   {PERC_FAST, 4, 71, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 71, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0,         0},
   {PERC_3RD,  4, 72, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 72, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0,         0},
   {LSL_STOP,  4, 87, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 87, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   4, 85, 0, 127, 1, IS_TOGGLE, IS_GLOBAL}, // LESLIE OFF
@@ -133,7 +127,13 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][22]=
 }
 };
 
-
+ const byte ST_ALT  = 0; // Controller status: ALTERNATE
+ const byte ST_UP   = 1; // Controller status: UPPER
+ const byte ST_LOW  = 2; // Controller status: LOWER
+ const byte STATUS_IDX[] =  // the column number in the PRESETS array where starts parameters for each status
+ {
+  15, 1, 8
+ };
 
 // initialize the ReponsiveAnalogRead objects
 ResponsiveAnalogRead drwb[] {
@@ -164,7 +164,7 @@ byte led_alt_blink_status;
 void setup()
 {
 
-  pinMode(LED, OUTPUT);
+  //pinMode(LED, OUTPUT);
 
   
   Serial.begin(38400);
@@ -189,7 +189,8 @@ void setup()
   STATUS = ST_UP;
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
-
+  preset = 1;
+  old_preset_led = 1;
 }
 
 
@@ -291,7 +292,7 @@ void setVibchoLeds( byte ledon ){
 void setLeds(){
   
     if ( STATUS == ST_ALT){
-      digitalWrite(LED, 1);
+      //digitalWrite(LED, 1);
 
       //blink LED_ALT
       if( millis()-led_alt_on_time < 500 ){
@@ -303,7 +304,7 @@ void setLeds(){
       }
     }
     else{
-      digitalWrite(LED, 0);
+     // digitalWrite(LED, 0);
       led.digitalWrite(LED_ALT, ledState[STATUS][LED_ALT]);
     }
     
@@ -326,14 +327,14 @@ void getAnalogData() {
     // update the ResponsiveAnalogRead object every loop
     drwb[drwb_scanned].update();
     
-    // if the repsonsive value has change, print out 'changed'
+    // if the repsonsive value has changed, go
     if (drwb[drwb_scanned].hasChanged()) {
       data[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
       if (data[drwb_scanned] != dataLag[drwb_scanned]) {
         dataLag[drwb_scanned] = data[drwb_scanned];
         Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + data[drwb_scanned] );
 
-        // check if is the VIB/CHO control
+        // check if this drawbar is dedicated to the VIB/CHO control
         if (PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] + TOGGLE] == 2){
            Serial.println (String("DWB controls VIBCHO") );
           
@@ -379,7 +380,16 @@ void getDigitalData() {
           btn_val = btn_state[STATUS][btn_scanned];
         }
         
-        if ( SEND_ALL == PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] ){
+        if ( IS_PRESET == PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TOGGLE] ){
+            // If this button is dedicated to switch the presets...
+               Serial.println (String("CHANGING preset") );
+               ledState[STATUS][old_preset_led] = 0;
+               ledState[STATUS][btn_scanned +1] = btn_val;  
+               old_preset_led = btn_scanned +1;
+               preset = PRESETS[preset][btn_index][STATUS_IDX[STATUS] +MAX];  
+               Serial.println (String("New preset is: ") + preset );
+        }
+        else if ( SEND_ALL == PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] ){
               sendMidi( PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
               sendMidi( PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
               ledState[ST_UP][btn_scanned +1] = btn_val;
@@ -402,11 +412,12 @@ void getDigitalData() {
       }
       // Pulsante rilasciato
       else {
-          if (PRESETS[preset][btn_index][STATUS_IDX[1] +TOGGLE] != IS_TOGGLE){
+          if (PRESETS[preset][btn_index][STATUS_IDX[1] +TOGGLE] == 0){
            ledState[STATUS][btn_scanned +1] = !btn_val;
            //led.digitalWrite(btn_scanned +1, !btn_val);
            sendMidi( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
           }
+          
       }
     } // fine btn scanned.updated
   }
