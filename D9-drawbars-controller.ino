@@ -133,17 +133,16 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][21]=
 
 // initialize the ReponsiveAnalogRead objects
 ResponsiveAnalogRead drwb[] {
-  {PRESETS[preset][0][0], true},
-  {PRESETS[preset][1][0], true},
-  {PRESETS[preset][2][0], true},
-  {PRESETS[preset][3][0], true},
-  {PRESETS[preset][4][0], true},
-  {PRESETS[preset][5][0], true},
-  {PRESETS[preset][6][0], true},
-  {PRESETS[preset][7][0], true},
-  {PRESETS[preset][8][0], true},
+  {DWB1, true},
+  {DWB1_13, true},
+  {DWB1_35, true},
+  {DWB2, true},
+  {DWB2_23, true},
+  {DWB4, true},
+  {DWB8, true},
+  {DWB5_13, true},
+  {DWB16, true},
 };
-
 // Creates an array and fills it with Bounce objects. see https://forum.arduino.cc/index.php?topic=266132.msg2071306#msg2071306
 byte btn_state[3][BTN_COUNT] = {};
 Bounce * btn = new Bounce[BTN_COUNT] ; 
