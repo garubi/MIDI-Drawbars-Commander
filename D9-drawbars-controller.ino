@@ -5,22 +5,22 @@
 #include <ResponsiveAnalogRead.h>
 
 
- byte STATUS;
- byte OLD_STATUS;
- byte btnAlt_released;
+byte STATUS;
+byte OLD_STATUS;
+byte btnAlt_released;
+
+byte preset;
+byte old_preset_led;
  
- byte preset;
- byte old_preset_led;
- 
- const byte DWB16    = A8;
- const byte DWB5_13  = A7;
- const byte DWB8     = A6;
- const byte DWB4     = A10;
- const byte DWB2_23  = A11;
- const byte DWB2     = A3;
- const byte DWB1_35  = A2;
- const byte DWB1_13  = A1;
- const byte DWB1     = A0;
+const byte DWB16    = A8;
+const byte DWB5_13  = A7;
+const byte DWB8     = A6;
+const byte DWB4     = A10;
+const byte DWB2_23  = A11;
+const byte DWB2     = A3;
+const byte DWB1_35  = A2;
+const byte DWB1_13  = A1;
+const byte DWB1     = A0;
 
 const byte BTN_ALT = 9;
 const byte CHOVIB_ON = 8;
@@ -37,11 +37,11 @@ const byte BTN_COUNT = 7; // configurable buttons number (less the Alternate but
 const byte DRWB_COUNT = 9; // configurable number of drawbars used
 const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start the drawbars rows?
 const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT; 
-const byte IS_TOGGLE   = 1;
+const byte IS_TOGGLE = 1;
 const byte IS_VIBCHO = 2;
 const byte IS_PRESET = 3;
 const byte IS_GLOBAL = 1; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
-const byte SEND_ALL = 2; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
+const byte SEND_ALL  = 2; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
 // a data array and a lagged copy to tell when Midi changes are required
 byte data[DRWB_COUNT];
@@ -56,7 +56,7 @@ byte vibcho_lag; //
       0 = Disabled
       1 = Note Off,
       2 = Note On,
-     c 3 = Poliphonic Pressure,
+      3 = Poliphonic Pressure,
       4 = Control Change,
       5 = Program Change,
       6 = After Touch,
@@ -83,43 +83,43 @@ const byte BEHAV = 6;
  * 0: Factory preset for Roland FA 06/07/07
  * 1: Factory preset for GSi Gemini expander 
  */
-const byte PRESETS[2][PRESET_CONTROLS_NUM][21]=
+const byte PRESETS[2][PRESET_CONTROLS_NUM][20]=
 {//                 UPPER                                    LOWER                                  ALTERNATE
-{//PIN      Type Prm Min Max Ch Toggle    Behaviour  Type Prm Min Max Ch Toggle    Behaviour   Type Prm Min Max Ch Toggle
-  {DWB1,      8, 0x2A, 0, 8, 1, 0,         0,          8, 0x2A, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {DWB1_13,   8, 0x29, 0, 8, 1, 0,         0,          8, 0x29, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {DWB1_35,   8, 0x28, 0, 8, 1, 0,         0,          8, 0x28, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {DWB2,      8, 0x27, 0, 8, 1, 0,         0,          8, 0x27, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {DWB2_23,   8, 0x26, 0, 8, 1, 0,         0,          8, 0x26, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {DWB4,      8, 0x25, 0, 8, 1, 0,         0,          8, 0x25, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {DWB8,      8, 0x24, 0, 8, 1, 0,         0,          8, 0x24, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {DWB5_13,   8, 0x23, 0, 8, 1, 0,         0,          8, 0x23, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {DWB16,     8, 0x22, 0, 8, 1, 0,         0,          8, 0x22, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-  {CHOVIB_ON, 0, 0x00, 0, 0, 0, 0,         0,          0, 0x00, 0, 0, 0, 0,         0,           0, 0x00, 0, 0, 0, 0}, 
-  {PERC_ON,   8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 0, 1, IS_PRESET},
-  {PERC_SOFT, 8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, IS_PRESET},
-  {PERC_FAST, 8, 0x2D, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2D, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0},
-  {PERC_3RD,  8, 0x2C, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2C, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0},
-  {LSL_STOP,  4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL,   4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL,    4, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
-  {LSL_FAST,  4, 81, 0, 127, 1, IS_TOGGLE, SEND_ALL,   4, 81, 0, 127, 1, IS_TOGGLE, SEND_ALL,    0, 0,  0, 127, 1, 0},  
+{//PIN        Type Prm Min Max Ch Toggle    Behaviour  Type Prm Min Max Ch Toggle    Behaviour   Type Prm Min Max Ch Toggle
+/*DWB1*/        {8, 0x2A, 0, 8, 1, 0,         0,          8, 0x2A, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*DWB1_13*/     {8, 0x29, 0, 8, 1, 0,         0,          8, 0x29, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*DWB1_35*/     {8, 0x28, 0, 8, 1, 0,         0,          8, 0x28, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*DWB2*/        {8, 0x27, 0, 8, 1, 0,         0,          8, 0x27, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*DWB2_23*/     {8, 0x26, 0, 8, 1, 0,         0,          8, 0x26, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*DWB4*/        {8, 0x25, 0, 8, 1, 0,         0,          8, 0x25, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*DWB8*/        {8, 0x24, 0, 8, 1, 0,         0,          8, 0x24, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*DWB5_13*/     {8, 0x23, 0, 8, 1, 0,         0,          8, 0x23, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*DWB16*/       {8, 0x22, 0, 8, 1, 0,         0,          8, 0x22, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
+/*CHOVIB_ON*/   {0, 0x00, 0, 0, 0, 0,         0,          0, 0x00, 0, 0, 0, 0,         0,           0, 0x00, 0, 0, 0, 0}, 
+/*PERC_ON*/     {8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 0, 1, IS_PRESET},
+/*PERC_SOFT*/   {8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, IS_PRESET},
+/*PERC_FAST*/   {8, 0x2D, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2D, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0},
+/*PERC_3RD*/    {8, 0x2C, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2C, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0},
+/*LSL_STOP*/    {4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL,   4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL,    4, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
+/*LSL_FAST*/    {4, 81, 0, 127, 1, IS_TOGGLE, SEND_ALL,   4, 81, 0, 127, 1, IS_TOGGLE, SEND_ALL,    0, 0,  0, 127, 1, 0},  
 },//                 UPPER                           |             LOWER                       |             ALTERNATE
-{//PIN      Type Prm Min Max Ch Toggle    Behaviour  Type Prm Min Max Ch Toggle    Behaviour   Type Prm Min Max Ch Toggle   
-  {DWB1,      4, 20, 0, 127, 1, 0,         0,          4, 29, 0, 127, 1, 0,         0,           4, 84, 0, 127, 1, 0}, // REV LEVEL
-  {DWB1_13,   4, 19, 0, 127, 1, 0,         0,          4, 28, 0, 127, 1, 0,         0,           4, 76, 0, 127, 1, 0}, // DRIVE
-  {DWB1_35,   4, 18, 0, 127, 1, 0,         0,          4, 27, 0, 127, 1, 0,         0,           4, 75, 0, 127, 1, 0}, // KEY CLICK
-  {DWB2,      4, 17, 0, 127, 1, 0,         0,          4, 26, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
-  {DWB2_23,   4, 16, 0, 127, 1, 0,         0,          4, 25, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
-  {DWB4,      4, 15, 0, 127, 1, 0,         0,          4, 24, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
-  {DWB8,      4, 14, 0, 127, 1, 0,         0,          4, 23, 0, 127, 1, 0,         0,           4, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
-  {DWB5_13,   4, 13, 0, 127, 1, 0,         0,          4, 22, 0, 127, 1, 0,         0,           4, 35, 0, 127, 1, 0}, // PEDAL 8
-  {DWB16,     4, 12, 0, 127, 1, 0,         0,          4, 21, 0, 127, 1, 0,         0,           4, 33, 0, 127, 1, 0}, // PEDAL 16
-  {CHOVIB_ON, 4, 31, 0, 127, 1, IS_TOGGLE, 0,          4, 30, 0, 127, 1, IS_TOGGLE, 0,           4, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
-  {PERC_ON,   4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0,   0, 1, IS_PRESET},
-  {PERC_SOFT, 4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0,   1, 1, IS_PRESET},
-  {PERC_FAST, 4, 71, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 71, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0},
-  {PERC_3RD,  4, 72, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 72, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0},
-  {LSL_STOP,  4, 87, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 87, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   4, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
-  {LSL_FAST,  4, 86, 0,  127, 1,IS_TOGGLE, IS_GLOBAL,  4, 86, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   4, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
+{//PIN        Type Prm Min Max Ch Toggle    Behaviour  Type Prm Min Max Ch Toggle    Behaviour   Type Prm Min Max Ch Toggle   
+/*DWB1*/        {4, 20, 0, 127, 1, 0,         0,          4, 29, 0, 127, 1, 0,         0,           4, 84, 0, 127, 1, 0}, // REV LEVEL
+/*DWB1_13*/     {4, 19, 0, 127, 1, 0,         0,          4, 28, 0, 127, 1, 0,         0,           4, 76, 0, 127, 1, 0}, // DRIVE
+/*DWB1_35*/     {4, 18, 0, 127, 1, 0,         0,          4, 27, 0, 127, 1, 0,         0,           4, 75, 0, 127, 1, 0}, // KEY CLICK
+/*DWB2*/        {4, 17, 0, 127, 1, 0,         0,          4, 26, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
+/*DWB2_23*/     {4, 16, 0, 127, 1, 0,         0,          4, 25, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
+/*DWB4*/        {4, 15, 0, 127, 1, 0,         0,          4, 24, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
+/*DWB8*/        {4, 14, 0, 127, 1, 0,         0,          4, 23, 0, 127, 1, 0,         0,           4, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
+/*DWB5_13*/     {4, 13, 0, 127, 1, 0,         0,          4, 22, 0, 127, 1, 0,         0,           4, 35, 0, 127, 1, 0}, // PEDAL 8
+/*DWB16*/       {4, 12, 0, 127, 1, 0,         0,          4, 21, 0, 127, 1, 0,         0,           4, 33, 0, 127, 1, 0}, // PEDAL 16
+/*CHOVIB_ON*/   {4, 31, 0, 127, 1, IS_TOGGLE, 0,          4, 30, 0, 127, 1, IS_TOGGLE, 0,           4, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
+/*PERC_ON*/     {4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0,   0, 1, IS_PRESET},
+/*PERC_SOFT*/   {4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0,   1, 1, IS_PRESET},
+/*PERC_FAST*/   {4, 71, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 71, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0},
+/*PERC_3RD*/    {4, 72, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 72, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0},
+/*LSL_STOP*/    {4, 87, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 87, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   4, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
+/*LSL_FAST*/    {4, 86, 0,  127, 1,IS_TOGGLE, IS_GLOBAL,  4, 86, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   4, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
 }
 };
 
@@ -171,8 +171,9 @@ void setup()
     
   // set all "standard" buttons as input Pullup and attach debouncer
   for (int b = 0; b < BTN_COUNT; b++) {
-    pinMode(PRESETS[preset][b + BTN_IDX_START][0], INPUT_PULLUP);
-    btn[b].attach(PRESETS[preset][b + BTN_IDX_START][0]);
+    // we use PRESETS[0] since any of them has the 1st column the same
+    pinMode(PRESETS[0][b + BTN_IDX_START][0], INPUT_PULLUP);
+    btn[b].attach(PRESETS[0][b + BTN_IDX_START][0]);
   }
 
   led.begin();      // use default address 0
