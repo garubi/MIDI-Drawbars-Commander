@@ -128,7 +128,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][20]=
  const byte ST_LOW  = 2; // Controller status: LOWER
  const byte STATUS_IDX[] =  // the column number in the PRESETS array where starts parameters for each status
  {
-  15, 1, 8
+  14, 0, 7
  };
 
 // initialize the ReponsiveAnalogRead objects
@@ -237,14 +237,12 @@ void getAltBtn(){
           if ( STATUS == ST_UP && OLD_STATUS != ST_ALT){
             OLD_STATUS = STATUS;
             STATUS = ST_LOW;
-            //led.digitalWrite(LED_ALT, 1);
             ledState[STATUS][LED_ALT] = 1;
             Serial.println (String("STATUS: ") + STATUS);
           }
           else{
             OLD_STATUS = STATUS;
             STATUS = ST_UP;
-            //led.digitalWrite(LED_ALT, 0);
             ledState[STATUS][LED_ALT] = 0;
             Serial.println (String("STATUS: ") + STATUS);
           }          
@@ -265,19 +263,15 @@ void getAltBtn(){
             if ( STATUS == ST_ALT ){
               btnAlt_released = 0;
               STATUS = ST_UP;
-              //digitalWrite(LED, 0);
               ledState[STATUS][LED_ALT] = 0;
-              //led.digitalWrite(LED_ALT, 0);
               Serial.println (String("from ALT to STATUS: ") + STATUS);
             }
             else {
               btnAlt_released = 0;
               STATUS = ST_ALT;
               led_alt_on_time = millis();
-              //digitalWrite(LED, 1);
               ledState[STATUS][LED_ALT] = 1;
               led_alt_blink_status = ledState[STATUS][LED_ALT];
-              //led.digitalWrite(LED_ALT, 0);
               Serial.println (String("STATUS: ") + STATUS);
             }
          }
@@ -423,7 +417,6 @@ void getDigitalData() {
           if (PRESETS[preset][btn_index][STATUS_IDX[1] +TOGGLE] == 0){
            Serial.println(String("Btn released - No TOOGLE - new btn_val: ") + !btn_val );
            ledState[STATUS][btn_scanned +1] = !btn_val;
-           //led.digitalWrite(btn_scanned +1, !btn_val);
            sendMidi( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
           }
           
@@ -482,8 +475,8 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
               data[8] = partsB[channel - 1];
               data[10] = parameter;
               data[11] = value;
-              if ( PRESETS[preset][control][4] != 127 || PRESETS[preset][control][3] != 0 ) {
-                data[11] = map(value, 0, 127, PRESETS[preset][control][3], PRESETS[preset][control][4]);
+              if ( PRESETS[preset][control][STATUS_IDX[STATUS] +MAX] != 127 || PRESETS[preset][control][STATUS_IDX[STATUS] +MIN] != 0 ) {
+                data[11] = map(value, 0, 127, PRESETS[preset][control][STATUS_IDX[STATUS] +MIN], PRESETS[preset][control][STATUS_IDX[STATUS] +MAX]);
               }
 
               /*
@@ -492,13 +485,7 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
               int address = data[7] + data[8] + data[9] + data[10] + data[11] ;
               int remainder = address % 128;
               data[12] = 128 - remainder;
-              /*
-              Serial.print("SysEX data:");
-              for(int i = 0; i < SysexLenght; i++)
-              {
-                Serial.println(data[i], HEX);
-              }
-              */
+
               MIDI.sendSysEx(SysexLenght, data);
               usbMIDI.sendSysEx(SysexLenght, data);
           }
