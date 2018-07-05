@@ -160,6 +160,8 @@ Adafruit_MCP23017 led;
 byte ledState[3][8] = {};
 long led_alt_on_time;
 byte led_alt_blink_status;
+
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
   
 void setup()
 {
@@ -208,8 +210,8 @@ void loop() {
   setLeds();
   
   // read and discard any incoming Midi messages
-  //while (usbMIDI.read()); 
-
+  while (usbMIDI.read()); 
+              /*
   // RX1 to TX1 
 if (MIDI.read()){
   
@@ -217,14 +219,14 @@ if (MIDI.read()){
               MIDI.getData1(),
               MIDI.getData2(),
               MIDI.getChannel());
-              
+
     usbMIDI.send(MIDI.getType(),
               MIDI.getData1(),
               MIDI.getData2(),
-              MIDI.getChannel());                     
+              MIDI.getChannel());                    
   }
 
-
+*/ 
 }
 
 void getAltBtn(){
@@ -458,8 +460,8 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
         MIDI.sendNoteOn(parameter, value, midi_channel);
         break;
       case 3: // Poliphonic Pressure
-        MIDI.sendPolyPressure(parameter, value, midi_channel);
-        usbMIDI.sendPolyPressure(parameter, value, midi_channel);
+        MIDI.sendAfterTouch(parameter, value, midi_channel);
+        usbMIDI.sendAfterTouchPoly(parameter, value, midi_channel);
         break;
       case 4: // Control Change
         MIDI.sendControlChange(parameter, value, midi_channel);
