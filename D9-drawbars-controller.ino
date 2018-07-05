@@ -8,13 +8,9 @@
  byte STATUS;
  byte OLD_STATUS;
  byte btnAlt_released;
-
-//const byte LED = 13;       // LED pin on board
  
  byte preset;
  byte old_preset_led;
- 
- byte midi_channel = 1;
  
  const byte DWB16    = A8;
  const byte DWB5_13  = A7;
@@ -166,8 +162,6 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 void setup()
 {
 
-  //pinMode(LED, OUTPUT);
-
   
   Serial.begin(38400);
   MIDI.begin(MIDI_CHANNEL_OMNI);
@@ -293,12 +287,6 @@ void getAltBtn(){
 
 
 void setVibchoLeds( byte ledon ){
-  /*
-    // tur off all the 6 vib/cho status leds
-    for (byte ledto = 8; ledto < 14; ledto++) {
-      led.digitalWrite(ledto, 0);
-    }
-    */
     // turn off the old led     
     led.digitalWrite(vibcho_lag + 8, 0);
     
@@ -354,7 +342,7 @@ void getAnalogData() {
         Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + data[drwb_scanned] );
 
         // check if this drawbar is dedicated to the VIB/CHO control
-        if (PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] + TOGGLE] == 2){
+        if ( PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] + TOGGLE] == IS_VIBCHO ){
            Serial.println (String("DWB controls VIBCHO") );
           
           // calculate which Led turn on based on the Drawbar value
@@ -452,32 +440,32 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
   int SysexLenght = 0;
     switch (type) {
       case 1: // NoteOff
-        usbMIDI.sendNoteOff(parameter, value, midi_channel);
-        MIDI.sendNoteOff(parameter, value, midi_channel);
+        usbMIDI.sendNoteOff(parameter, value, channel);
+        MIDI.sendNoteOff(parameter, value, channel);
         break;
       case 2: // Note On
-        usbMIDI.sendNoteOn(parameter, value, midi_channel);
-        MIDI.sendNoteOn(parameter, value, midi_channel);
+        usbMIDI.sendNoteOn(parameter, value, channel);
+        MIDI.sendNoteOn(parameter, value, channel);
         break;
       case 3: // Poliphonic Pressure
-        MIDI.sendAfterTouch(parameter, value, midi_channel);
-        usbMIDI.sendAfterTouchPoly(parameter, value, midi_channel);
+        MIDI.sendAfterTouch(parameter, value, channel);
+        usbMIDI.sendAfterTouchPoly(parameter, value, channel);
         break;
       case 4: // Control Change
-        MIDI.sendControlChange(parameter, value, midi_channel);
-        usbMIDI.sendControlChange(parameter, value, midi_channel);
+        MIDI.sendControlChange(parameter, value, channel);
+        usbMIDI.sendControlChange(parameter, value, channel);
         break;
       case 5: // Program Change
-        MIDI.sendProgramChange(value, midi_channel);
-        usbMIDI.sendProgramChange(value, midi_channel);
+        MIDI.sendProgramChange(value, channel);
+        usbMIDI.sendProgramChange(value, channel);
         break;
       case 6: // AfterTouch
-        MIDI.sendAfterTouch(value, midi_channel);
-        usbMIDI.sendAfterTouch(value, midi_channel);
+        MIDI.sendAfterTouch(value, channel);
+        usbMIDI.sendAfterTouch(value, channel);
         break;
       case 7: // Pitch Bend
-        MIDI.sendPitchBend(value, midi_channel);
-        usbMIDI.sendPitchBend(value, midi_channel);
+        MIDI.sendPitchBend(value, channel);
+        usbMIDI.sendPitchBend(value, channel);
         break;
       case 8: // SysEx
         if (preset == 0) {
@@ -490,8 +478,8 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
               uint8_t data[SysexLenght] = {0xF0, 0x41, 0x10, 0x00, 0x00, 0x77, 0x12, 0x19, 0x02, 0x00, 0x00, 0x00, 0x00, 0xF7 };
               byte partsA[16] = {0x19, 0x19, 0x19, 0x19, 0x1A, 0x1A, 0x1A, 0x1A, 0x1B, 0x1B, 0x1B, 0x1B, 0x1C, 0x1C, 0x1C, 0x1C };
               byte partsB[16] =  {0x02, 0x22, 0x42, 0x62, 0x02, 0x22, 0x42, 0x62, 0x02, 0x22, 0x42, 0x62, 0x02, 0x22, 0x42, 0x62 };
-              data[7] = partsA[midi_channel - 1];
-              data[8] = partsB[midi_channel - 1];
+              data[7] = partsA[channel - 1];
+              data[8] = partsB[channel - 1];
               data[10] = parameter;
               data[11] = value;
               if ( PRESETS[preset][control][4] != 127 || PRESETS[preset][control][3] != 0 ) {
