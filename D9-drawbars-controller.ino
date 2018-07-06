@@ -172,11 +172,21 @@ void setup()
   btn_alt.attach(BTN_ALT);
     
   // set all "standard" buttons as input Pullup and attach debouncer
-  for (int b = 0; b < BTN_COUNT; b++) {
-    // we use PRESETS[0] since any of them has the 1st column the same
-    pinMode(PRESETS[0][b + BTN_IDX_START][0], INPUT_PULLUP);
-    btn[b].attach(PRESETS[0][b + BTN_IDX_START][0]);
-  }
+  pinMode(CHOVIB_ON, INPUT_PULLUP);
+  pinMode(PERC_ON, INPUT_PULLUP);
+  pinMode(PERC_SOFT , INPUT_PULLUP);
+  pinMode(PERC_FAST , INPUT_PULLUP);
+  pinMode(PERC_3RD , INPUT_PULLUP);
+  pinMode(LSL_STOP, INPUT_PULLUP);
+  pinMode(LSL_FAST , INPUT_PULLUP);
+  btn[0].attach(CHOVIB_ON);
+  btn[1].attach(PERC_ON);
+  btn[2].attach(PERC_SOFT);
+  btn[3].attach(PERC_FAST);
+  btn[4].attach(PERC_3RD);
+  btn[5].attach(LSL_STOP);
+  btn[6].attach(LSL_FAST);
+
 
   led.begin();      // use default address 0
   for (int a = 0; a < 15; a++) {
