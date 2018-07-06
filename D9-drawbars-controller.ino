@@ -42,9 +42,9 @@ const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 
 const byte IS_TOGGLE = 1;
 const byte IS_VIBCHO = 2;
-const byte IS_PRESET = 3;
-const byte IS_GLOBAL = 1; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
-const byte SEND_ALL  = 2; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
+const byte IS_PRESET = 4;
+const byte IS_GLOBAL = 8; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
+const byte SEND_ALL  = 16; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
 // a data array and a lagged copy to tell when Midi changes are required
 byte data[DRWB_COUNT];
@@ -78,51 +78,50 @@ const byte PARAM = 1;
 const byte MIN = 2;
 const byte MAX = 3;
 const byte CHAN = 4;
-const byte TOGGLE = 5;
-const byte BEHAV = 6;
+const byte BEHAV = 5;
 
 /*****************************
  * PRESETS
  * 0: Factory preset for Roland FA 06/07/07
  * 1: Factory preset for GSi Gemini expander 
  */
-const byte PRESETS[2][PRESET_CONTROLS_NUM][20]=
-{//                 UPPER                                    LOWER                                  ALTERNATE
-{//PIN        Type Prm Min Max Ch Toggle    Behaviour  Type Prm Min Max Ch Toggle    Behaviour   Type Prm Min Max Ch Toggle
-/*DWB1*/        {8, 0x2A, 0, 8, 1, 0,         0,          8, 0x2A, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*DWB1_13*/     {8, 0x29, 0, 8, 1, 0,         0,          8, 0x29, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*DWB1_35*/     {8, 0x28, 0, 8, 1, 0,         0,          8, 0x28, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*DWB2*/        {8, 0x27, 0, 8, 1, 0,         0,          8, 0x27, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*DWB2_23*/     {8, 0x26, 0, 8, 1, 0,         0,          8, 0x26, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*DWB4*/        {8, 0x25, 0, 8, 1, 0,         0,          8, 0x25, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*DWB8*/        {8, 0x24, 0, 8, 1, 0,         0,          8, 0x24, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*DWB5_13*/     {8, 0x23, 0, 8, 1, 0,         0,          8, 0x23, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*DWB16*/       {8, 0x22, 0, 8, 1, 0,         0,          8, 0x22, 0, 8, 2, 0,         0,           8, 0x00, 0, 8, 1, 0},
-/*CHOVIB_ON*/   {0, 0x00, 0, 0, 0, 0,         0,          0, 0x00, 0, 0, 0, 0,         0,           0, 0x00, 0, 0, 0, 0}, 
-/*PERC_ON*/     {8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2B, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 0, 1, IS_PRESET},
-/*PERC_SOFT*/   {8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x36, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, IS_PRESET},
-/*PERC_FAST*/   {8, 0x2D, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2D, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0},
-/*PERC_3RD*/    {8, 0x2C, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,  8, 0x2C, 0, 1, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,    0, 1, 1, 0},
-/*LSL_STOP*/    {4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL,   4, 80, 0, 127, 1, IS_TOGGLE, SEND_ALL,    4, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
-/*LSL_FAST*/    {4, 81, 0, 127, 1, IS_TOGGLE, SEND_ALL,   4, 81, 0, 127, 1, IS_TOGGLE, SEND_ALL,    0, 0,  0, 127, 1, 0},  
-},//                 UPPER                           |             LOWER                       |             ALTERNATE
-{//PIN        Type Prm Min Max Ch Toggle    Behaviour  Type Prm Min Max Ch Toggle    Behaviour   Type Prm Min Max Ch Toggle   
-/*DWB1*/        {4, 20, 0, 127, 1, 0,         0,          4, 29, 0, 127, 1, 0,         0,           4, 84, 0, 127, 1, 0}, // REV LEVEL
-/*DWB1_13*/     {4, 19, 0, 127, 1, 0,         0,          4, 28, 0, 127, 1, 0,         0,           4, 76, 0, 127, 1, 0}, // DRIVE
-/*DWB1_35*/     {4, 18, 0, 127, 1, 0,         0,          4, 27, 0, 127, 1, 0,         0,           4, 75, 0, 127, 1, 0}, // KEY CLICK
-/*DWB2*/        {4, 17, 0, 127, 1, 0,         0,          4, 26, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
-/*DWB2_23*/     {4, 16, 0, 127, 1, 0,         0,          4, 25, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
-/*DWB4*/        {4, 15, 0, 127, 1, 0,         0,          4, 24, 0, 127, 1, 0,         0,           0,  0, 0, 127, 1, 0},
-/*DWB8*/        {4, 14, 0, 127, 1, 0,         0,          4, 23, 0, 127, 1, 0,         0,           4, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
-/*DWB5_13*/     {4, 13, 0, 127, 1, 0,         0,          4, 22, 0, 127, 1, 0,         0,           4, 35, 0, 127, 1, 0}, // PEDAL 8
-/*DWB16*/       {4, 12, 0, 127, 1, 0,         0,          4, 21, 0, 127, 1, 0,         0,           4, 33, 0, 127, 1, 0}, // PEDAL 16
-/*CHOVIB_ON*/   {4, 31, 0, 127, 1, IS_TOGGLE, 0,          4, 30, 0, 127, 1, IS_TOGGLE, 0,           4, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
-/*PERC_ON*/     {4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 66, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0,   0, 1, IS_PRESET},
-/*PERC_SOFT*/   {4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 70, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0,   1, 1, IS_PRESET},
-/*PERC_FAST*/   {4, 71, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 71, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0},
-/*PERC_3RD*/    {4, 72, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 72, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   0, 0,  0, 127, 1, 0},
-/*LSL_STOP*/    {4, 87, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,  4, 87, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   4, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
-/*LSL_FAST*/    {4, 86, 0,  127, 1,IS_TOGGLE, IS_GLOBAL,  4, 86, 0, 127, 1, IS_TOGGLE, IS_GLOBAL,   4, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
+const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
+{//                 UPPER                                    LOWER                                     ALTERNATE
+{//PIN         Type Prm Min Max Ch Behaviour             Type Prm Min Max Ch Behaviour              Type Prm Min Max Ch Behaviour
+/*DWB1*/        {8, 0x2A, 0, 8, 1, 0,                      8, 0x2A, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*DWB1_13*/     {8, 0x29, 0, 8, 1, 0,                      8, 0x29, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*DWB1_35*/     {8, 0x28, 0, 8, 1, 0,                      8, 0x28, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*DWB2*/        {8, 0x27, 0, 8, 1, 0,                      8, 0x27, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*DWB2_23*/     {8, 0x26, 0, 8, 1, 0,                      8, 0x26, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*DWB4*/        {8, 0x25, 0, 8, 1, 0,                      8, 0x25, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*DWB8*/        {8, 0x24, 0, 8, 1, 0,                      8, 0x24, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*DWB5_13*/     {8, 0x23, 0, 8, 1, 0,                      8, 0x23, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*DWB16*/       {8, 0x22, 0, 8, 1, 0,                      8, 0x22, 0, 8, 2, 0,                       8, 0x00, 0, 8, 1, 0},
+/*CHOVIB_ON*/   {0, 0x00, 0, 0, 0, 0,                      0, 0x00, 0, 0, 0, 0,                       0, 0x00, 0, 0, 0, 0}, 
+/*PERC_ON*/     {8, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  8, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,    0, 0, 1, IS_PRESET},
+/*PERC_SOFT*/   {8, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  8, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,    0, 1, 1, IS_PRESET},
+/*PERC_FAST*/   {8, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  8, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,    0, 1, 1, 0},
+/*PERC_3RD*/    {8, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  8, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,    0, 1, 1, 0},
+/*LSL_STOP*/    {4, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,   4, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,    4, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
+/*LSL_FAST*/    {4, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   4, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    0, 0,  0, 127, 1, 0},  
+},//                 UPPER                                        LOWER                                    ALTERNATE
+{//PIN        Type Prm Min Max Ch Behaviour             Type Prm Min Max Ch Behaviour               Type Prm Min Max Ch Behaviour   
+/*DWB1*/        {4, 20, 0, 127, 1, 0,                      4, 29, 0, 127, 1, 0,                       4, 84, 0, 127, 1, 0}, // REV LEVEL
+/*DWB1_13*/     {4, 19, 0, 127, 1, 0,                      4, 28, 0, 127, 1, 0,                       4, 76, 0, 127, 1, 0}, // DRIVE
+/*DWB1_35*/     {4, 18, 0, 127, 1, 0,                      4, 27, 0, 127, 1, 0,                       4, 75, 0, 127, 1, 0}, // KEY CLICK
+/*DWB2*/        {4, 17, 0, 127, 1, 0,                      4, 26, 0, 127, 1, 0,                       0,  0, 0, 127, 1, 0},
+/*DWB2_23*/     {4, 16, 0, 127, 1, 0,                      4, 25, 0, 127, 1, 0,                       0,  0, 0, 127, 1, 0},
+/*DWB4*/        {4, 15, 0, 127, 1, 0,                      4, 24, 0, 127, 1, 0,                       0,  0, 0, 127, 1, 0},
+/*DWB8*/        {4, 14, 0, 127, 1, 0,                      4, 23, 0, 127, 1, 0,                       4, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
+/*DWB5_13*/     {4, 13, 0, 127, 1, 0,                      4, 22, 0, 127, 1, 0,                       4, 35, 0, 127, 1, 0}, // PEDAL 8
+/*DWB16*/       {4, 12, 0, 127, 1, 0,                      4, 21, 0, 127, 1, 0,                       4, 33, 0, 127, 1, 0}, // PEDAL 16
+/*CHOVIB_ON*/   {4, 31, 0, 127, 1, IS_TOGGLE,              4, 30, 0, 127, 1, IS_TOGGLE,               4, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
+/*PERC_ON*/     {4, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  4, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,  0,   0, 1, IS_PRESET},
+/*PERC_SOFT*/   {4, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  4, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,  0,   1, 1, IS_PRESET},
+/*PERC_FAST*/   {4, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  4, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,  0, 127, 1, 0},
+/*PERC_3RD*/    {4, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  4, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,  0, 127, 1, 0},
+/*LSL_STOP*/    {4, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  4, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   4, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
+/*LSL_FAST*/    {4, 86, 0,  127, 1,IS_TOGGLE + IS_GLOBAL,  4, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   4, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
 }
 };
 
@@ -131,7 +130,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][20]=
  const byte ST_LOW  = 2; // Controller status: LOWER
  const byte STATUS_IDX[] =  // the column number in the PRESETS array where starts parameters for each status
  {
-  14, 0, 7
+  12, 0, 6
  };
 
 // initialize the ReponsiveAnalogRead objects
@@ -246,7 +245,7 @@ void loop() {
     activity = true;
   }
 
-if (usbMIDI.read()) {
+  if (usbMIDI.read()) {
     // get the USB MIDI message, defined by these 5 numbers (except SysEX)
     byte type = usbMIDI.getType();
     byte channel = usbMIDI.getChannel();
@@ -259,9 +258,7 @@ if (usbMIDI.read()) {
       // Normal messages, first we must convert usbMIDI's type (an ordinary
       // byte) to the MIDI library's special MidiType.
       midi::MidiType mtype = (midi::MidiType)type;
-
       MIDI.send(mtype, data1, data2, channel);
-
     } else {
       // SysEx messages are special.  The message length is given in data1 & data2
       unsigned int SysExLength = data1 + data2 * 256;
@@ -396,7 +393,7 @@ void getAnalogData() {
         Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + data[drwb_scanned] );
 
         // check if this drawbar is dedicated to the VIB/CHO control
-        if ( PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] + TOGGLE] == IS_VIBCHO ){
+        if ( (PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
            Serial.println (String("DWB controls VIBCHO") );
           
           // calculate which Led turn on based on the Drawbar value
@@ -431,7 +428,7 @@ void getDigitalData() {
 
        Serial.println(String("BTN pressed: ") + btn_scanned + String(" value: ") + btn_val );
         
-        if (PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TOGGLE] == IS_TOGGLE){
+        if ( (PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
           if ( btn_state[STATUS][btn_scanned] == 1){
             btn_state[STATUS][btn_scanned] = 0;
           }
@@ -441,7 +438,7 @@ void getDigitalData() {
           btn_val = btn_state[STATUS][btn_scanned];
         }
 
-        if ( IS_PRESET == PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TOGGLE] ){
+        if ( ( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_PRESET ) == IS_PRESET ){
             // If this button is dedicated to switch the presets...
                Serial.println (String("CHANGING preset") + STATUS );
                btn_val = !btn_state[STATUS][btn_scanned];
@@ -451,7 +448,7 @@ void getDigitalData() {
                preset = PRESETS[preset][btn_index][STATUS_IDX[STATUS] +MAX];  
                Serial.println (String("New preset is: ") + preset );
         }
-        else if ( SEND_ALL == PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] && STATUS != ST_ALT ){
+        else if ( ( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & SEND_ALL ) == SEND_ALL  && STATUS != ST_ALT ){
               sendMidi( PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
               sendMidi( PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
               ledState[ST_UP][btn_scanned +1] = btn_val;
@@ -459,7 +456,7 @@ void getDigitalData() {
               btn_state[ST_UP][btn_scanned] = btn_val;
               btn_state[ST_LOW][btn_scanned] = btn_val;
         }
-        else if (IS_GLOBAL == PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] && STATUS != ST_ALT) {
+        else if ( ( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && STATUS != ST_ALT) {
               sendMidi( PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );         
               ledState[ST_UP][btn_scanned +1] = btn_val;
               ledState[ST_LOW][btn_scanned +1] = btn_val;     
@@ -474,7 +471,7 @@ void getDigitalData() {
       }
       // Pulsante rilasciato
       else {
-          if (PRESETS[preset][btn_index][STATUS_IDX[1] +TOGGLE] == 0){
+          if (PRESETS[preset][btn_index][STATUS_IDX[1] +BEHAV] == 0){
            Serial.println(String("Btn released - No TOOGLE - new btn_val: ") + !btn_val );
            ledState[STATUS][btn_scanned +1] = !btn_val;
            sendMidi( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
