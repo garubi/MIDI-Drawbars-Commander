@@ -48,8 +48,8 @@ const byte IS_GLOBAL = 8; // if the control sends always the same value both in 
 const byte SEND_ALL  = 16; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
 // a data array and a lagged copy to tell when Midi changes are required
-byte data[DRWB_COUNT];
-byte dataLag[DRWB_COUNT]; // when lag and new are not the same then update Midi CC value
+byte analogData[DRWB_COUNT];
+byte analogDataLag[DRWB_COUNT]; // when lag and new are not the same then update Midi CC value
 
 byte vibcho_lag; // 
 
@@ -388,25 +388,25 @@ void getAnalogData() {
     
     // if the repsonsive value has changed, go
     if (drwb[drwb_scanned].hasChanged()) {
-      data[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
-      if (data[drwb_scanned] != dataLag[drwb_scanned]) {
-        dataLag[drwb_scanned] = data[drwb_scanned];
-        Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + data[drwb_scanned] );
+      analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
+      if (analogData[drwb_scanned] != analogDataLag[drwb_scanned]) {
+        analogDataLag[drwb_scanned] = analogData[drwb_scanned];
+        Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
 
         // check if this drawbar is dedicated to the VIB/CHO control
         if ( (PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
            Serial.println (String("DWB controls VIBCHO") );
           
           // calculate which Led turn on based on the Drawbar value
-          byte vibcho_led_on =  map(data[drwb_scanned], 0, 127, 0, 5);
+          byte vibcho_led_on =  map(analogData[drwb_scanned], 0, 127, 0, 5);
           if (vibcho_led_on != vibcho_lag){
             setVibchoLeds( vibcho_led_on );
             vibcho_lag = vibcho_led_on;
-            sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], data[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
+            sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
           }
         }
         else{
-          sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], data[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
+          sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
           }
       }
     }
