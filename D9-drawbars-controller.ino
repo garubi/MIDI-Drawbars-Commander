@@ -224,6 +224,8 @@ void setup()
   btnAlt_released = 1;
   curr_preset = 1;
   old_preset_led = 3;
+
+  syncAnalogData();
 }
 
 
@@ -433,6 +435,22 @@ void getAnalogData() {
     }
   }
 }
+
+void syncAnalogData() {
+  for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
+    // update the ResponsiveAnalogRead object every loop
+    drwb[drwb_scanned].update();
+    
+    // if the repsonsive value has changed, go
+    //if (drwb[drwb_scanned].hasChanged()) {
+      analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
+      analogDataLag[drwb_scanned] = analogData[drwb_scanned];
+      Serial.println (String("DWB synced: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
+      sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
+    //}
+  }  
+}
+
 void getDigitalData() {
 
   // scansioniamo i pulsanti "normali"
