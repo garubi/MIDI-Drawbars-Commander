@@ -4,14 +4,9 @@
 #include <MIDI.h>
 #include <ResponsiveAnalogRead.h>
 
-
-byte STATUS;
-byte OLD_STATUS;
-byte btnAlt_released;
-
-byte curr_preset;
-byte old_preset_led;
-
+/* ************************************************************************* 
+ *  Pins assign
+ */
 // Drawbars <-> Analog PIN corrispondence
 const byte DWB16    = A8;
 const byte DWB5_13  = A7;
@@ -35,23 +30,24 @@ const byte LSL_FAST = 2;
 
 const byte LED_ALT = 0;
 
+
 const byte BTN_COUNT = 7; // configurable buttons number (less the Alternate button, counted a part)
 const byte DRWB_COUNT = 9; // configurable number of drawbars used
-const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start the drawbars rows?
 const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT; 
 
+/* ************************************************************************* 
+ *  presets
+ */
+ 
+const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start the buttons rows?
+byte curr_preset; // the currennt selected preset.
+ 
 // Controls behaviour "labels"
 const byte IS_TOGGLE = 1; // is a pushbutton (momentary) or is toggle? 
 const byte IS_VIBCHO = 2; // the drawbar with this constant sets controls the Vibrato / Chorus type
 const byte IS_PRESET = 4; // the buttons with this constatnt sets are for switching between D9 presets
 const byte IS_GLOBAL = 8; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
 const byte SEND_ALL  = 16; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
-
-// a data array and a lagged copy to tell when Midi changes are required
-byte analogData[DRWB_COUNT];
-byte analogDataLag[DRWB_COUNT]; // when lag and new are not the same then update Midi CC value
-
-byte vibcho_lag; // 
 
 /*
    The multidimensional Array byte PRESETS will contains in each row:
@@ -82,7 +78,7 @@ const byte CHAN = 4;
 const byte BEHAV = 5;
 
 /*****************************
- * PRESETS
+ * PRESETS array
  * 0: Factory preset for Roland FA 06/07/07
  * 1: Factory preset for GSi Gemini expander 
  */
@@ -126,13 +122,27 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 }
 };
 
- const byte ST_ALT  = 0; // Controller status: ALTERNATE
- const byte ST_UP   = 1; // Controller status: UPPER
- const byte ST_LOW  = 2; // Controller status: LOWER
- const byte STATUS_IDX[] =  // the column number in the PRESETS array where starts parameters for each status
+/* ************************************************************************* 
+ *  Momentary status
+ */
+byte STATUS;
+byte OLD_STATUS;
+
+const byte ST_ALT  = 0; // Controller status: ALTERNATE
+const byte ST_UP   = 1; // Controller status: UPPER
+const byte ST_LOW  = 2; // Controller status: LOWER
+const byte STATUS_IDX[] =  // the column number in the PRESETS array where the parameters starts for each status
  {
   12, 0, 6
  };
+
+/* ************************************************************************* 
+ *  Drawbars initialization
+ */
+ 
+// a data array and a lagged copy to tell when Midi changes are required
+byte analogData[DRWB_COUNT];
+byte analogDataLag[DRWB_COUNT]; // when lag and new are not the same then update Midi CC value
 
 // initialize the ReponsiveAnalogRead objects
 ResponsiveAnalogRead drwb[] {
@@ -146,11 +156,21 @@ ResponsiveAnalogRead drwb[] {
   {DWB5_13, true},
   {DWB16, true},
 };
+
+
+/* ************************************************************************* 
+ *  Buttons initialization
+ */
 // Creates an array and fills it with Bounce objects. see https://forum.arduino.cc/index.php?topic=266132.msg2071306#msg2071306
 byte btn_state[3][BTN_COUNT] = {};
 Bounce * btn = new Bounce[BTN_COUNT] ; 
 Bounce btn_alt = Bounce() ; 
 
+byte btnAlt_released;
+
+/* ************************************************************************* 
+ *  LEDs initialization
+ */
 // Controls LEDs attacched to MCP23017 
 Adafruit_MCP23017 led;
 
@@ -158,13 +178,17 @@ Adafruit_MCP23017 led;
 byte ledState[3][8] = {};
 long led_alt_on_time;
 byte led_alt_blink_status;
+byte vibcho_lag; // the previous selected vibrato type's led
+byte old_preset_led; // the previous selected preset's led
 
+/* ************************************************************************* 
+ *  MIDI initialization
+ */
+ 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
-  
+
 void setup()
 {
-
-  
   Serial.begin(38400);
   MIDI.begin(MIDI_CHANNEL_OMNI);
 
@@ -215,9 +239,6 @@ void loop() {
 
   // Set Leds
   setLeds();
-  
-  // read and discard any incoming Midi messages
-  //while (usbMIDI.read()); 
 
   /* MIDI merge and thru */
 
