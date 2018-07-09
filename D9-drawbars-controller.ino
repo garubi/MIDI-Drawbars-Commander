@@ -187,6 +187,8 @@ byte old_preset_led; // the previous selected preset's led
  
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 
+byte btn_mem ;
+  
 void setup()
 {
   Serial.begin(38400);
@@ -219,12 +221,14 @@ void setup()
     led.pinMode(a, OUTPUT);
   }
 
+// initialize at the startup
   STATUS = ST_UP;
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
   curr_preset = 1;
   old_preset_led = 3;
 
+  setStartingData();
   syncAnalogData();
 }
 
@@ -303,6 +307,26 @@ void loop() {
   */
 }
 
+void setStartingData(){
+   Serial.println (String("SET STARTING DATA"));
+  byte btn_mem[7][3] = {
+      /*CHOVIB_ON*/   {0, 0, 0}, //PEDAL TO LOWER
+      /*PERC_ON*/     {0, 0, 0}, //preset
+      /*PERC_SOFT*/   {0, 0, 0}, //preset
+      /*PERC_FAST*/   {0, 0, 0},
+      /*PERC_3RD*/    {0, 0, 0},
+      /*LSL_STOP*/    {0, 0, 0}, //leslie off
+      /*LSL_FAST*/    {0, 0, 0}, //rev off
+  };
+  for (byte st = 0; st < 3; st++){
+     Serial.println (String("For STATUS: ") + st);
+      for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
+        updateBtn( btn_scanned, btn_mem[btn_scanned][st] );
+         Serial.println (String("Button: ") + btn_scanned + String("value: ") + btn_mem[btn_scanned][st] );
+      }
+  }
+ 
+}
 
 void getAltBtn(){
   static unsigned long btnAlt_DownTime;
@@ -441,7 +465,6 @@ void syncAnalogData() {
     // update the ResponsiveAnalogRead object every loop
     drwb[drwb_scanned].update();
     
-    // if the repsonsive value has changed, go
     //if (drwb[drwb_scanned].hasChanged()) {
       analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
       analogDataLag[drwb_scanned] = analogData[drwb_scanned];
@@ -451,17 +474,8 @@ void syncAnalogData() {
   }  
 }
 
-void getDigitalData() {
-
-  // scansioniamo i pulsanti "normali"
-  for (int btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
-    int btn_index = btn_scanned + BTN_IDX_START;
-    byte btn_val = 0;
-
-    if (btn[btn_scanned].update()) {
-      
-      btn_val = btn[btn_scanned].read();
-
+void updateBtn( byte btn_scanned, byte btn_val ){
+      byte btn_index = btn_scanned + BTN_IDX_START;
 
       // Pulsnte PREMUTO
       if (btn[btn_scanned].fell()) {
@@ -517,7 +531,21 @@ void getDigitalData() {
            sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
           }
           
-      }
+      } 
+}
+
+void getDigitalData() {
+
+  // scansioniamo i pulsanti (tranne ALT che va da solo)
+  for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
+    byte btn_val = 0;
+
+    if (btn[btn_scanned].update()) {
+      
+      btn_val = btn[btn_scanned].read();
+
+      updateBtn( btn_scanned, btn_val);
+
     } // fine btn scanned.updated
   }
 }
