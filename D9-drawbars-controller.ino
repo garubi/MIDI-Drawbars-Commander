@@ -40,9 +40,10 @@ const byte DRWB_COUNT = 9; // configurable number of drawbars used
 const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start the drawbars rows?
 const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT; 
 
-const byte IS_TOGGLE = 1;
-const byte IS_VIBCHO = 2;
-const byte IS_PRESET = 4;
+// Controls behaviour "labels"
+const byte IS_TOGGLE = 1; // is a pushbutton (momentary) or is toggle? 
+const byte IS_VIBCHO = 2; // the drawbar with this constant sets controls the Vibrato / Chorus type
+const byte IS_PRESET = 4; // the buttons with this constatnt sets are for switching between D9 presets
 const byte IS_GLOBAL = 8; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
 const byte SEND_ALL  = 16; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
