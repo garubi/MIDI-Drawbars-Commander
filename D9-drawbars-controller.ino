@@ -9,7 +9,7 @@ byte STATUS;
 byte OLD_STATUS;
 byte btnAlt_released;
 
-byte preset;
+byte curr_preset;
 byte old_preset_led;
 
 // Drawbars <-> Analog PIN corrispondence
@@ -197,7 +197,7 @@ void setup()
   STATUS = ST_UP;
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
-  preset = 1;
+  curr_preset = 1;
   old_preset_led = 3;
 }
 
@@ -393,7 +393,7 @@ void getAnalogData() {
         Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + data[drwb_scanned] );
 
         // check if this drawbar is dedicated to the VIB/CHO control
-        if ( (PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
+        if ( (PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
            Serial.println (String("DWB controls VIBCHO") );
           
           // calculate which Led turn on based on the Drawbar value
@@ -401,11 +401,11 @@ void getAnalogData() {
           if (vibcho_led_on != vibcho_lag){
             setVibchoLeds( vibcho_led_on );
             vibcho_lag = vibcho_led_on;
-            sendMidi( PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], data[drwb_scanned], drwb_scanned, PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
+            sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], data[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
           }
         }
         else{
-          sendMidi( PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], data[drwb_scanned], drwb_scanned, PRESETS[preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
+          sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], data[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
           }
       }
     }
@@ -428,7 +428,7 @@ void getDigitalData() {
 
        Serial.println(String("BTN pressed: ") + btn_scanned + String(" value: ") + btn_val );
         
-        if ( (PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
+        if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
           if ( btn_state[STATUS][btn_scanned] == 1){
             btn_state[STATUS][btn_scanned] = 0;
           }
@@ -438,43 +438,43 @@ void getDigitalData() {
           btn_val = btn_state[STATUS][btn_scanned];
         }
 
-        if ( ( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_PRESET ) == IS_PRESET ){
+        if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_PRESET ) == IS_PRESET ){
             // If this button is dedicated to switch the presets...
                Serial.println (String("CHANGING preset") + STATUS );
                btn_val = !btn_state[STATUS][btn_scanned];
                ledState[STATUS][old_preset_led] = 0;
                ledState[STATUS][btn_scanned +1] = btn_val;  
                old_preset_led = btn_scanned +1;
-               preset = PRESETS[preset][btn_index][STATUS_IDX[STATUS] +MAX];  
-               Serial.println (String("New preset is: ") + preset );
+               curr_preset = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +MAX];  
+               Serial.println (String("New preset is: ") + curr_preset );
         }
-        else if ( ( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & SEND_ALL ) == SEND_ALL  && STATUS != ST_ALT ){
-              sendMidi( PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
-              sendMidi( PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
+        else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & SEND_ALL ) == SEND_ALL  && STATUS != ST_ALT ){
+              sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
+              sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
               ledState[ST_UP][btn_scanned +1] = btn_val;
               ledState[ST_LOW][btn_scanned +1] = btn_val;
               btn_state[ST_UP][btn_scanned] = btn_val;
               btn_state[ST_LOW][btn_scanned] = btn_val;
         }
-        else if ( ( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && STATUS != ST_ALT) {
-              sendMidi( PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );         
+        else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && STATUS != ST_ALT) {
+              sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );         
               ledState[ST_UP][btn_scanned +1] = btn_val;
               ledState[ST_LOW][btn_scanned +1] = btn_val;     
               btn_state[ST_UP][btn_scanned] = btn_val;
               btn_state[ST_LOW][btn_scanned] = btn_val;               
         }
         else {
-          sendMidi( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[STATUS] +PARAM], btn_val * 127, btn_index, PRESETS[preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
+          sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
           ledState[STATUS][btn_scanned +1] = btn_val;        
         }
         Serial.println(String("new btn_val: ") + btn_val );    
       }
       // Pulsante rilasciato
       else {
-          if (PRESETS[preset][btn_index][STATUS_IDX[1] +BEHAV] == 0){
+          if (PRESETS[curr_preset][btn_index][STATUS_IDX[1] +BEHAV] == 0){
            Serial.println(String("Btn released - No TOOGLE - new btn_val: ") + !btn_val );
            ledState[STATUS][btn_scanned +1] = !btn_val;
-           sendMidi( PRESETS[preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
+           sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
           }
           
       }
@@ -518,7 +518,7 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
         usbMIDI.sendPitchBend(value, channel);
         break;
       case 8: // SysEx
-        if (preset == 0) {
+        if (curr_preset == 0) {
           /**
            * è il preset per Roland FA 06/07/08
            */
@@ -532,8 +532,8 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
               data[8] = partsB[channel - 1];
               data[10] = parameter;
               data[11] = value;
-              if ( PRESETS[preset][control][STATUS_IDX[STATUS] +MAX] != 127 || PRESETS[preset][control][STATUS_IDX[STATUS] +MIN] != 0 ) {
-                data[11] = map(value, 0, 127, PRESETS[preset][control][STATUS_IDX[STATUS] +MIN], PRESETS[preset][control][STATUS_IDX[STATUS] +MAX]);
+              if ( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +MAX] != 127 || PRESETS[curr_preset][control][STATUS_IDX[STATUS] +MIN] != 0 ) {
+                data[11] = map(value, 0, 127, PRESETS[curr_preset][control][STATUS_IDX[STATUS] +MIN], PRESETS[curr_preset][control][STATUS_IDX[STATUS] +MAX]);
               }
 
               /*
