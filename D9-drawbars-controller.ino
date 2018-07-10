@@ -313,6 +313,7 @@ void setStartingData(){
   delay(10000);
    Serial.println (String("SET STARTING DATA"));
   byte btn_mem[7][3] = {
+                    //UP LOW ALT
       /*CHOVIB_ON*/   {0, 1, 1}, //PEDAL TO LOWER
       /*PERC_ON*/     {1, 1, 0}, //preset
       /*PERC_SOFT*/   {0, 1, 0}, //preset
@@ -328,7 +329,7 @@ void setStartingData(){
         byte btn_index = btn_scanned + BTN_IDX_START;        
         if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != 0 ){
             updateBtn( btn_scanned, ! btn_mem[btn_scanned][st] );
-            Serial.println (String("Button: ") + btn_scanned + String("value: ") + btn_mem[btn_scanned][st] );          
+            Serial.println (String("Button: ") + btn_scanned + String("value set: ") + ! btn_mem[btn_scanned][st] );          
         }
       }
   }
@@ -487,25 +488,6 @@ void syncAnalogData() {
 
 void updateBtn( byte btn_scanned, byte btn_val ){
       byte btn_index = btn_scanned + BTN_IDX_START;
-
-      // Pulsnte PREMUTO
-      if (btn[btn_scanned].fell()) {
-
-        if( btnAlt_pushed == 0){ 
-          // Caso "normale" il pulsante è premuto da solo
-           Serial.println(String("BTN pressed: ") + btn_scanned + String(" value: ") + btn_val );
-    
-            
-            if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
-              if ( btn_state[STATUS][btn_scanned] == 1){
-                btn_state[STATUS][btn_scanned] = 0;
-              }
-              else{
-                btn_state[STATUS][btn_scanned] = 1;
-              }
-              btn_val = btn_state[STATUS][btn_scanned];
-            }
-    
             if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_PRESET ) == IS_PRESET ){
                 // If this button is dedicated to switch the presets...
                    Serial.println (String("CHANGING preset") + STATUS );
@@ -535,7 +517,39 @@ void updateBtn( byte btn_scanned, byte btn_val ){
               sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
               ledState[STATUS][btn_scanned +1] = btn_val;        
             }
-            Serial.println(String("new btn_val: ") + btn_val );            
+            Serial.println(String("new btn_val: ") + btn_val );   
+      
+}
+
+void getDigitalData() {
+
+  // scansioniamo i pulsanti (tranne ALT che va da solo)
+  for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
+    byte btn_val = 0;
+
+    if (btn[btn_scanned].update()) {
+      byte btn_index = btn_scanned + BTN_IDX_START;
+      btn_val = btn[btn_scanned].read();
+
+      // Pulsnte PREMUTO
+      if (btn[btn_scanned].fell()) {
+
+        if( btnAlt_pushed == 0){ 
+          // Caso "normale" il pulsante è premuto da solo
+           Serial.println(String("BTN pressed: ") + btn_scanned + String(" value: ") + btn_val );
+    
+            
+            if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
+              if ( btn_state[STATUS][btn_scanned] == 1){
+                btn_state[STATUS][btn_scanned] = 0;
+              }
+              else{
+                btn_state[STATUS][btn_scanned] = 1;
+              }
+              btn_val = btn_state[STATUS][btn_scanned];
+            }
+      
+            updateBtn( btn_scanned, btn_val);   
         }
         else{
           // Pulsante premuto in contemporanea all'ALT ... 
@@ -557,19 +571,6 @@ void updateBtn( byte btn_scanned, byte btn_val ){
            sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
           }
       } 
-}
-
-void getDigitalData() {
-
-  // scansioniamo i pulsanti (tranne ALT che va da solo)
-  for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
-    byte btn_val = 0;
-
-    if (btn[btn_scanned].update()) {
-      
-      btn_val = btn[btn_scanned].read();
-
-      updateBtn( btn_scanned, btn_val);
 
     } // fine btn scanned.updated
   }
