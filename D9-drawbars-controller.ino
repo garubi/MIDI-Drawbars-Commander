@@ -229,7 +229,6 @@ void setup()
   curr_preset = 1;
   old_preset_led = 3;
   
-delay(15000);
   setStartingData();
   syncAnalogData();
 }
@@ -297,7 +296,7 @@ void loop() {
     activity = true;
   }  
 
-  // blink the LED when any activity has happened
+  // TODO: blink the LED when any activity has happened
   /*
   if (activity) {
     digitalWriteFast(13, HIGH); // LED on
@@ -310,17 +309,16 @@ void loop() {
 }
 
 void setStartingData(){
-  delay(10000);
    Serial.println (String("SET STARTING DATA"));
   byte btn_mem[7][3] = {
                     //UP LOW ALT
       /*CHOVIB_ON*/   {0, 1, 1}, //PEDAL TO LOWER
       /*PERC_ON*/     {1, 1, 0}, //preset
-      /*PERC_SOFT*/   {0, 1, 0}, //preset
-      /*PERC_FAST*/   {0, 1, 0},
-      /*PERC_3RD*/    {0, 1, 0},
-      /*LSL_STOP*/    {0, 1, 0}, //leslie off
-      /*LSL_FAST*/    {1, 1, 0}, //rev off
+      /*PERC_SOFT*/   {0, 0, 1}, //preset
+      /*PERC_FAST*/   {0, 0, 0},
+      /*PERC_3RD*/    {0, 0, 0},
+      /*LSL_STOP*/    {0, 0, 0}, //leslie off
+      /*LSL_FAST*/    {1, 0, 0}, //rev off
   };
   for (byte st = 0; st < 3; st++){
      Serial.println (String("For STATUS: ") + STATUS_IDX[st]);
@@ -476,14 +474,24 @@ void syncAnalogData() {
   for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
     // update the ResponsiveAnalogRead object every loop
     drwb[drwb_scanned].update();
-    
-    //if (drwb[drwb_scanned].hasChanged()) {
-      analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
-      analogDataLag[drwb_scanned] = analogData[drwb_scanned];
-      Serial.println (String("DWB synced: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
-      sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
-    //}
-  }  
+
+    analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
+    analogDataLag[drwb_scanned] = analogData[drwb_scanned];
+    Serial.println (String("DWB synced: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
+    sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );    
+  }
+  
+    //Led feedback
+    for (byte ledto = 1; ledto < 8; ledto++) {
+      //turn off all leds
+      led.digitalWrite(ledto, 0);
+    } 
+  
+    for (byte ledto = 1; ledto < 8; ledto++) {
+      led.digitalWrite(ledto, 1);
+      delay(100);
+      led.digitalWrite(ledto, 0);
+    }   
 }
 
 void updateBtn( byte btn_scanned, byte btn_val ){
