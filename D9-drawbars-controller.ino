@@ -311,23 +311,24 @@ void loop() {
 void setStartingData(){
    Serial.println (String("SET STARTING DATA"));
   byte btn_mem[7][3] = {
-                    //UP LOW ALT
-      /*CHOVIB_ON*/   {0, 1, 1}, //PEDAL TO LOWER
-      /*PERC_ON*/     {1, 1, 0}, //preset
-      /*PERC_SOFT*/   {0, 0, 1}, //preset
+                    //ALT UP LOW
+      /*CHOVIB_ON*/   {1, 0, 1}, //PEDAL TO LOWER
+      /*PERC_ON*/     {0, 1, 0}, //preset
+      /*PERC_SOFT*/   {1, 0, 0}, //preset
       /*PERC_FAST*/   {0, 0, 0},
       /*PERC_3RD*/    {0, 0, 0},
       /*LSL_STOP*/    {0, 0, 0}, //leslie off
-      /*LSL_FAST*/    {1, 0, 0}, //rev off
+      /*LSL_FAST*/    {0, 1, 0}, //rev off
   };
   for (byte st = 0; st < 3; st++){
-     Serial.println (String("For STATUS: ") + STATUS_IDX[st]);
+     Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
 
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;        
         if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != 0 ){
-            updateBtn( btn_scanned, ! btn_mem[btn_scanned][st], st );
-            Serial.println (String("Button: ") + btn_scanned + String("value set: ") + ! btn_mem[btn_scanned][st] );          
+            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_mem[btn_scanned][st] + String(" Status: ") + st);          
+
+            updateBtn( btn_scanned, btn_mem[btn_scanned][st], st );
         }
       }
   }
@@ -525,7 +526,7 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
               sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
               ledState[curr_status][btn_scanned +1] = btn_val;        
             }
-            Serial.println(String("new btn_val: ") + btn_val );   
+            Serial.println(String("new btn_val: ") + btn_val + String(" Status: ") + curr_status);   
       
 }
 
@@ -565,8 +566,8 @@ void getDigitalData() {
           Serial.println (String("ALT + BTN: ") + btn_scanned);
           //sync analog data
           if( btn_scanned == 0 ){
-            syncAnalogData();             
-            //setStartingData();
+           // syncAnalogData();             
+            setStartingData();
           }
         }
 
@@ -587,7 +588,7 @@ void getDigitalData() {
 
 void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
 {
-  Serial.println(String("Send midi - Type: ") + type);
+  Serial.println(String("Send midi - Type: ") + type + String(" Par: ") + parameter + String(" value: ") + value + String(" control: ") + control );
  
   int SysexLenght = 0;
     switch (type) {
