@@ -440,29 +440,30 @@ void getAnalogData() {
   for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
     // update the ResponsiveAnalogRead object every loop
     drwb[drwb_scanned].update();
-
-    // if the repsonsive value has changed, go
-    if (drwb[drwb_scanned].hasChanged()) {
-      analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
-      if (analogData[drwb_scanned] != analogDataLag[drwb_scanned]) {
-        analogDataLag[drwb_scanned] = analogData[drwb_scanned];
-        Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
-
-        // check if this drawbar is dedicated to the VIB/CHO control
-        if ( (PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
-           Serial.println (String("DWB controls VIBCHO") );
-
-          // calculate which Led turn on based on the Drawbar value
-          byte vibcho_led_on =  map(analogData[drwb_scanned], 0, 127, 0, 5);
-          if (vibcho_led_on != vibcho_lag){
-            setVibchoLeds( vibcho_led_on );
-            vibcho_lag = vibcho_led_on;
+    if( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
+      // if the repsonsive value has changed, go
+      if (drwb[drwb_scanned].hasChanged()) {
+        analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
+        if (analogData[drwb_scanned] != analogDataLag[drwb_scanned]) {
+          analogDataLag[drwb_scanned] = analogData[drwb_scanned];
+          Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
+  
+          // check if this drawbar is dedicated to the VIB/CHO control
+          if ( (PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
+             Serial.println (String("DWB controls VIBCHO") );
+  
+            // calculate which Led turn on based on the Drawbar value
+            byte vibcho_led_on =  map(analogData[drwb_scanned], 0, 127, 0, 5);
+            if (vibcho_led_on != vibcho_lag){
+              setVibchoLeds( vibcho_led_on );
+              vibcho_lag = vibcho_led_on;
+              sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
+            }
+          }
+          else{
             sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
-          }
+            }
         }
-        else{
-          sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
-          }
       }
     }
   }
@@ -473,11 +474,12 @@ void syncAnalogData() {
   for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
     // update the ResponsiveAnalogRead object every loop
     drwb[drwb_scanned].update();
-
-    analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
-    analogDataLag[drwb_scanned] = analogData[drwb_scanned];
-    Serial.println (String("DWB synced: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
-    sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
+    if( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
+      analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
+      analogDataLag[drwb_scanned] = analogData[drwb_scanned];
+      Serial.println (String("DWB synced: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
+      sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
+    }
   }
 
     //Led feedback
