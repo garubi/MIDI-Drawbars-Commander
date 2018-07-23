@@ -229,7 +229,7 @@ void setup()
   curr_preset = 1;
   old_preset_led = 3;
   
-  setStartingData();
+  //setStartingData();
   syncAnalogData();
 }
 
