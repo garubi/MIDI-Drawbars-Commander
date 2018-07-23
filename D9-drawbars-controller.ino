@@ -111,8 +111,8 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
-/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, 
-/*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   1, 1, 0},
+/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
+/*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
 /*PERC_FAST*/   {TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
 /*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
 /*LSL_STOP*/    {TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
@@ -235,10 +235,25 @@ void setup()
   STATUS = ST_UP;
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
-  curr_preset = 1;
-  old_preset_led = 3;
-
-  setStartupPreset();
+  //curr_preset = 1;
+  //old_preset_led = 3;
+  
+  // load the default preset
+  for (byte st = 0; st < 3; st++){
+      for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
+        byte btn_index = btn_scanned + BTN_IDX_START;        
+        if( PRESETS[0][btn_index][STATUS_IDX[st] + TYPE] == TP_PR ){
+          if( 0 != btn_default[btn_scanned][st] ){
+            changePreset(  btn_scanned, st  ); 
+          }          
+        }
+      }
+  }
+  
+  // turn off all the 6 vib/cho status leds
+  for (byte ledto = 8; ledto < 14; ledto++) {
+    led.digitalWrite(ledto, 0);
+ }
   syncAnalogData();
 }
 
@@ -317,18 +332,21 @@ void loop() {
   */
 }
 
-void setStartupPreset(){
-  Serial.println (String("SET STARTING PRESET"));
 
-  for (byte st = 0; st < 3; st++){
-      for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
-        byte btn_index = btn_scanned + BTN_IDX_START;
-        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] == TP_PR ){
-            changePreset( btn_scanned, st );
-        }
-      }
-  }
+void changePreset( byte btn_scanned, byte curr_status ){
+   byte btn_index = btn_scanned + BTN_IDX_START;
+   Serial.println (String("CHANGING preset") + curr_status );
+   ledState[curr_status][old_preset_led] = 0;
+   ledState[curr_status][btn_scanned +1] = !btn_state[curr_status][btn_scanned];
 
+   // set the new preset value
+   curr_preset = PRESETS[0][btn_index][STATUS_IDX[curr_status] +MAX];
+   // reset all data
+   setStartingData();
+   
+   Serial.println (String("New preset is: ") + curr_preset );  
+   
+   old_preset_led = btn_scanned +1;
 }
 
 void setStartingData(){
@@ -363,9 +381,6 @@ void setStartingData(){
         }
       }  
   }
-
-  
-
 }
 
 void getAltBtn(){
@@ -530,25 +545,9 @@ void syncAnalogData() {
     }
 }
 
-void changePreset( byte btn_scanned, byte curr_status ){
-   byte btn_index = btn_scanned + BTN_IDX_START;
-   Serial.println (String("CHANGING preset") + curr_status );
-   ledState[curr_status][old_preset_led] = 0;
-   ledState[curr_status][btn_scanned +1] = !btn_state[curr_status][btn_scanned];
-
-   // set the new preset value
-   curr_preset = PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +MAX];
-   // reset all data
-   setStartingData();
-   
-   Serial.println (String("New preset is: ") + curr_preset );  
-   
-   old_preset_led = btn_scanned +1;
-}
-
 void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
       byte btn_index = btn_scanned + BTN_IDX_START;
-            if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE] ) == TP_PR ){
+            if ( ( PRESETS[0][btn_index][STATUS_IDX[curr_status] +TYPE] ) == TP_PR ){
                 // If this button is dedicated to switch the presets...
                 changePreset( btn_scanned, curr_status );
             }
