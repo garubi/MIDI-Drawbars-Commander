@@ -186,7 +186,17 @@ byte old_preset_led; // the previous selected preset's led
  */
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
-byte btn_mem ;
+
+byte btn_default[7][3] = {
+                         //ALT UP LOW
+    /*PEDAL TO LOWER */   {1, 0, 1},  /*CHOVIB_ON*/
+    /*preset */           {0, 1, 0},  /*PERC_ON*/
+    /*preset */           {1, 0, 0},  /*PERC_SOFT*/
+                          {0, 0, 0},  /*PERC_FAST*/
+                          {0, 0, 0},  /*PERC_3RD*/
+    /* leslie off */      {0, 0, 0},  /*LSL_STOP*/
+    /* rev off */         {0, 1, 0},  /*LSL_FAST*/
+};
 
 void setup()
 {
@@ -227,7 +237,7 @@ void setup()
   curr_preset = 1;
   old_preset_led = 3;
 
-  setStartingData();
+  setStartingPreset();
   syncAnalogData();
 }
 
@@ -305,28 +315,48 @@ void loop() {
   }
   */
 }
+void setStartingPreset(){
+  Serial.println (String("SET STARTING PRESET"));
 
-void setStartingData(){
-   Serial.println (String("SET STARTING DATA"));
-  byte btn_mem[7][3] = {
-                    //ALT UP LOW
-      /*CHOVIB_ON*/   {1, 0, 1}, //PEDAL TO LOWER
-      /*PERC_ON*/     {0, 1, 0}, //preset
-      /*PERC_SOFT*/   {1, 0, 0}, //preset
-      /*PERC_FAST*/   {0, 0, 0},
-      /*PERC_3RD*/    {0, 0, 0},
-      /*LSL_STOP*/    {0, 0, 0}, //leslie off
-      /*LSL_FAST*/    {0, 1, 0}, //rev off
-  };
   for (byte st = 0; st < 3; st++){
      Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
 
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
-        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_NO ){
-            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_mem[btn_scanned][st] + String(" Status: ") + st);
+        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] == TP_PR ){
+            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st] + String(" Status: ") + st);
+            updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
+        }
+      }
+  }
 
-            updateBtn( btn_scanned, btn_mem[btn_scanned][st], st );
+}
+
+void setStartingData(){
+  
+  Serial.println (String("RESET DATA")); 
+  for (byte st = 0; st < 3; st++){
+     Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
+
+      for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
+        byte btn_index = btn_scanned + BTN_IDX_START;
+        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_PR ){
+            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st] + String(" Status: ") + st);
+            updateBtn( btn_scanned, 0, st );
+        }
+      }
+  }
+  
+   Serial.println (String("SET STARTING DATA"));
+   
+  for (byte st = 0; st < 3; st++){
+     Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
+
+      for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
+        byte btn_index = btn_scanned + BTN_IDX_START;
+        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_PR && PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_NO ){
+            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st] + String(" Status: ") + st);
+            updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
         }
       }
   }
@@ -505,7 +535,9 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
                    ledState[curr_status][btn_scanned +1] = btn_val;
                    old_preset_led = btn_scanned +1;
                    curr_preset = PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +MAX];
+                   setStartingData();
                    Serial.println (String("New preset is: ") + curr_preset );
+                   
             }
             else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_ALL ) == SEND_ALL  && curr_status != ST_ALT ){
                   sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
@@ -535,9 +567,9 @@ void getDigitalData() {
   // scansioniamo i pulsanti (tranne ALT che va da solo)
   for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
     byte btn_val = 0;
-
-    if (PRESETS[curr_preset][btn_scanned][STATUS_IDX[STATUS] + TYPE] != TP_NO && btn[btn_scanned].update()) {
-      byte btn_index = btn_scanned + BTN_IDX_START;
+    byte btn_index = btn_scanned + BTN_IDX_START;
+    
+    if (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO && btn[btn_scanned].update()) {
       btn_val = btn[btn_scanned].read();
 
       // Pulsnte PREMUTO
@@ -567,7 +599,7 @@ void getDigitalData() {
           //sync analog data
           if( btn_scanned == 0 ){
             syncAnalogData();
-            setStartingData();
+            //setStartingData();
           }
         }
 
