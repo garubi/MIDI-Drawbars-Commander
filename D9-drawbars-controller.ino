@@ -237,7 +237,12 @@ void setup()
   btnAlt_released = 1;
   //curr_preset = 1;
   //old_preset_led = 3;
-  
+
+  // turn off all the 6 vib/cho status leds
+  for (byte ledto = 8; ledto < 14; ledto++) {
+    led.digitalWrite(ledto, 0);
+ }
+ 
   // load the default preset
   for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
@@ -249,11 +254,8 @@ void setup()
         }
       }
   }
-  
-  // turn off all the 6 vib/cho status leds
-  for (byte ledto = 8; ledto < 14; ledto++) {
-    led.digitalWrite(ledto, 0);
- }
+
+ 
   syncAnalogData();
 }
 
@@ -341,15 +343,16 @@ void changePreset( byte btn_scanned, byte curr_status ){
 
    // set the new preset value
    curr_preset = PRESETS[0][btn_index][STATUS_IDX[curr_status] +MAX];
+   
    // reset all data
-   setStartingData();
+   resetToDefaultData();
    
    Serial.println (String("New preset is: ") + curr_preset );  
    
    old_preset_led = btn_scanned +1;
 }
 
-void setStartingData(){
+void resetToDefaultData(){
   Serial.println (String("RESET ALL BUTTONS to 0 - except for the preset buttons")); 
   for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
@@ -360,23 +363,23 @@ void setStartingData(){
       }
   }
   
-  Serial.println (String("SET STARTING DATA"));
-  byte vibcho_led_on =  5;
-  setVibchoLeds( vibcho_led_on );
-  vibcho_lag = vibcho_led_on;
+  Serial.println (String("SET DEFAULT DATA"));
   for (byte st = 0; st < 3; st++){
      Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
 
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
         if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_PR && PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_NO ){
-            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st] + String(" Status: ") + st);
+            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st]);
             updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
         }
       }
       for (byte analog = 0; analog < DRWB_COUNT; analog++) {
         if ( (PRESETS[curr_preset][analog][STATUS_IDX[st] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
-            Serial.println (String("SET VIB/CHO"));
+            Serial.println (String("SET VIB/CHO to C3 (127)"));
+            byte vibcho_led_on =  5;
+            setVibchoLeds( vibcho_led_on );
+            vibcho_lag = vibcho_led_on;
             sendMidi( PRESETS[curr_preset][analog][STATUS_IDX[st] +TYPE], PRESETS[curr_preset][analog][STATUS_IDX[st] +PARAM], 127, analog, PRESETS[curr_preset][analog][STATUS_IDX[st] +CHAN] );
         }
       }  
@@ -611,7 +614,7 @@ void getDigitalData() {
           //sync analog data
           if( btn_scanned == 0 ){
             syncAnalogData();
-            //setStartingData();
+            //resetToDefaultData();
           }
         }
 
