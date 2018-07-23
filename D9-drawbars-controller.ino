@@ -319,8 +319,6 @@ void setStartingPreset(){
   Serial.println (String("SET STARTING PRESET"));
 
   for (byte st = 0; st < 3; st++){
-     Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
-
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
         if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] == TP_PR ){
@@ -334,21 +332,17 @@ void setStartingPreset(){
 
 void setStartingData(){
   
-  Serial.println (String("RESET DATA")); 
+  Serial.println (String("RESET ALL BUTTONS to 0 - except for the preset buttons")); 
   for (byte st = 0; st < 3; st++){
-     Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
-
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
         if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_PR ){
-            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st] + String(" Status: ") + st);
             updateBtn( btn_scanned, 0, st );
         }
       }
   }
   
-   Serial.println (String("SET STARTING DATA"));
-   
+  Serial.println (String("SET STARTING DATA"));
   for (byte st = 0; st < 3; st++){
      Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
 
@@ -360,7 +354,6 @@ void setStartingData(){
         }
       }
   }
-
 }
 
 void getAltBtn(){
