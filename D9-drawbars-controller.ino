@@ -178,6 +178,7 @@ Adafruit_MCP23017 led;
 byte ledState[3][8] = {};
 long led_alt_on_time;
 byte led_alt_blink_status;
+byte vibcho_control[2] = {};
 byte vibcho_lag; // the previous selected vibrato type's led
 byte old_preset_led; // the previous selected preset's led
 
@@ -237,7 +238,7 @@ void setup()
   curr_preset = 1;
   old_preset_led = 3;
 
-  setStartingPreset();
+  setStartupPreset();
   syncAnalogData();
 }
 
@@ -315,15 +316,15 @@ void loop() {
   }
   */
 }
-void setStartingPreset(){
+
+void setStartupPreset(){
   Serial.println (String("SET STARTING PRESET"));
 
   for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
         if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] == TP_PR ){
-            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st] + String(" Status: ") + st);
-            updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
+            changePreset( btn_scanned, st );
         }
       }
   }
@@ -331,7 +332,6 @@ void setStartingPreset(){
 }
 
 void setStartingData(){
-  
   Serial.println (String("RESET ALL BUTTONS to 0 - except for the preset buttons")); 
   for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
@@ -343,6 +343,9 @@ void setStartingData(){
   }
   
   Serial.println (String("SET STARTING DATA"));
+  byte vibcho_led_on =  5;
+  setVibchoLeds( vibcho_led_on );
+  vibcho_lag = vibcho_led_on;
   for (byte st = 0; st < 3; st++){
      Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
 
@@ -353,7 +356,16 @@ void setStartingData(){
             updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
         }
       }
+      for (byte analog = 0; analog < DRWB_COUNT; analog++) {
+        if ( (PRESETS[curr_preset][analog][STATUS_IDX[st] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
+            Serial.println (String("SET VIB/CHO"));
+            sendMidi( PRESETS[curr_preset][analog][STATUS_IDX[st] +TYPE], PRESETS[curr_preset][analog][STATUS_IDX[st] +PARAM], 127, analog, PRESETS[curr_preset][analog][STATUS_IDX[st] +CHAN] );
+        }
+      }  
   }
+
+  
+
 }
 
 void getAltBtn(){
@@ -518,19 +530,27 @@ void syncAnalogData() {
     }
 }
 
+void changePreset( byte btn_scanned, byte curr_status ){
+   byte btn_index = btn_scanned + BTN_IDX_START;
+   Serial.println (String("CHANGING preset") + curr_status );
+   ledState[curr_status][old_preset_led] = 0;
+   ledState[curr_status][btn_scanned +1] = !btn_state[curr_status][btn_scanned];
+
+   // set the new preset value
+   curr_preset = PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +MAX];
+   // reset all data
+   setStartingData();
+   
+   Serial.println (String("New preset is: ") + curr_preset );  
+   
+   old_preset_led = btn_scanned +1;
+}
+
 void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
       byte btn_index = btn_scanned + BTN_IDX_START;
             if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE] ) == TP_PR ){
                 // If this button is dedicated to switch the presets...
-                   Serial.println (String("CHANGING preset") + curr_status );
-                   btn_val = !btn_state[curr_status][btn_scanned];
-                   ledState[curr_status][old_preset_led] = 0;
-                   ledState[curr_status][btn_scanned +1] = btn_val;
-                   old_preset_led = btn_scanned +1;
-                   curr_preset = PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +MAX];
-                   setStartingData();
-                   Serial.println (String("New preset is: ") + curr_preset );
-                   
+                changePreset( btn_scanned, curr_status );
             }
             else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_ALL ) == SEND_ALL  && curr_status != ST_ALT ){
                   sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
