@@ -323,7 +323,7 @@ void setStartingData(){
 
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
-        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != 0 ){
+        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_NO ){
             Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_mem[btn_scanned][st] + String(" Status: ") + st);
 
             updateBtn( btn_scanned, btn_mem[btn_scanned][st], st );
@@ -534,7 +534,7 @@ void getDigitalData() {
   for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
     byte btn_val = 0;
 
-    if (btn[btn_scanned].update()) {
+    if (PRESETS[curr_preset][btn_scanned][STATUS_IDX[STATUS] + TYPE] != TP_NO && btn[btn_scanned].update()) {
       byte btn_index = btn_scanned + BTN_IDX_START;
       btn_val = btn[btn_scanned].read();
 
@@ -572,7 +572,7 @@ void getDigitalData() {
       }
       // Pulsante rilasciato
       else {
-          if (PRESETS[curr_preset][btn_index][STATUS_IDX[1] +BEHAV] == 0){
+          if (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] == 0 && ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE] ) != TP_PR){
            Serial.println(String("Btn released - No TOOGLE - new btn_val: ") + !btn_val );
            ledState[STATUS][btn_scanned +1] = !btn_val;
            sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
