@@ -1,4 +1,4 @@
-3,#include <Wire.h>
+#include <Wire.h>
 #include <Adafruit_MCP23017.h>
 #include <Bounce2.h> // https://github.com/thomasfredericks/Bounce2/wiki
 #include <MIDI.h>
@@ -45,10 +45,10 @@ byte curr_preset; // the currennt selected preset.
 // Controls behaviour "labels"
 const byte IS_TOGGLE = 1; // is a pushbutton (momentary) or is toggle?
 const byte IS_VIBCHO = 2; // the drawbar with this constant sets controls the Vibrato / Chorus type
-const byte IS_PRESET = 4; // the buttons with this constatnt sets are for switching between D9 presets
-const byte IS_GLOBAL = 8; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
-const byte SEND_ALL  = 16; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
+const byte IS_GLOBAL = 4; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
+const byte SEND_ALL  = 8; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
+const byte IS_PRESET = 6; // the buttons with this constatnt sets are for switching between D9 presets
 /*
    The multidimensional Array byte PRESETS will contains in each row:
    1) the pin to which the drawbar/button is attached to
@@ -66,7 +66,7 @@ const byte SEND_ALL  = 16; // if we have to send both the Lower and the Upper va
    3) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    4) the min value to send out
    5) the max value to sed out
-   6) does the button have to behave as a toggle one (IS_TOGGLE) or is used for switch presets (IS_PRESET, set the preset number in the MAX location) or is used to change the Vibrato/choorus type (IS_VIBCHO)?
+   6) does the button have to behave as a toggle one (IS_TOGGLE) or is used to change the Vibrato/choorus type (IS_VIBCHO)?
    7) Upper/lower behaviour.
 */
 
@@ -96,8 +96,8 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB5_13*/     {5, 0x23, 0, 8, 1, 0,                      5, 0x23, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
 /*DWB16*/       {5, 0x22, 0, 8, 1, 0,                      5, 0x22, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
 /*CHOVIB_ON*/   {0, 0x00, 0, 0, 0, 0,                      0, 0x00, 0, 0, 0, 0,                       0, 0x00, 0, 0, 0, 0},
-/*PERC_ON*/     {5, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,    0, 0, 1, IS_PRESET},
-/*PERC_SOFT*/   {5, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,    0, 1, 1, IS_PRESET},
+/*PERC_ON*/     {5, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,    0, 0, 1, 0},
+/*PERC_SOFT*/   {5, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,    0, 1, 1, 0},
 /*PERC_FAST*/   {5, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,    0, 1, 1, 0},
 /*PERC_3RD*/    {5, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,    0, 1, 1, 0},
 /*LSL_STOP*/    {3, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,   3, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,    3, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
@@ -114,8 +114,8 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB5_13*/     {3, 13, 0, 127, 1, 0,                      3, 22, 0, 127, 1, 0,                       3, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {3, 12, 0, 127, 1, 0,                      3, 21, 0, 127, 1, 0,                       3, 33, 0, 127, 1, 0}, // PEDAL 16
 /*CHOVIB_ON*/   {3, 31, 0, 127, 1, IS_TOGGLE,              3, 30, 0, 127, 1, IS_TOGGLE,               3, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
-/*PERC_ON*/     {3, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,  0,   0, 1, IS_PRESET},
-/*PERC_SOFT*/   {3, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,  0,   1, 1, IS_PRESET},
+/*PERC_ON*/     {3, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,  0,   0, 1, 0},
+/*PERC_SOFT*/   {3, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,  0,   1, 1, 0},
 /*PERC_FAST*/   {3, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,  0, 127, 1, 0},
 /*PERC_3RD*/    {3, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,  0, 127, 1, 0},
 /*LSL_STOP*/    {3, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   3, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
@@ -498,7 +498,7 @@ void syncAnalogData() {
 
 void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
       byte btn_index = btn_scanned + BTN_IDX_START;
-            if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_PRESET ) == IS_PRESET ){
+            if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE] ) == IS_PRESET ){
                 // If this button is dedicated to switch the presets...
                    Serial.println (String("CHANGING preset") + curr_status );
                    btn_val = !btn_state[curr_status][btn_scanned];
