@@ -48,21 +48,18 @@ const byte IS_VIBCHO = 2; // the drawbar with this constant sets controls the Vi
 const byte IS_GLOBAL = 4; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
 const byte SEND_ALL  = 8; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
-const byte IS_PRESET = 6; // the buttons with this constatnt sets are for switching between D9 presets
 /*
    The multidimensional Array byte PRESETS will contains in each row:
    1) the pin to which the drawbar/button is attached to
-   2) the type of midi message to send out:
-      0 = Disabled
-      1 = Note Off,
-      2 = Note On,
-
-      3 = Control Change,
-      4 = Program Change,
-
-
-      5 = System Exclusive,
-  	  6 = D9 preset)
+   2) the type of midi message to send out:*/
+      const byte TP_NO  = 0;
+      const byte TP_OF   = 1; // NOte off
+      const byte TP_ON    = 2; // Note on
+      const byte TP_CC      = 3; // COntrol Change
+      const byte TP_PC      = 4; // Program CHange
+      const byte TP_SX   = 5; // System Exclusive
+      const byte TP_PR  = 6; // Controller presets (set the preset value in MAX column)
+/*      
    3) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    4) the min value to send out
    5) the max value to sed out
@@ -86,40 +83,40 @@ const byte BEHAV = 5;
 const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 {//                 UPPER                                    LOWER                                     ALTERNATE
 {//PIN         Type Prm Min Max Ch Behaviour             Type Prm Min Max Ch Behaviour              Type Prm Min Max Ch Behaviour
-/*DWB1*/        {5, 0x2A, 0, 8, 1, 0,                      5, 0x2A, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*DWB1_13*/     {5, 0x29, 0, 8, 1, 0,                      5, 0x29, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*DWB1_35*/     {5, 0x28, 0, 8, 1, 0,                      5, 0x28, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*DWB2*/        {5, 0x27, 0, 8, 1, 0,                      5, 0x27, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*DWB2_23*/     {5, 0x26, 0, 8, 1, 0,                      5, 0x26, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*DWB4*/        {5, 0x25, 0, 8, 1, 0,                      5, 0x25, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*DWB8*/        {5, 0x24, 0, 8, 1, 0,                      5, 0x24, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*DWB5_13*/     {5, 0x23, 0, 8, 1, 0,                      5, 0x23, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*DWB16*/       {5, 0x22, 0, 8, 1, 0,                      5, 0x22, 0, 8, 2, 0,                       5, 0x00, 0, 8, 1, 0},
-/*CHOVIB_ON*/   {0, 0x00, 0, 0, 0, 0,                      0, 0x00, 0, 0, 0, 0,                       0, 0x00, 0, 0, 0, 0},
-/*PERC_ON*/     {5, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,    0, 0, 1, 0},
-/*PERC_SOFT*/   {5, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,    0, 1, 1, 0},
-/*PERC_FAST*/   {5, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,    0, 1, 1, 0},
-/*PERC_3RD*/    {5, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  5, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,    0, 1, 1, 0},
-/*LSL_STOP*/    {3, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,   3, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,    3, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
-/*LSL_FAST*/    {3, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   3, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    0, 0,  0, 127, 1, 0},
+/*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*DWB1_13*/     {TP_SX, 0x29, 0, 8, 1, 0,                      TP_SX, 0x29, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*DWB1_35*/     {TP_SX, 0x28, 0, 8, 1, 0,                      TP_SX, 0x28, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*DWB2*/        {TP_SX, 0x27, 0, 8, 1, 0,                      TP_SX, 0x27, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*DWB2_23*/     {TP_SX, 0x26, 0, 8, 1, 0,                      TP_SX, 0x26, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*DWB4*/        {TP_SX, 0x25, 0, 8, 1, 0,                      TP_SX, 0x25, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*DWB8*/        {TP_SX, 0x24, 0, 8, 1, 0,                      TP_SX, 0x24, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*DWB5_13*/     {TP_SX, 0x23, 0, 8, 1, 0,                      TP_SX, 0x23, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*DWB16*/       {TP_SX, 0x22, 0, 8, 1, 0,                      TP_SX, 0x22, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*CHOVIB_ON*/   {TP_NO, 0x00, 0, 0, 0, 0,                      TP_NO, 0x00, 0, 0, 0, 0,                       TP_NO, 0x00, 0, 0, 0, 0},
+/*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 0, 1, 0},
+/*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 1, 1, 0},
+/*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 1, 1, 0},
+/*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 1, 1, 0},
+/*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_CC, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
+/*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
 },//                 UPPER                                        LOWER                                    ALTERNATE
 {//PIN        Type Prm Min Max Ch Behaviour             Type Prm Min Max Ch Behaviour               Type Prm Min Max Ch Behaviour
-/*DWB1*/        {3, 20, 0, 127, 1, 0,                      3, 29, 0, 127, 1, 0,                       3, 84, 0, 127, 1, 0}, // REV LEVEL
-/*DWB1_13*/     {3, 19, 0, 127, 1, 0,                      3, 28, 0, 127, 1, 0,                       3, 76, 0, 127, 1, 0}, // DRIVE
-/*DWB1_35*/     {3, 18, 0, 127, 1, 0,                      3, 27, 0, 127, 1, 0,                       3, 75, 0, 127, 1, 0}, // KEY CLICK
-/*DWB2*/        {3, 17, 0, 127, 1, 0,                      3, 26, 0, 127, 1, 0,                       0,  0, 0, 127, 1, 0},
-/*DWB2_23*/     {3, 16, 0, 127, 1, 0,                      3, 25, 0, 127, 1, 0,                       0,  0, 0, 127, 1, 0},
-/*DWB4*/        {3, 15, 0, 127, 1, 0,                      3, 24, 0, 127, 1, 0,                       0,  0, 0, 127, 1, 0},
-/*DWB8*/        {3, 14, 0, 127, 1, 0,                      3, 23, 0, 127, 1, 0,                       3, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
-/*DWB5_13*/     {3, 13, 0, 127, 1, 0,                      3, 22, 0, 127, 1, 0,                       3, 35, 0, 127, 1, 0}, // PEDAL 8
-/*DWB16*/       {3, 12, 0, 127, 1, 0,                      3, 21, 0, 127, 1, 0,                       3, 33, 0, 127, 1, 0}, // PEDAL 16
-/*CHOVIB_ON*/   {3, 31, 0, 127, 1, IS_TOGGLE,              3, 30, 0, 127, 1, IS_TOGGLE,               3, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
-/*PERC_ON*/     {3, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,  0,   0, 1, 0},
-/*PERC_SOFT*/   {3, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   6, 0,  0,   1, 1, 0},
-/*PERC_FAST*/   {3, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,  0, 127, 1, 0},
-/*PERC_3RD*/    {3, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   0, 0,  0, 127, 1, 0},
-/*LSL_STOP*/    {3, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  3, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   3, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
-/*LSL_FAST*/    {3, 86, 0,  127, 1,IS_TOGGLE + IS_GLOBAL,  3, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   3, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
+/*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 84, 0, 127, 1, 0}, // REV LEVEL
+/*DWB1_13*/     {TP_CC, 19, 0, 127, 1, 0,                      TP_CC, 28, 0, 127, 1, 0,                       TP_CC, 76, 0, 127, 1, 0}, // DRIVE
+/*DWB1_35*/     {TP_CC, 18, 0, 127, 1, 0,                      TP_CC, 27, 0, 127, 1, 0,                       TP_CC, 75, 0, 127, 1, 0}, // KEY CLICK
+/*DWB2*/        {TP_CC, 17, 0, 127, 1, 0,                      TP_CC, 26, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
+/*DWB2_23*/     {TP_CC, 16, 0, 127, 1, 0,                      TP_CC, 25, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
+/*DWB4*/        {TP_CC, 15, 0, 127, 1, 0,                      TP_CC, 24, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
+/*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
+/*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
+/*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
+/*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
+/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0},
+/*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   1, 1, 0},
+/*PERC_FAST*/   {TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
+/*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
+/*LSL_STOP*/    {TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
+/*LSL_FAST*/    {TP_CC, 86, 0,  127, 1,IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
 }
 };
 
@@ -498,7 +495,7 @@ void syncAnalogData() {
 
 void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
       byte btn_index = btn_scanned + BTN_IDX_START;
-            if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE] ) == IS_PRESET ){
+            if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE] ) == TP_PR ){
                 // If this button is dedicated to switch the presets...
                    Serial.println (String("CHANGING preset") + curr_status );
                    btn_val = !btn_state[curr_status][btn_scanned];
@@ -593,23 +590,23 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
 
   int SysexLenght = 0;
     switch (type) {
-      case 1: // NoteOff
+      case TP_OF: // NoteOff
         usbMIDI.sendNoteOff(parameter, value, channel);
         MIDI.sendNoteOff(parameter, value, channel);
         break;
-      case 2: // Note On
+      case TP_ON: // Note On
         usbMIDI.sendNoteOn(parameter, value, channel);
         MIDI.sendNoteOn(parameter, value, channel);
         break;
-      case 3: // Control Change
+      case TP_CC: // Control Change
         MIDI.sendControlChange(parameter, value, channel);
         usbMIDI.sendControlChange(parameter, value, channel);
         break;
-      case 4: // Program Change
+      case TP_PC: // Program Change
         MIDI.sendProgramChange(value, channel);
         usbMIDI.sendProgramChange(value, channel);
         break;
-      case 5: // SysEx
+      case TP_SX: // SysEx
         if (curr_preset == 0) {
           /**
            * è il preset per Roland FA 06/07/08
