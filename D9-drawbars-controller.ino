@@ -52,13 +52,13 @@ const byte SEND_ALL  = 8; // if we have to send both the Lower and the Upper val
    The multidimensional Array byte PRESETS will contains in each row:
    1) the pin to which the drawbar/button is attached to
    2) the type of midi message to send out:*/
-      const byte TP_NO  = 0;
+      const byte TP_NO   = 0; // Disabled
       const byte TP_OF   = 1; // NOte off
-      const byte TP_ON    = 2; // Note on
-      const byte TP_CC      = 3; // COntrol Change
-      const byte TP_PC      = 4; // Program CHange
+      const byte TP_ON   = 2; // Note on
+      const byte TP_CC   = 3; // COntrol Change
+      const byte TP_PC   = 4; // Program CHange
       const byte TP_SX   = 5; // System Exclusive
-      const byte TP_PR  = 6; // Controller presets (set the preset value in MAX column)
+      const byte TP_PR   = 6; // Controller presets (set the preset value in MAX column)
 /*      
    3) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    4) the min value to send out
@@ -82,7 +82,7 @@ const byte BEHAV = 5;
  */
 const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 {//                 UPPER                                    LOWER                                     ALTERNATE
-{//PIN         Type Prm Min Max Ch Behaviour             Type Prm Min Max Ch Behaviour              Type Prm Min Max Ch Behaviour
+{//PIN             Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour                Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*DWB1_13*/     {TP_SX, 0x29, 0, 8, 1, 0,                      TP_SX, 0x29, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*DWB1_35*/     {TP_SX, 0x28, 0, 8, 1, 0,                      TP_SX, 0x28, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
@@ -100,7 +100,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_CC, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
 /*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
 },//                 UPPER                                        LOWER                                    ALTERNATE
-{//PIN        Type Prm Min Max Ch Behaviour             Type Prm Min Max Ch Behaviour               Type Prm Min Max Ch Behaviour
+{//PIN            Type Prm Min Max Ch Behaviour                 Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 84, 0, 127, 1, 0}, // REV LEVEL
 /*DWB1_13*/     {TP_CC, 19, 0, 127, 1, 0,                      TP_CC, 28, 0, 127, 1, 0,                       TP_CC, 76, 0, 127, 1, 0}, // DRIVE
 /*DWB1_35*/     {TP_CC, 18, 0, 127, 1, 0,                      TP_CC, 27, 0, 127, 1, 0,                       TP_CC, 75, 0, 127, 1, 0}, // KEY CLICK
@@ -111,7 +111,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
-/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0},
+/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, 
 /*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   1, 1, 0},
 /*PERC_FAST*/   {TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
 /*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
@@ -227,7 +227,7 @@ void setup()
   curr_preset = 1;
   old_preset_led = 3;
 
-  //setStartingData();
+  setStartingData();
   syncAnalogData();
 }
 
@@ -564,7 +564,7 @@ void getDigitalData() {
           Serial.println (String("ALT + BTN: ") + btn_scanned);
           //sync analog data
           if( btn_scanned == 0 ){
-           // syncAnalogData();
+            syncAnalogData();
             setStartingData();
           }
         }
