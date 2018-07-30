@@ -53,7 +53,6 @@ const byte SEND_ALL  = 8; // if we have to send both the Lower and the Upper val
    1) the pin to which the drawbar/button is attached to
    2) the type of midi message to send out:*/
       const byte TP_NO   = 0; // Disabled
-      const byte TP_OF   = 1; // NOte off
       const byte TP_ON   = 2; // Note on
       const byte TP_CC   = 3; // COntrol Change
       const byte TP_PC   = 4; // Program CHange
@@ -187,6 +186,7 @@ byte old_preset_led; // the previous selected preset's led
  */
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
+const byte SEND_NOTE_OFF = 0; // if send also the note off control when sending note on = 0;
 
 byte btn_default[7][3] = {
                          //ALT UP LOW
@@ -639,13 +639,13 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
 
   int SysexLenght = 0;
     switch (type) {
-      case TP_OF: // NoteOff
-        usbMIDI.sendNoteOff(parameter, value, channel);
-        MIDI.sendNoteOff(parameter, value, channel);
-        break;
       case TP_ON: // Note On
         usbMIDI.sendNoteOn(parameter, value, channel);
         MIDI.sendNoteOn(parameter, value, channel);
+        if(SEND_NOTE_OFF){
+            usbMIDI.sendNoteOff(parameter, value, channel);
+            MIDI.sendNoteOff(parameter, value, channel);
+        }
         break;
       case TP_CC: // Control Change
         MIDI.sendControlChange(parameter, value, channel);
