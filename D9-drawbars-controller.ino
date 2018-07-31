@@ -559,7 +559,8 @@ void syncAnalogData() {
       analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
       analogDataLag[drwb_scanned] = analogData[drwb_scanned];
       Serial.println (String("DWB synced: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
-      sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
+      //sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
+      sendAnalogMidi( analogData[drwb_scanned], drwb_scanned );
     }
   }
 
