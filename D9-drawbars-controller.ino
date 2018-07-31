@@ -523,15 +523,30 @@ void getAnalogData() {
             if (vibcho_led_on != vibcho_lag){
               setVibchoLeds( vibcho_led_on );
               vibcho_lag = vibcho_led_on;
-              sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
+              sendAnalogMidi( analogData[drwb_scanned], drwb_scanned );
             }
           }
           else{
-            sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
+                sendAnalogMidi( analogData[drwb_scanned], drwb_scanned );
             }
         }
       }
     }
+  }
+}
+
+void sendAnalogMidi ( byte value, byte control ){
+  // sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
+
+  if ( ( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +BEHAV] & SEND_ALL ) == SEND_ALL  && STATUS != ST_ALT ){
+        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[ST_UP]  +TYPE], PRESETS[curr_preset][control][STATUS_IDX[ST_UP]  +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_UP]  +CHAN] );
+        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[ST_LOW] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[ST_LOW] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_LOW] +CHAN] );
+  }
+  else if ( ( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && STATUS != ST_ALT) {
+        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +CHAN] );
+  }
+  else {
+    sendMidi( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[STATUS] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[STATUS] +CHAN] );
   }
 }
 
