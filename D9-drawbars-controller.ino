@@ -17,6 +17,7 @@ const byte DWB2     = A3;
 const byte DWB1_35  = A2;
 const byte DWB1_13  = A1;
 const byte DWB1     = A0;
+const byte PED_EXP  = A12;
 
 // Buttons <-> Digital PIN corrispondence
 const byte PED_SW = 12;
@@ -33,7 +34,7 @@ const byte LED_ALT = 0;
 
 
 const byte BTN_COUNT = 8; // configurable buttons number (less the Alternate button, counted a part)
-const byte DRWB_COUNT = 9; // configurable number of drawbars used
+const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp pedal too)
 const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 
 /* *************************************************************************
@@ -92,6 +93,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB8*/        {TP_SX, 0x24, 0, 8, 1, 0,                      TP_SX, 0x24, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*DWB5_13*/     {TP_SX, 0x23, 0, 8, 1, 0,                      TP_SX, 0x23, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*DWB16*/       {TP_SX, 0x22, 0, 8, 1, 0,                      TP_SX, 0x22, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
+/*PED_EXP */    {TP_CC, 11, 0, 127, 1, SEND_ALL,               TP_CC, 11, 0, 127, 2, SEND_ALL,                TP_NO, 0x00, 0, 8, 1, 0},
 /*CHOVIB_ON*/   {TP_NO, 0x00, 0, 0, 0, 0,                      TP_NO, 0x00, 0, 0, 0, 0,                       TP_NO, 0x00, 0, 0, 0, 0},
 /*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 0, 1, 0},
 /*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 1, 1, 0},
@@ -111,6 +113,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
 /*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
+/*PED_EXP */    {TP_CC, 11, 0, 127, 1, IS_GLOBAL,              TP_CC, 11, 0, 127, 1, IS_GLOBAL,               TP_NO, 0x00, 0, 8, 1, 0},
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
 /*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
 /*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
@@ -156,6 +159,7 @@ ResponsiveAnalogRead drwb[] {
   {DWB8, true},
   {DWB5_13, true},
   {DWB16, true},
+  {PED_EXP, true},
 };
 
 
