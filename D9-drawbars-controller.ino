@@ -19,7 +19,7 @@ const byte DWB1_13  = A1;
 const byte DWB1     = A0;
 
 // Buttons <-> Digital PIN corrispondence
-const byte PED_SW = 10;
+const byte PED_SW = 12;
 const byte BTN_ALT = 9;
 const byte CHOVIB_ON = 8;
 const byte PERC_ON = 7;
@@ -93,13 +93,13 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB5_13*/     {TP_SX, 0x23, 0, 8, 1, 0,                      TP_SX, 0x23, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*DWB16*/       {TP_SX, 0x22, 0, 8, 1, 0,                      TP_SX, 0x22, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*CHOVIB_ON*/   {TP_NO, 0x00, 0, 0, 0, 0,                      TP_NO, 0x00, 0, 0, 0, 0,                       TP_NO, 0x00, 0, 0, 0, 0},
-/*PED_SWITCH*/  {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
 /*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 0, 1, 0},
 /*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 1, 1, 0},
 /*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 1, 1, 0},
 /*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 1, 1, 0},
 /*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_CC, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
 /*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
+/*PED_SWITCH*/  {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
 },//                 UPPER                                        LOWER                                    ALTERNATE
 {//PIN            Type Prm Min Max Ch Behaviour                 Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 84, 0, 127, 1, 0}, // REV LEVEL
@@ -111,14 +111,14 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
 /*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
-/*PED_SWITCH*/  {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,    TP_NO, 0,  0, 127, 1, 0},
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
 /*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
 /*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
 /*PERC_FAST*/   {TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
 /*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
 /*LSL_STOP*/    {TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
-/*LSL_FAST*/    {TP_CC, 86, 0,  127, 1,IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
+/*LSL_FAST*/    {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
+/*PED_SWITCH*/  {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
 }
 };
 
@@ -338,12 +338,17 @@ void loop() {
   */
 }
 
+void setLedState( byte status, byte btn, byte value ){
+  if ( btn < 7 ){
+    ledState[status][btn] = value;
+  }
+}
 
 void changePreset( byte btn_scanned, byte curr_status ){
    byte btn_index = btn_scanned + BTN_IDX_START;
    Serial.println (String("CHANGING preset") + curr_status );
-   ledState[curr_status][old_preset_led] = 0;
-   ledState[curr_status][btn_scanned +1] = !btn_state[curr_status][btn_scanned];
+   setLedState(curr_status, old_preset_led, 0);
+   setLedState(curr_status, btn_scanned +1,  !btn_state[curr_status][btn_scanned]);
 
    // set the new preset value
    curr_preset = PRESETS[0][btn_index][STATUS_IDX[curr_status] +MAX];
@@ -406,13 +411,13 @@ void getAltBtn(){
             if ( STATUS == ST_UP && OLD_STATUS != ST_ALT){
               OLD_STATUS = STATUS;
               STATUS = ST_LOW;
-              ledState[STATUS][LED_ALT] = 1;
+              setLedState( STATUS, LED_ALT, 1);
               Serial.println (String("STATUS: ") + STATUS);
             }
             else{
               OLD_STATUS = STATUS;
               STATUS = ST_UP;
-              ledState[STATUS][LED_ALT] = 0;
+              setLedState( STATUS, LED_ALT, 0);
               Serial.println (String("STATUS: ") + STATUS);
             }
         }
@@ -434,13 +439,13 @@ void getAltBtn(){
             OLD_STATUS = STATUS;
             if ( STATUS == ST_ALT ){
               STATUS = ST_UP;
-              ledState[STATUS][LED_ALT] = 0;
+              setLedState( STATUS, LED_ALT, 0 );
               Serial.println (String("from ALT to STATUS: ") + STATUS);
             }
             else {
               STATUS = ST_ALT;
               led_alt_on_time = millis();
-              ledState[STATUS][LED_ALT] = 1;
+              setLedState( STATUS, LED_ALT, 1);
               led_alt_blink_status = ledState[STATUS][LED_ALT];
               Serial.println (String("STATUS: ") + STATUS);
             }
@@ -561,21 +566,21 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
             else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_ALL ) == SEND_ALL  && curr_status != ST_ALT ){
                   sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
                   sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
-                  ledState[ST_UP][btn_scanned +1] = btn_val;
-                  ledState[ST_LOW][btn_scanned +1] = btn_val;
+                  setLedState(ST_UP, btn_scanned +1,  btn_val);
+                  setLedState(ST_LOW, btn_scanned +1, btn_val);
                   btn_state[ST_UP][btn_scanned] = btn_val;
                   btn_state[ST_LOW][btn_scanned] = btn_val;
             }
             else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && curr_status != ST_ALT) {
                   sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
-                  ledState[ST_UP][btn_scanned +1] = btn_val;
-                  ledState[ST_LOW][btn_scanned +1] = btn_val;
+                  setLedState(ST_UP, btn_scanned +1, btn_val);
+                  setLedState(ST_LOW, btn_scanned +1, btn_val);
                   btn_state[ST_UP][btn_scanned] = btn_val;
                   btn_state[ST_LOW][btn_scanned] = btn_val;
             }
             else {
               sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
-              ledState[curr_status][btn_scanned +1] = btn_val;
+              setLedState(curr_status, btn_scanned +1, btn_val);
             }
             Serial.println(String("new btn_val: ") + btn_val + String(" Status: ") + curr_status);
 
@@ -627,7 +632,7 @@ void getDigitalData() {
       else {
           if (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] == 0 && ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE] ) != TP_PR){
            Serial.println(String("Btn released - No TOOGLE - new btn_val: ") + !btn_val );
-           ledState[STATUS][btn_scanned +1] = !btn_val;
+           setLedState(STATUS, btn_scanned +1, !btn_val);
            sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
           }
       }
