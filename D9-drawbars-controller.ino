@@ -19,6 +19,7 @@ const byte DWB1_13  = A1;
 const byte DWB1     = A0;
 
 // Buttons <-> Digital PIN corrispondence
+const byte PED_SW = 10;
 const byte BTN_ALT = 9;
 const byte CHOVIB_ON = 8;
 const byte PERC_ON = 7;
@@ -31,7 +32,7 @@ const byte LSL_FAST = 2;
 const byte LED_ALT = 0;
 
 
-const byte BTN_COUNT = 7; // configurable buttons number (less the Alternate button, counted a part)
+const byte BTN_COUNT = 8; // configurable buttons number (less the Alternate button, counted a part)
 const byte DRWB_COUNT = 9; // configurable number of drawbars used
 const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 
@@ -92,6 +93,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB5_13*/     {TP_SX, 0x23, 0, 8, 1, 0,                      TP_SX, 0x23, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*DWB16*/       {TP_SX, 0x22, 0, 8, 1, 0,                      TP_SX, 0x22, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*CHOVIB_ON*/   {TP_NO, 0x00, 0, 0, 0, 0,                      TP_NO, 0x00, 0, 0, 0, 0,                       TP_NO, 0x00, 0, 0, 0, 0},
+/*PED_SWITCH*/  {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
 /*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 0, 1, 0},
 /*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 1, 1, 0},
 /*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 1, 1, 0},
@@ -109,6 +111,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
 /*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
+/*PED_SWITCH*/  {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,    TP_NO, 0,  0, 127, 1, 0},
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
 /*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
 /*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
@@ -209,6 +212,7 @@ void setup()
   btn_alt.attach(BTN_ALT);
 
   // set all "standard" buttons as input Pullup and attach debouncer
+  pinMode(PED_SW, INPUT_PULLUP);
   pinMode(CHOVIB_ON, INPUT_PULLUP);
   pinMode(PERC_ON, INPUT_PULLUP);
   pinMode(PERC_SOFT , INPUT_PULLUP);
@@ -223,7 +227,7 @@ void setup()
   btn[4].attach(PERC_3RD);
   btn[5].attach(LSL_STOP);
   btn[6].attach(LSL_FAST);
-
+  btn[7].attach(PED_SW);
 
   led.begin();      // use default address 0
   for (int a = 0; a < 15; a++) {
