@@ -1,3 +1,8 @@
+/* TODO
+ *  get rid of btn_scanned +1 moving the +1 in the setLeds() function. Also consider the opportunity of using directly BTN_IND_START
+ *  create the setButton(btn_index) function. inside set the button subtracting BTN_IND_START
+ *  */
+ 
 #include <Wire.h>
 #include <Adafruit_MCP23017.h>
 #include <Bounce2.h> // https://github.com/thomasfredericks/Bounce2/wiki
@@ -33,10 +38,14 @@ const byte LSL_FAST = 2;
 const byte LED_ALT = 0;
 
 
-const byte BTN_COUNT = 8; // configurable buttons number (less the Alternate button, counted a part)
+const byte BTN_COUNT = 8; // configurable digital input number (less the Alternate button, counted a part) include the pedal input
 const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp pedal too)
 const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
-
+const byte BTN_LED_COUNT = 7; // number of digital inputs that have leds (less the Alternate button, counted a part)
+const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
+const byte VIBCHO_LED_COUNT = 6; 
+const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT;
+const byte TOTAL_LED_ALT_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1;
 /* *************************************************************************
  *  presets
  */
@@ -180,8 +189,8 @@ byte btnAlt_released;
 // Controls LEDs attacched to MCP23017
 Adafruit_MCP23017 led;
 
-// An array that store the state of the buttons leds.
-byte ledState[3][8] = {};
+// An array that store the state of the buttons leds (including the Alt btn/led).
+byte ledState[3][BTN_LED_COUNT+1] = {};
 long led_alt_on_time;
 byte led_alt_blink_status;
 byte vibcho_control[2] = {};
@@ -195,7 +204,7 @@ byte old_preset_led; // the previous selected preset's led
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 const byte SEND_NOTE_OFF = 0; // if send also the note off control when sending note on = 0;
 
-byte btn_default[7][3] = {
+byte btn_default[BTN_LED_COUNT][3] = {
                          //ALT UP LOW
     /*PEDAL TO LOWER */   {1, 0, 1},  /*CHOVIB_ON*/
     /*preset */           {0, 1, 0},  /*PERC_ON*/
@@ -234,7 +243,7 @@ void setup()
   btn[7].attach(PED_SW);
 
   led.begin();      // use default address 0
-  for (int a = 0; a < 15; a++) {
+  for (int a = 0; a < TOTAL_LED_ALT_COUNT; a++) {
     // from 0 to 8 are the pushbutton leds, from 9 to 14 are the chorus/vibrato status leds
     led.pinMode(a, OUTPUT);
   }
@@ -247,7 +256,7 @@ void setup()
   //old_preset_led = 3;
 
   // turn off all the 6 vib/cho status leds
-  for (byte ledto = 8; ledto < 14; ledto++) {
+  for (byte ledto = VIBCHO_LED_IDX_START; ledto < TOTAL_LED_ALT_COUNT; ledto++) {
     led.digitalWrite(ledto, 0);
  }
  
@@ -343,11 +352,15 @@ void loop() {
 }
 
 void setLedState( byte status, byte btn, byte value ){
-  if ( btn < 7 ){
+  if ( btn <= BTN_LED_COUNT ){ // escludiamo di impostare lo stato per input che non hanno il led (tipo il pedale)
     ledState[status][btn] = value;
   }
 }
 
+void SetAltLedState( byte status, byte value ){
+  ledState[status][LED_ALT] = value;
+  }
+  
 void changePreset( byte btn_scanned, byte curr_status ){
    byte btn_index = btn_scanned + BTN_IDX_START;
    Serial.println (String("CHANGING preset") + curr_status );
@@ -415,15 +428,14 @@ void getAltBtn(){
             if ( STATUS == ST_UP && OLD_STATUS != ST_ALT){
               OLD_STATUS = STATUS;
               STATUS = ST_LOW;
-              setLedState( STATUS, LED_ALT, 1);
-              Serial.println (String("STATUS: ") + STATUS);
+              SetAltLedState( STATUS, 1);
             }
             else{
               OLD_STATUS = STATUS;
               STATUS = ST_UP;
-              setLedState( STATUS, LED_ALT, 0);
-              Serial.println (String("STATUS: ") + STATUS);
+              SetAltLedState( STATUS, 0);
             }
+            Serial.println (String("STATUS: ") + STATUS);
         }
       }
 
@@ -443,13 +455,13 @@ void getAltBtn(){
             OLD_STATUS = STATUS;
             if ( STATUS == ST_ALT ){
               STATUS = ST_UP;
-              setLedState( STATUS, LED_ALT, 0 );
+              SetAltLedState( STATUS, 0 );
               Serial.println (String("from ALT to STATUS: ") + STATUS);
             }
             else {
               STATUS = ST_ALT;
               led_alt_on_time = millis();
-              setLedState( STATUS, LED_ALT, 1);
+              SetAltLedState( STATUS, 1);
               led_alt_blink_status = ledState[STATUS][LED_ALT];
               Serial.println (String("STATUS: ") + STATUS);
             }
@@ -461,19 +473,17 @@ void getAltBtn(){
 
 void setVibchoLeds( byte ledon ){
     // turn off the old led
-    led.digitalWrite(vibcho_lag + 8, 0);
+    led.digitalWrite(vibcho_lag + VIBCHO_LED_IDX_START, 0);
 
     // turn on the Led
     Serial.println (String("VIB/CHO led: ") + ledon);
-    led.digitalWrite(ledon + 8, 1);
+    led.digitalWrite(ledon + VIBCHO_LED_IDX_START, 1);
   }
 
 void setLeds(){
 
     if ( STATUS == ST_ALT){
-      //digitalWrite(LED, 1);
-
-      //blink LED_ALT
+       //blink LED_ALT
       if( millis()-led_alt_on_time < 500 ){
         led.digitalWrite(LED_ALT, led_alt_blink_status);
       }
@@ -483,11 +493,10 @@ void setLeds(){
       }
     }
     else{
-     // digitalWrite(LED, 0);
       led.digitalWrite(LED_ALT, ledState[STATUS][LED_ALT]);
     }
 
-    for (byte ledto = 1; ledto < 8; ledto++) {
+    for (byte ledto = 1; ledto <= BTN_LED_COUNT; ledto++) {
       // Serial.println (String("Leds for status: ") + STATUS + String(" led : ") + ledto + ledState[STATUS][ledto] );
       led.digitalWrite(ledto, ledState[STATUS][ledto]);
     }
@@ -564,17 +573,7 @@ void syncAnalogData() {
     }
   }
 
-    //Led feedback
-    for (byte ledto = 1; ledto < 8; ledto++) {
-      //turn off all leds
-      led.digitalWrite(ledto, 0);
-    }
-
-    for (byte ledto = 1; ledto < 8; ledto++) {
-      led.digitalWrite(ledto, 1);
-      delay(100);
-      led.digitalWrite(ledto, 0);
-    }
+  ledCarousel();
 }
 
 void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
@@ -720,3 +719,18 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
         break;
     }
 }
+
+void ledCarousel(){
+      //Led feedback
+    for (byte ledto = 1; ledto < 8; ledto++) {
+      //turn off all leds
+      led.digitalWrite(ledto, 0);
+    }
+
+    for (byte ledto = 1; ledto < 8; ledto++) {
+      led.digitalWrite(ledto, 1);
+      delay(100);
+      led.digitalWrite(ledto, 0);
+    }
+}
+
