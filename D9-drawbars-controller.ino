@@ -308,64 +308,8 @@ void loop() {
   setLeds();
 
   /* MIDI merge and thru */
-
-  // MIDI IN to MIDI OUT should be already handled by the Midi library soft thru.
-  // here we handle MIDI to usbMidi and usbMIDI to MIDI
-
-  // code heavily derived form the Interface_3X3 example in Teensyduino
-  bool activity = false;
-
-  if (MIDI.read()) {
-    // get a MIDI IN1 (Serial) message
-    byte type = MIDI.getType();
-    byte channel = MIDI.getChannel();
-    byte data1 = MIDI.getData1();
-    byte data2 = MIDI.getData2();
-
-    // forward the message to USB MIDI virtual cable #0
-    if (type != midi::SystemExclusive) {
-      // Normal messages, simply give the data to the usbMIDI.send()
-      usbMIDI.send(type, data1, data2, channel, 0);
-    } else {
-      // SysEx messages are special.  The message length is given in data1 & data2
-      unsigned int SysExLength = data1 + data2 * 256;
-      usbMIDI.sendSysEx(SysExLength, MIDI.getSysExArray(), true, 0);
-    }
-    activity = true;
-  }
-
-  if (usbMIDI.read()) {
-    // get the USB MIDI message, defined by these 5 numbers (except SysEX)
-    byte type = usbMIDI.getType();
-    byte channel = usbMIDI.getChannel();
-    byte data1 = usbMIDI.getData1();
-    byte data2 = usbMIDI.getData2();
-   // byte cable = usbMIDI.getCable();
-
-    // forward this message to 1 of the 3 Serial MIDI OUT ports
-    if (type != usbMIDI.SystemExclusive) {
-      // Normal messages, first we must convert usbMIDI's type (an ordinary
-      // byte) to the MIDI library's special MidiType.
-      midi::MidiType mtype = (midi::MidiType)type;
-      MIDI.send(mtype, data1, data2, channel);
-    } else {
-      // SysEx messages are special.  The message length is given in data1 & data2
-      unsigned int SysExLength = data1 + data2 * 256;
-      MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
-    }
-    activity = true;
-  }
-
-  // TODO: blink the LED when any activity has happened
-  /*
-  if (activity) {
-    digitalWriteFast(13, HIGH); // LED on
-    ledOnMillis = 0;
-  }
-  if (ledOnMillis > 15) {
-    digitalWriteFast(13, LOW);  // LED off
-  }
-  */
+  MidiMerge();
+  
 }
 
 void setLedState( byte status, byte btn, byte value ){
@@ -749,5 +693,66 @@ void ledCarousel(){
       delay(100);
       led.digitalWrite(ledto, 0);
     }
+}
+
+void MidiMerge(){
+    // MIDI IN to MIDI OUT should be already handled by the Midi library soft thru.
+  // here we handle MIDI to usbMidi and usbMIDI to MIDI
+
+  // code heavily derived form the Interface_3X3 example in Teensyduino
+  //bool activity = false;
+
+  if (MIDI.read()) {
+    // get a MIDI IN1 (Serial) message
+    byte type = MIDI.getType();
+    byte channel = MIDI.getChannel();
+    byte data1 = MIDI.getData1();
+    byte data2 = MIDI.getData2();
+
+    // forward the message to USB MIDI virtual cable #0
+    if (type != midi::SystemExclusive) {
+      // Normal messages, simply give the data to the usbMIDI.send()
+      usbMIDI.send(type, data1, data2, channel, 0);
+    } else {
+      // SysEx messages are special.  The message length is given in data1 & data2
+      unsigned int SysExLength = data1 + data2 * 256;
+      usbMIDI.sendSysEx(SysExLength, MIDI.getSysExArray(), true, 0);
+    }
+    //activity = true;
+  }
+
+  if (usbMIDI.read()) {
+    // get the USB MIDI message, defined by these 5 numbers (except SysEX)
+    byte type = usbMIDI.getType();
+    byte channel = usbMIDI.getChannel();
+    byte data1 = usbMIDI.getData1();
+    byte data2 = usbMIDI.getData2();
+   // byte cable = usbMIDI.getCable();
+
+    // forward this message to 1 of the 3 Serial MIDI OUT ports
+    if (type != usbMIDI.SystemExclusive) {
+      // Normal messages, first we must convert usbMIDI's type (an ordinary
+      // byte) to the MIDI library's special MidiType.
+      midi::MidiType mtype = (midi::MidiType)type;
+      MIDI.send(mtype, data1, data2, channel);
+    } else {
+      // SysEx messages are special.  The message length is given in data1 & data2
+      unsigned int SysExLength = data1 + data2 * 256;
+      MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
+    }
+    //activity = true;
+  }
+
+  // TODO: blink the LED when any activity has happened
+  /*
+  if (activity) {
+    digitalWriteFast(13, HIGH); // LED on
+    ledOnMillis = 0;
+  }
+  if (ledOnMillis > 15) {
+    digitalWriteFast(13, LOW);  // LED off
+  }
+  */
+
 }
 
