@@ -38,15 +38,15 @@ const byte LSL_FAST = 2;
 
 const byte LED_ALT = 0;
 
-
 const byte BTN_COUNT = 8; // configurable digital input number (less the Alternate button, counted a part) include the pedal input
 const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp pedal too)
 const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 const byte BTN_LED_COUNT = 7; // number of digital inputs that have leds (less the Alternate button, counted a part)
 const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
-const byte VIBCHO_LED_COUNT = 6; 
+const byte VIBCHO_LED_COUNT = 6; // number of leds used to show the Vibrato/Chorus selected. 
 const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT;
 const byte TOTAL_LED_ALT_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1;
+
 /* *************************************************************************
  *  presets
  */
