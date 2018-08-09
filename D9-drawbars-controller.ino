@@ -199,6 +199,7 @@ Bounce btn_alt = Bounce() ;
 
 byte btnAlt_pushed;
 byte btnAlt_released;
+static unsigned long BTN_LONG_PRESS_MILLIS = 1300;
 
 /* *************************************************************************
  *  LEDs initialization
@@ -375,7 +376,7 @@ void resetToDefaultData(){
 
 void getAltBtn(){
   static unsigned long btnAlt_DownTime;
-  static unsigned long holdTime = 2000;
+  
   // scansioniamo il pulsante "ALT"
   if (btn_alt.update()){
     if (btn_alt.fell()) {
@@ -409,7 +410,7 @@ void getAltBtn(){
       // se il suo stato è "premuto" ( cioè 0)... allora verifichiamo da quanto tempo è permuto
       if( btn_alt.read() == 0 ){
           // se è premuto da abbastanza tempo allora passiamo a allo Status ALT
-          if ((millis() - btnAlt_DownTime) > holdTime && btnAlt_released == 1 ) {
+          if ((millis() - btnAlt_DownTime) > BTN_LONG_PRESS_MILLIS && btnAlt_released == 1 ) {
             Serial.println(String("ALT BTN LONG PRESS!!:") );
             btnAlt_pushed = 0;
             btnAlt_released = 0;
