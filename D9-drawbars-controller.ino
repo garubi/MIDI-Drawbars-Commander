@@ -1,6 +1,7 @@
 /* TODO
  *  get rid of btn_scanned +1 moving the +1 in the setLeds() function. Also consider the opportunity of using directly BTN_IND_START
  *  create the setButton(btn_index) function. inside set the button subtracting BTN_IND_START
+ *  reduce code repetition when controlling for IS_GLOBAL and IS_ALL in both analog and digital input
  *  */
  
 #include <Wire.h>
