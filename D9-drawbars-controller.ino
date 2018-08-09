@@ -1,3 +1,19 @@
+/*
+  D9 programmable drawbars controller
+
+  ver 1.0
+
+  Created 2018
+  By Stefano Garuti stefano@garuti.it
+
+  Project home:
+  https://github.com/garubi/D9-drawbars-controller
+
+  LICENSE:
+  https://github.com/garubi/D9-drawbars-controller/blob/master/LICENSE
+
+*/
+
 /* TODO
  *  get rid of btn_scanned +1 moving the +1 in the setLeds() function. Also consider the opportunity of using directly BTN_IND_START
  *  create the setButton(btn_index) function. inside set the button subtracting BTN_IND_START
