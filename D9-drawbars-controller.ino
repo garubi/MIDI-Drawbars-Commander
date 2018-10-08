@@ -139,7 +139,7 @@ const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
 /*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
 /*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
-/*PED_EXP */    {TP_CC, 11, 0, 127, 1, IS_GLOBAL,              TP_CC, 11, 0, 127, 1, IS_GLOBAL,               TP_NO, 0x00, 0, 8, 1, 0},
+/*PED_EXP */    {TP_CC,  7, 0, 127, 1, IS_GLOBAL,              TP_CC,  7, 0, 127, 1, IS_GLOBAL,               TP_NO, 0x00, 0, 8, 1, 0},
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
 /*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
 /*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
@@ -220,7 +220,7 @@ byte old_preset_led; // the previous selected preset's led
  */
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
-const byte SEND_NOTE_OFF = 0; // if send also the note off control when sending note on = 0;
+const byte SEND_NOTE_OFF = 0; // don't send also the note off control when sending note on = 0;
 
 byte btn_default[BTN_LED_COUNT][3] = {
                          //ALT UP LOW
@@ -583,8 +583,6 @@ void getDigitalData() {
         if( btnAlt_pushed == 0){
           // Caso "normale" il pulsante è premuto da solo
            Serial.println(String("BTN pressed: ") + btn_scanned + String(" value: ") + btn_val );
-
-
             if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
               if ( btn_state[STATUS][btn_scanned] == 1){
                 btn_state[STATUS][btn_scanned] = 0;
