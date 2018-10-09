@@ -229,7 +229,7 @@ byte btn_default[BTN_LED_COUNT][3] = {
     /*preset */           {1, 0, 0},  /*PERC_SOFT*/
                           {0, 0, 0},  /*PERC_FAST*/
                           {0, 0, 0},  /*PERC_3RD*/
-    /* leslie off */      {0, 0, 0},  /*LSL_STOP*/
+    /* leslie off */      {1, 0, 0},  /*LSL_STOP*/
     /* rev off */         {0, 1, 0},  /*LSL_FAST*/
 };
 
@@ -584,6 +584,7 @@ void getDigitalData() {
           // Caso "normale" il pulsante è premuto da solo
            Serial.println(String("BTN pressed: ") + btn_scanned + String(" value: ") + btn_val );
             if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
+              // il pulsante è TOGGLE
               if ( btn_state[STATUS][btn_scanned] == 1){
                 btn_state[STATUS][btn_scanned] = 0;
               }
@@ -592,6 +593,11 @@ void getDigitalData() {
               }
               btn_val = btn_state[STATUS][btn_scanned];
             }
+            else{
+              //il pulsante non è TOGGLE
+             // btn_state[STATUS][btn_scanned] = !btn_val;
+              btn_val = !btn_val;
+              }
 
             updateBtn( btn_scanned, btn_val, STATUS);
         }
@@ -609,10 +615,11 @@ void getDigitalData() {
       }
       // Pulsante rilasciato
       else {
-          if (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] == 0 && ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE] ) != TP_PR){
-           Serial.println(String("Btn released - No TOOGLE - new btn_val: ") + !btn_val );
-           setLedState(STATUS, btn_scanned +1, !btn_val);
-           sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +PARAM], 0, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +CHAN] );
+        // reagisce solo se questo pulsante non è TOGGLE
+          if ( ((PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE) && ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE] ) != TP_PR){
+           Serial.println(String("Btn released - No TOOGLE - btn_val: ") + btn_val + String(" but we send !btn_val: ") + !btn_val);
+           //btn_state[STATUS][btn_scanned] = !btn_val;
+           updateBtn( btn_scanned, !btn_val, STATUS);
           }
       }
 
