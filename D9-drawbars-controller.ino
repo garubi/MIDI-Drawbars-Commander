@@ -301,10 +301,16 @@ void loop() {
 
   // Scan Drawbars
   getAnalogData();
-
+  
+  /* MIDI merge and thru */
+  MidiMerge();
+  
   // Scan Buttons
   getDigitalData();
-
+  
+  /* MIDI merge and thru */
+  MidiMerge();
+  
   // Set Leds
   setLeds();
 
@@ -761,4 +767,3 @@ void MidiMerge(){
   */
 
 }
-
