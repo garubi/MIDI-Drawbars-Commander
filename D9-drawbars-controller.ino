@@ -280,7 +280,7 @@ void setup()
  
   // load the default preset
   for (byte st = 0; st < 3; st++){
-      for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
+      for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;        
         if( PRESETS[0][btn_index][STATUS_IDX[st] + TYPE] == TP_PR ){
           if( 0 != btn_default[btn_scanned][st] ){
@@ -761,4 +761,3 @@ void MidiMerge(){
   */
 
 }
-
