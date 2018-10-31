@@ -333,12 +333,11 @@ void resetToDefaultData(){
 
   for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
-        //if(  st != ST_ALT && (btn_scanned < BTN_PRST_START || btn_scanned > BTN_PRST_COUNT - BTN_PRST_START) ){
-			//Serial.println (String("RESET ALL BUTTONS to 0 - except for the preset buttons"));
+			// RESET ALL BUTTONS to 0 - except for the preset buttons
             updateBtn( btn_scanned, 0, st );
-			//Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st]);
+
+			//Set the default for this button
 			updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
-        //}
       }
   }
 
