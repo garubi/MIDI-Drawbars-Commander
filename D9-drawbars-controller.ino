@@ -51,17 +51,15 @@ const byte PERC_FAST = 5;
 const byte PERC_3RD = 4;
 const byte LSL_STOP = 3;
 const byte LSL_FAST = 2;
-
 const byte LED_ALT = 0;
 
 const byte BTN_COUNT = 8; // configurable digital input number (less the Alternate button, counted a part) include the pedal input
 const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp pedal too)
-const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
+const byte CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 const byte BTN_LED_COUNT = 7; // number of digital inputs that have leds (less the Alternate button, counted a part)
 const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
 const byte VIBCHO_LED_COUNT = 6; // number of leds used to show the Vibrato/Chorus selected.
-const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT;
-const byte TOTAL_LED_ALT_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1;
+const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1; // total number of leds (buttons + vib/cho + ALT)
 
 /* *************************************************************************
  *  presets
@@ -107,7 +105,7 @@ const byte BEHAV = 5;
  * 0: Factory preset for Roland FA 06/07/07
  * 1: Factory preset for GSi Gemini expander
  */
-const byte PRESETS[2][PRESET_CONTROLS_NUM][18]=
+const byte PRESETS[2][CONTROLS_NUM][18]=
 {//                 UPPER                                    LOWER                                     ALTERNATE
 {//PIN             Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour                Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
@@ -211,8 +209,7 @@ Adafruit_MCP23017 led;
 byte ledState[3][BTN_LED_COUNT+1] = {};
 long led_alt_on_time;
 byte led_alt_blink_status;
-byte vibcho_control[2] = {};
-byte vibcho_lag; // the previous selected vibrato type's led
+byte old_vibcho_led; // the previous selected vibrato type's led
 byte old_preset_led; // the previous selected preset's led
 
 /* *************************************************************************
@@ -261,7 +258,7 @@ void setup()
   btn[7].attach(PED_SW);
 
   led.begin();      // use default address 0
-  for (int a = 0; a < TOTAL_LED_ALT_COUNT; a++) {
+  for (int a = 0; a < TOTAL_LED_COUNT; a++) {
     // from 0 to 8 are the pushbutton leds, from 9 to 14 are the chorus/vibrato status leds
     led.pinMode(a, OUTPUT);
   }
@@ -274,7 +271,7 @@ void setup()
   //old_preset_led = 3;
 
   // turn off all the 6 vib/cho status leds
-  for (byte ledto = VIBCHO_LED_IDX_START; ledto < TOTAL_LED_ALT_COUNT; ledto++) {
+  for (byte ledto = VIBCHO_LED_IDX_START; ledto < TOTAL_LED_COUNT; ledto++) {
     led.digitalWrite(ledto, 0);
  }
 
@@ -354,7 +351,6 @@ void resetToDefaultData(){
   Serial.println (String("SET DEFAULT DATA"));
   for (byte st = 0; st < 3; st++){
      Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
-
 	 // set the default startup values for the buttons
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
@@ -438,7 +434,7 @@ void getAltBtn(){
 
 void setVibchoLeds( byte ledon ){
     // turn off the old led
-    led.digitalWrite(vibcho_lag + VIBCHO_LED_IDX_START, 0);
+    led.digitalWrite(old_vibcho_led + VIBCHO_LED_IDX_START, 0);
 
     // turn on the Led
     Serial.println (String("VIB/CHO led: ") + ledon);
