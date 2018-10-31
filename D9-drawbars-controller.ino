@@ -90,7 +90,7 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start
  * 0: Factory preset for Roland FA 06/07/07
  * 1: Factory preset for GSi Gemini expander
  */
-const byte PRESETS[2][CONTROLS_NUM][18]=
+const byte PRESETS[][CONTROLS_NUM][18]=
 {//                 UPPER                                    LOWER                                     ALTERNATE
 {//PIN             Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour                Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
@@ -133,6 +133,8 @@ const byte PRESETS[2][CONTROLS_NUM][18]=
 /*PED_SWITCH*/  {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
 }
 };
+
+const byte PRESET_COUNT = sizeof(PRESETS) / sizeof(PRESETS[0]);
 
 /* Array index position labels */
 const byte TYPE = 0;
@@ -312,21 +314,27 @@ void SetAltLedState( byte status, byte value ){
   }
 
 void changePreset( byte btn_scanned ){
-	// TODO: set it only if is defined in the preset array
+	
+	// set it only if is defined in the preset array
+	if( btn_scanned - BTN_PRST_START <= PRESET_COUNT){
+		Serial.println (String("CHANGING preset"));
+		setLedState(ST_ALT, old_preset_led, 0);
+		setLedState(ST_ALT, btn_scanned +1,  !btn_state[ST_ALT][btn_scanned]);
 
-   Serial.println (String("CHANGING preset"));
-   setLedState(ST_ALT, old_preset_led, 0);
-   setLedState(ST_ALT, btn_scanned +1,  !btn_state[ST_ALT][btn_scanned]);
+		// set the new preset value
+		curr_preset = btn_scanned - BTN_PRST_START;
 
-   // set the new preset value
-   curr_preset = btn_scanned - BTN_PRST_START;
+		// reset all data
+		resetToDefaultData();
 
-   // reset all data
-   resetToDefaultData();
+		Serial.println (String("New preset is: ") + curr_preset );
 
-   Serial.println (String("New preset is: ") + curr_preset );
+		old_preset_led = btn_scanned +1;
+	}
+	else{
+		Serial.println (String("CANT CHANGE preset: preset location empty"));
+	}
 
-   old_preset_led = btn_scanned +1;
 }
 
 void resetToDefaultData(){
