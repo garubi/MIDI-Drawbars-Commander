@@ -134,7 +134,7 @@ const byte PRESETS[2][CONTROLS_NUM][18]=
 /*DWB2*/        {TP_CC, 17, 0, 127, 1, 0,                      TP_CC, 26, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
 /*DWB2_23*/     {TP_CC, 16, 0, 127, 1, 0,                      TP_CC, 25, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
 /*DWB4*/        {TP_CC, 15, 0, 127, 1, 0,                      TP_CC, 24, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
-/*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, IS_VIBCHO}, // VIB TYPE
+/*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, 0}, // VIB TYPE
 /*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
 /*PED_EXP */    {TP_CC,  7, 0, 127, 1, IS_GLOBAL,              TP_CC,  7, 0, 127, 1, IS_GLOBAL,               TP_NO, 0x00, 0, 8, 1, 0},
@@ -478,7 +478,6 @@ void getAnalogData() {
           Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
 
           // check if this drawbar is dedicated to the VIB/CHO control
-         // if ( (PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
           if ( STATUS == ST_ALT && drwb_scanned == VIBCHO_SEL_DRWB ){
             Serial.println (String("This DWB controls VIBCHO selection") );
 			setVibchoType( analogData[drwb_scanned] );
