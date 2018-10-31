@@ -215,15 +215,16 @@ byte old_preset_led; // the previous selected preset's led
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 const byte SEND_NOTE_OFF = 0; // don't send also the note off control when sending note on = 0;
 
-byte btn_default[BTN_LED_COUNT][3] = {
-                         //ALT UP LOW
-    /*PEDAL TO LOWER */   {1, 0, 1},  /*CHOVIB_ON*/
-    /*preset */           {0, 1, 0},  /*PERC_ON*/
-    /*preset */           {1, 0, 0},  /*PERC_SOFT*/
-                          {0, 0, 0},  /*PERC_FAST*/
-                          {0, 0, 0},  /*PERC_3RD*/
-    /* leslie off */      {1, 0, 0},  /*LSL_STOP*/
-    /* rev off */         {0, 1, 0},  /*LSL_FAST*/
+byte btn_default[BTN_LED_COUNT+1][3] = {
+                          //ALT UP LOW
+    /*PEDAL TO LOWER */ 	{1, 0, 1},  /*CHOVIB_ON*/
+    /*preset */           	{0, 1, 0},  /*PERC_ON*/
+    /*preset */           	{1, 0, 0},  /*PERC_SOFT*/
+                          	{0, 0, 0},  /*PERC_FAST*/
+                          	{0, 0, 0},  /*PERC_3RD*/
+    /* leslie off */      	{1, 0, 0},  /*LSL_STOP*/
+    /* rev off */         	{0, 1, 0},  /*LSL_FAST*/
+	/* vib/cho sel. value*/	{127,0,0} 	// we start with C3
 };
 
 void setup()
@@ -263,8 +264,6 @@ void setup()
   STATUS = ST_UP;
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
-  //curr_preset = 1;
-  //old_preset_led = 3;
 
   // turn off all the 6 vib/cho status leds
   for (byte ledto = VIBCHO_LED_IDX_START; ledto < TOTAL_LED_COUNT; ledto++) {
@@ -282,7 +281,6 @@ void setup()
         }
       }
   }
-
 
   syncAnalogData();
 }
@@ -348,7 +346,7 @@ void resetToDefaultData(){
   for (byte st = 0; st < 3; st++){
      Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
 	 // set the default startup values for the buttons
-      for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
+      for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
         if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_PR && PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_NO ){
             Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st]);
@@ -357,8 +355,7 @@ void resetToDefaultData(){
       }
   }
 
-	// we start with C3
-  setVibchoType( 127 );
+  setVibchoType( btn_default[7][ST_ALT]; );
 }
 
 void getAltBtn(){
