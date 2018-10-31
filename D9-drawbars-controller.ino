@@ -71,11 +71,10 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start
    The multidimensional Array byte PRESETS will contains in each row:
    1) the type of midi message to send out:*/
 		const byte TP_NO   = 0; // Disabled
-		const byte TP_ON   = 2; // Note on
-		const byte TP_CC   = 3; // COntrol Change
-		const byte TP_PC   = 4; // Program CHange
-		const byte TP_SX   = 5; // System Exclusive
-		const byte TP_PR   = 6; // Controller presets (set the preset value in MAX column)
+		const byte TP_ON   = 1; // Note on
+		const byte TP_CC   = 2; // COntrol Change
+		const byte TP_PC   = 3; // Program CHange
+		const byte TP_SX   = 4; // System Exclusive
 /*
    2) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    3) the min value to send out
@@ -105,10 +104,10 @@ const byte PRESETS[2][CONTROLS_NUM][18]=
 /*DWB16*/       {TP_SX, 0x22, 0, 8, 1, 0,                      TP_SX, 0x22, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
 /*PED_EXP */    {TP_CC, 11, 0, 127, 1, SEND_ALL,               TP_CC, 11, 0, 127, 2, SEND_ALL,                TP_NO, 0x00, 0, 8, 1, 0},
 /*CHOVIB_ON*/   {TP_NO, 0x00, 0, 0, 0, 0,                      TP_NO, 0x00, 0, 0, 0, 0,                       TP_NO, 0x00, 0, 0, 0, 0},
-/*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 0, 1, 0},
-/*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,    0, 1, 1, 0},
-/*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 1, 1, 0},
-/*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 1, 1, 0},
+/*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_CC, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
 /*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
 /*PED_SWITCH*/  {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
@@ -125,10 +124,10 @@ const byte PRESETS[2][CONTROLS_NUM][18]=
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
 /*PED_EXP */    {TP_CC,  7, 0, 127, 1, IS_GLOBAL,              TP_CC,  7, 0, 127, 1, IS_GLOBAL,               TP_NO, 0x00, 0, 8, 1, 0},
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
-/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
-/*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PR, 0,  0,   0, 1, 0}, //unused
-/*PERC_FAST*/   {TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
-/*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
+/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
+/*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
+/*PERC_FAST*/   {TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
+/*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
 /*LSL_FAST*/    {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
 /*PED_SWITCH*/  {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
@@ -194,6 +193,9 @@ Bounce btn_alt = Bounce() ;
 byte btnAlt_pushed;
 byte btnAlt_released;
 static unsigned long BTN_LONG_PRESS_MILLIS = 1300;
+
+const byte BTN_PRST_START = 1; // the btn at wich the preset selectors starts
+const byte BTN_PRST_COUNT = 4; // the number of presets selectors (even if inactive!!)
 
 /* *************************************************************************
  *  LEDs initialization
@@ -271,16 +273,11 @@ void setup()
  }
 
   // load the default preset
-  for (byte st = 0; st < 3; st++){
-      for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
-        byte btn_index = btn_scanned + BTN_IDX_START;
-        if( PRESETS[0][btn_index][STATUS_IDX[st] + TYPE] == TP_PR ){
-          if( 0 != btn_default[btn_scanned][st] ){
-            changePreset(  btn_scanned, st  );
+  for (byte btn_scanned = BTN_PRST_START; btn_scanned <= BTN_PRST_COUNT+BTN_PRST_START; btn_scanned++) {
+          if( 0 != btn_default[btn_scanned][ST_ALT] ){
+            changePreset(  btn_scanned  );
           }
-        }
       }
-  }
 
   syncAnalogData();
 }
@@ -314,14 +311,15 @@ void SetAltLedState( byte status, byte value ){
   ledState[status][LED_ALT] = value;
   }
 
-void changePreset( byte btn_scanned, byte curr_status ){
+void changePreset( byte btn_scanned ){
+	// TODO: set it only if is defined in the preset array
    byte btn_index = btn_scanned + BTN_IDX_START;
-   Serial.println (String("CHANGING preset") + curr_status );
-   setLedState(curr_status, old_preset_led, 0);
-   setLedState(curr_status, btn_scanned +1,  !btn_state[curr_status][btn_scanned]);
+   Serial.println (String("CHANGING preset") + ST_ALT );
+   setLedState(ST_ALT, old_preset_led, 0);
+   setLedState(ST_ALT, btn_scanned +1,  !btn_state[ST_ALT][btn_scanned]);
 
    // set the new preset value
-   curr_preset = PRESETS[0][btn_index][STATUS_IDX[curr_status] +MAX];
+   curr_preset = btn_scanned - BTN_PRST_START;
 
    // reset all data
    resetToDefaultData();
@@ -332,26 +330,15 @@ void changePreset( byte btn_scanned, byte curr_status ){
 }
 
 void resetToDefaultData(){
-  Serial.println (String("RESET ALL BUTTONS to 0 - except for the preset buttons"));
+
   for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
-        byte btn_index = btn_scanned + BTN_IDX_START;
-        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_PR ){
+        //if(  st != ST_ALT && (btn_scanned < BTN_PRST_START || btn_scanned > BTN_PRST_COUNT - BTN_PRST_START) ){
+			//Serial.println (String("RESET ALL BUTTONS to 0 - except for the preset buttons"));
             updateBtn( btn_scanned, 0, st );
-        }
-      }
-  }
-
-  Serial.println (String("SET DEFAULT DATA"));
-  for (byte st = 0; st < 3; st++){
-     Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
-	 // set the default startup values for the buttons
-      for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
-        byte btn_index = btn_scanned + BTN_IDX_START;
-        if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_PR && PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_NO ){
-            Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st]);
-            updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
-        }
+			//Serial.println (String("Button: ") + btn_scanned + String(" value set: ") + btn_default[btn_scanned][st]);
+			updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
+        //}
       }
   }
 
@@ -531,31 +518,28 @@ void syncAnalogData() {
 
 void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
       byte btn_index = btn_scanned + BTN_IDX_START;
-            if ( ( PRESETS[0][btn_index][STATUS_IDX[curr_status] +TYPE] ) == TP_PR ){
-                // If this button is dedicated to switch the presets...
-                changePreset( btn_scanned, curr_status );
-            }
-            else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_ALL ) == SEND_ALL  && curr_status != ST_ALT ){
-                  sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
-                  sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
-                  setLedState(ST_UP, btn_scanned +1,  btn_val);
-                  setLedState(ST_LOW, btn_scanned +1, btn_val);
-                  btn_state[ST_UP][btn_scanned] = btn_val;
-                  btn_state[ST_LOW][btn_scanned] = btn_val;
-            }
-            else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && curr_status != ST_ALT) {
-                  sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
-                  setLedState(ST_UP, btn_scanned +1, btn_val);
-                  setLedState(ST_LOW, btn_scanned +1, btn_val);
-                  btn_state[ST_UP][btn_scanned] = btn_val;
-                  btn_state[ST_LOW][btn_scanned] = btn_val;
-            }
-            else {
-              sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
-              setLedState(curr_status, btn_scanned +1, btn_val);
-            }
-            Serial.println(String("new btn_val: ") + btn_val + String(" Status: ") + curr_status);
-
+            if ( curr_status != ST_ALT && (btn_scanned < BTN_PRST_START && btn_scanned > BTN_PRST_COUNT - BTN_PRST_START) ){ // ci assicuriamo che non sia un pulsante dei preset
+	 			if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_ALL ) == SEND_ALL  && curr_status != ST_ALT ){
+	                  sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
+	                  sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
+	                  setLedState(ST_UP, btn_scanned +1,  btn_val);
+	                  setLedState(ST_LOW, btn_scanned +1, btn_val);
+	                  btn_state[ST_UP][btn_scanned] = btn_val;
+	                  btn_state[ST_LOW][btn_scanned] = btn_val;
+	            }
+	            else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && curr_status != ST_ALT) {
+	                  sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
+	                  setLedState(ST_UP, btn_scanned +1, btn_val);
+	                  setLedState(ST_LOW, btn_scanned +1, btn_val);
+	                  btn_state[ST_UP][btn_scanned] = btn_val;
+	                  btn_state[ST_LOW][btn_scanned] = btn_val;
+	            }
+	            else {
+	              sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
+	              setLedState(curr_status, btn_scanned +1, btn_val);
+	            }
+	            Serial.println(String("new btn_val: ") + btn_val + String(" Status: ") + curr_status);
+			}
 }
 
 void getDigitalData() {
@@ -585,10 +569,18 @@ void getDigitalData() {
               btn_val = btn_state[STATUS][btn_scanned];
             }
             else{
-              //il pulsante non è TOGGLE
-             // btn_state[STATUS][btn_scanned] = !btn_val;
-              btn_val = !btn_val;
-              }
+	              //il pulsante non è TOGGLE
+
+				//se il pulsante è un preset...
+				if( STATUS == ST_ALT && (btn_scanned >= BTN_PRST_START && btn_scanned <= BTN_PRST_COUNT - BTN_PRST_START)  ){
+					changePreset(  btn_scanned  );
+				}
+				else{
+
+	             // btn_state[STATUS][btn_scanned] = !btn_val;
+	              btn_val = !btn_val;
+				}
+            }
 
             updateBtn( btn_scanned, btn_val, STATUS);
         }
@@ -606,9 +598,9 @@ void getDigitalData() {
       // Pulsante rilasciato
       else {
         // reagisce solo se questo pulsante non è TOGGLE
-          if ( ((PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE) && ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +TYPE] ) != TP_PR){
+        //  if ( ((PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE) && (btn_scanned < BTN_PRST_START || btn_scanned > BTN_PRST_COUNT - BTN_PRST_START) ){
+          if ( ((PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE) ){
            Serial.println(String("Btn released - No TOOGLE - btn_val: ") + btn_val + String(" but we send !btn_val: ") + !btn_val);
-           //btn_state[STATUS][btn_scanned] = !btn_val;
            updateBtn( btn_scanned, !btn_val, STATUS);
           }
       }
