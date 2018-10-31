@@ -19,7 +19,7 @@
  *  create the setButton(btn_index) function. inside set the button subtracting BTN_IND_START
  *  reduce code repetition when controlling for IS_GLOBAL and IS_ALL in both analog and digital input
  *  */
- 
+
 #include <Wire.h>
 #include <Adafruit_MCP23017.h>
 #include <Bounce2.h> // https://github.com/thomasfredericks/Bounce2/wiki
@@ -59,7 +59,7 @@ const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp
 const byte PRESET_CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 const byte BTN_LED_COUNT = 7; // number of digital inputs that have leds (less the Alternate button, counted a part)
 const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
-const byte VIBCHO_LED_COUNT = 6; // number of leds used to show the Vibrato/Chorus selected. 
+const byte VIBCHO_LED_COUNT = 6; // number of leds used to show the Vibrato/Chorus selected.
 const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT;
 const byte TOTAL_LED_ALT_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1;
 
@@ -86,7 +86,7 @@ const byte SEND_ALL  = 8; // if we have to send both the Lower and the Upper val
       const byte TP_PC   = 4; // Program CHange
       const byte TP_SX   = 5; // System Exclusive
       const byte TP_PR   = 6; // Controller presets (set the preset value in MAX column)
-/*      
+/*
    3) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    4) the min value to send out
    5) the max value to sed out
@@ -277,20 +277,20 @@ void setup()
   for (byte ledto = VIBCHO_LED_IDX_START; ledto < TOTAL_LED_ALT_COUNT; ledto++) {
     led.digitalWrite(ledto, 0);
  }
- 
+
   // load the default preset
   for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
-        byte btn_index = btn_scanned + BTN_IDX_START;        
+        byte btn_index = btn_scanned + BTN_IDX_START;
         if( PRESETS[0][btn_index][STATUS_IDX[st] + TYPE] == TP_PR ){
           if( 0 != btn_default[btn_scanned][st] ){
-            changePreset(  btn_scanned, st  ); 
-          }          
+            changePreset(  btn_scanned, st  );
+          }
         }
       }
   }
 
- 
+
   syncAnalogData();
 }
 
@@ -310,7 +310,7 @@ void loop() {
 
   /* MIDI merge and thru */
   MidiMerge();
-  
+
 }
 
 void setLedState( byte status, byte btn, byte value ){
@@ -322,7 +322,7 @@ void setLedState( byte status, byte btn, byte value ){
 void SetAltLedState( byte status, byte value ){
   ledState[status][LED_ALT] = value;
   }
-  
+
 void changePreset( byte btn_scanned, byte curr_status ){
    byte btn_index = btn_scanned + BTN_IDX_START;
    Serial.println (String("CHANGING preset") + curr_status );
@@ -331,17 +331,17 @@ void changePreset( byte btn_scanned, byte curr_status ){
 
    // set the new preset value
    curr_preset = PRESETS[0][btn_index][STATUS_IDX[curr_status] +MAX];
-   
+
    // reset all data
    resetToDefaultData();
-   
-   Serial.println (String("New preset is: ") + curr_preset );  
-   
+
+   Serial.println (String("New preset is: ") + curr_preset );
+
    old_preset_led = btn_scanned +1;
 }
 
 void resetToDefaultData(){
-  Serial.println (String("RESET ALL BUTTONS to 0 - except for the preset buttons")); 
+  Serial.println (String("RESET ALL BUTTONS to 0 - except for the preset buttons"));
   for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
@@ -350,11 +350,12 @@ void resetToDefaultData(){
         }
       }
   }
-  
+
   Serial.println (String("SET DEFAULT DATA"));
   for (byte st = 0; st < 3; st++){
      Serial.println (String("For STATUS: ") + st + String(" IDX: ") + STATUS_IDX[st]);
 
+	 // set the default startup values for the buttons
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
         byte btn_index = btn_scanned + BTN_IDX_START;
         if( PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_PR && PRESETS[curr_preset][btn_index][STATUS_IDX[st] + TYPE] != TP_NO ){
@@ -362,6 +363,8 @@ void resetToDefaultData(){
             updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
         }
       }
+
+	  // set the default startup type for the vib/cho
       for (byte analog = 0; analog < DRWB_COUNT; analog++) {
         if ( (PRESETS[curr_preset][analog][STATUS_IDX[st] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
             Serial.println (String("SET VIB/CHO to C3 (127)"));
@@ -370,13 +373,13 @@ void resetToDefaultData(){
             vibcho_lag = vibcho_led_on;
             sendMidi( PRESETS[curr_preset][analog][STATUS_IDX[st] +TYPE], PRESETS[curr_preset][analog][STATUS_IDX[st] +PARAM], 127, analog, PRESETS[curr_preset][analog][STATUS_IDX[st] +CHAN] );
         }
-      }  
+      }
   }
 }
 
 void getAltBtn(){
   static unsigned long btnAlt_DownTime;
-  
+
   // scansioniamo il pulsante "ALT"
   if (btn_alt.update()){
     if (btn_alt.fell()) {
@@ -484,11 +487,11 @@ void getAnalogData() {
         if (analogData[drwb_scanned] != analogDataLag[drwb_scanned]) {
           analogDataLag[drwb_scanned] = analogData[drwb_scanned];
           Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
-  
+
           // check if this drawbar is dedicated to the VIB/CHO control
           if ( (PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
              Serial.println (String("DWB controls VIBCHO") );
-  
+
             // calculate which Led turn on based on the Drawbar value
             byte vibcho_led_on =  map(analogData[drwb_scanned], 0, 127, 0, 5);
             if (vibcho_led_on != vibcho_lag){
@@ -573,7 +576,7 @@ void getDigitalData() {
   for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
     byte btn_val = 0;
     byte btn_index = btn_scanned + BTN_IDX_START;
-    
+
     if (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO && btn[btn_scanned].update()) {
       btn_val = btn[btn_scanned].read();
 
@@ -608,7 +611,6 @@ void getDigitalData() {
           //sync analog data
           if( btn_scanned == 0 ){
             syncAnalogData();
-            //resetToDefaultData();
           }
         }
 
