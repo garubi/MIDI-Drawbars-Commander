@@ -66,39 +66,25 @@ const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1; // total numb
  */
 
 const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start the buttons rows?
-byte curr_preset; // the currennt selected preset.
-
-// Controls behaviour "labels"
-const byte IS_TOGGLE = 1; // is a pushbutton (momentary) or is toggle?
-const byte IS_VIBCHO = 2; // the drawbar with this constant sets controls the Vibrato / Chorus type
-const byte IS_GLOBAL = 4; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
-const byte SEND_ALL  = 8; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
 /*
    The multidimensional Array byte PRESETS will contains in each row:
-   1) the pin to which the drawbar/button is attached to
-   2) the type of midi message to send out:*/
-      const byte TP_NO   = 0; // Disabled
-      const byte TP_ON   = 2; // Note on
-      const byte TP_CC   = 3; // COntrol Change
-      const byte TP_PC   = 4; // Program CHange
-      const byte TP_SX   = 5; // System Exclusive
-      const byte TP_PR   = 6; // Controller presets (set the preset value in MAX column)
+   1) the type of midi message to send out:*/
+		const byte TP_NO   = 0; // Disabled
+		const byte TP_ON   = 2; // Note on
+		const byte TP_CC   = 3; // COntrol Change
+		const byte TP_PC   = 4; // Program CHange
+		const byte TP_SX   = 5; // System Exclusive
+		const byte TP_PR   = 6; // Controller presets (set the preset value in MAX column)
 /*
-   3) the command parameter (CC number, or Note number, or SySEx parameter etc...)
-   4) the min value to send out
-   5) the max value to sed out
-   6) does the button have to behave as a toggle one (IS_TOGGLE) or is used to change the Vibrato/choorus type (IS_VIBCHO)?
-   7) Upper/lower behaviour.
+   2) the command parameter (CC number, or Note number, or SySEx parameter etc...)
+   3) the min value to send out
+   4) the max value to sed out
+   5) the button (and associated control command) behaviour:
 */
-
-/* Array index position labels */
-const byte TYPE = 0;
-const byte PARAM = 1;
-const byte MIN = 2;
-const byte MAX = 3;
-const byte CHAN = 4;
-const byte BEHAV = 5;
+		const byte IS_TOGGLE = 1; // is a pushbutton (momentary) or is toggle?
+		const byte IS_GLOBAL = 2; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
+		const byte SEND_ALL  = 4; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
 
 /*****************************
  * PRESETS array
@@ -149,6 +135,15 @@ const byte PRESETS[2][CONTROLS_NUM][18]=
 }
 };
 
+/* Array index position labels */
+const byte TYPE = 0;
+const byte PARAM = 1;
+const byte MIN = 2;
+const byte MAX = 3;
+const byte CHAN = 4;
+const byte BEHAV = 5;
+
+byte curr_preset; // the currennt selected preset.
 
 /* *************************************************************************
  *  Momentary status
