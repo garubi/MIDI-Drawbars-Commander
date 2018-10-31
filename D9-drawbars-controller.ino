@@ -222,8 +222,8 @@ byte btn_default[BTN_LED_COUNT+1][3] = {
     /*PEDAL TO LOWER */ 	{1, 0, 1},  /*CHOVIB_ON*/
     /*preset */           	{0, 1, 0},  /*PERC_ON*/
     /*preset */           	{1, 0, 0},  /*PERC_SOFT*/
-                          	{0, 0, 0},  /*PERC_FAST*/
-                          	{0, 0, 0},  /*PERC_3RD*/
+    /*preset */            	{0, 0, 0},  /*PERC_FAST*/
+    /*preset */            	{0, 0, 0},  /*PERC_3RD*/
     /* leslie off */      	{1, 0, 0},  /*LSL_STOP*/
     /* rev off */         	{0, 1, 0},  /*LSL_FAST*/
 	/* vib/cho sel. value*/	{127,0,0} 	// we start with C3
@@ -313,8 +313,8 @@ void SetAltLedState( byte status, byte value ){
 
 void changePreset( byte btn_scanned ){
 	// TODO: set it only if is defined in the preset array
-   byte btn_index = btn_scanned + BTN_IDX_START;
-   Serial.println (String("CHANGING preset") + ST_ALT );
+
+   Serial.println (String("CHANGING preset"));
    setLedState(ST_ALT, old_preset_led, 0);
    setLedState(ST_ALT, btn_scanned +1,  !btn_state[ST_ALT][btn_scanned]);
 
