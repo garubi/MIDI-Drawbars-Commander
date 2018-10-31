@@ -355,7 +355,7 @@ void resetToDefaultData(){
       }
   }
 
-  setVibchoType( btn_default[7][ST_ALT]; );
+  setVibchoType( btn_default[7][ST_ALT] );
 }
 
 void getAltBtn(){
