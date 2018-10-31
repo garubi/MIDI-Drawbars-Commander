@@ -185,6 +185,7 @@ ResponsiveAnalogRead drwb[] {
   {DWB16, true},
   {PED_EXP, true},
 };
+const byte VIBCHO_SEL_DRWB = 6; // which Drawbar is used to select the vib/cho type when in ALT mode?
 
 
 /* *************************************************************************
@@ -359,18 +360,10 @@ void resetToDefaultData(){
             updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
         }
       }
-
-	  // set the default startup type for the vib/cho
-      for (byte analog = 0; analog < DRWB_COUNT; analog++) {
-        if ( (PRESETS[curr_preset][analog][STATUS_IDX[st] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
-            Serial.println (String("SET VIB/CHO to C3 (127)"));
-            byte vibcho_led_on =  5;
-            setVibchoLeds( vibcho_led_on );
-            vibcho_lag = vibcho_led_on;
-            sendMidi( PRESETS[curr_preset][analog][STATUS_IDX[st] +TYPE], PRESETS[curr_preset][analog][STATUS_IDX[st] +PARAM], 127, analog, PRESETS[curr_preset][analog][STATUS_IDX[st] +CHAN] );
-        }
-      }
   }
+
+	// we start with C3
+  setVibchoType( 127 );
 }
 
 void getAltBtn(){
@@ -485,16 +478,10 @@ void getAnalogData() {
           Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
 
           // check if this drawbar is dedicated to the VIB/CHO control
-          if ( (PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
-             Serial.println (String("DWB controls VIBCHO") );
-
-            // calculate which Led turn on based on the Drawbar value
-            byte vibcho_led_on =  map(analogData[drwb_scanned], 0, 127, 0, 5);
-            if (vibcho_led_on != vibcho_lag){
-              setVibchoLeds( vibcho_led_on );
-              vibcho_lag = vibcho_led_on;
-              sendAnalogMidi( analogData[drwb_scanned], drwb_scanned );
-            }
+         // if ( (PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +BEHAV] & IS_VIBCHO )== IS_VIBCHO ){
+          if ( STATUS == ST_ALT && drwb_scanned == VIBCHO_SEL_DRWB ){
+            Serial.println (String("This DWB controls VIBCHO selection") );
+			setVibchoType( analogData[drwb_scanned] );
           }
           else{
                 sendAnalogMidi( analogData[drwb_scanned], drwb_scanned );
@@ -518,6 +505,20 @@ void sendAnalogMidi ( byte value, byte control ){
   else {
     sendMidi( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[STATUS] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[STATUS] +CHAN] );
   }
+}
+
+void setVibchoType( byte CCvalue ){
+	// calculate which Led turn on based on the Drawbar value
+	byte vibcho_led_on =  map(CCvalue, 0, 127, 0, 5);
+
+	// only send if the new LED is different from the old one
+	if (vibcho_led_on != old_vibcho_led){
+		Serial.println (String("SET VIB/CHO to ") + CCvalue );
+	  setVibchoLeds( vibcho_led_on );
+	  old_vibcho_led = vibcho_led_on;
+	  // sendAnalogMidi( CCvalue, VIBCHO_SEL_DRWB ); // we could use this if we could send the STatus too
+	  sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[ST_ALT] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[ST_ALT] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[ST_ALT] +CHAN] );
+	}
 }
 
 void syncAnalogData() {
