@@ -83,7 +83,7 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start
 */
 		const byte IS_TOGGLE = 1; // is a pushbutton (momentary) or is toggle?
 		const byte IS_GLOBAL = 2; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
-		const byte SEND_ALL  = 4; // if we have to send both the Lower and the Upper values at the same time both in Upper taht in Lower state
+		const byte SEND_BOTH = 4; // send the value set in this STATUS to both the Upper and Lower channels
 
 /*****************************
  * PRESETS array
@@ -93,24 +93,24 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start
 const byte PRESETS[][CONTROLS_NUM][18]=
 {//                 UPPER                                    LOWER                                     ALTERNATE
 {//PIN             Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour                Type Prm Min Max Ch Behaviour
-/*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*DWB1_13*/     {TP_SX, 0x29, 0, 8, 1, 0,                      TP_SX, 0x29, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*DWB1_35*/     {TP_SX, 0x28, 0, 8, 1, 0,                      TP_SX, 0x28, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*DWB2*/        {TP_SX, 0x27, 0, 8, 1, 0,                      TP_SX, 0x27, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*DWB2_23*/     {TP_SX, 0x26, 0, 8, 1, 0,                      TP_SX, 0x26, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*DWB4*/        {TP_SX, 0x25, 0, 8, 1, 0,                      TP_SX, 0x25, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*DWB8*/        {TP_SX, 0x24, 0, 8, 1, 0,                      TP_SX, 0x24, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*DWB5_13*/     {TP_SX, 0x23, 0, 8, 1, 0,                      TP_SX, 0x23, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*DWB16*/       {TP_SX, 0x22, 0, 8, 1, 0,                      TP_SX, 0x22, 0, 8, 2, 0,                       TP_SX, 0x00, 0, 8, 1, 0},
-/*PED_EXP */    {TP_CC, 11, 0, 127, 1, SEND_ALL,               TP_CC, 11, 0, 127, 2, SEND_ALL,                TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB1_13*/     {TP_SX, 0x29, 0, 8, 1, 0,                      TP_SX, 0x29, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB1_35*/     {TP_SX, 0x28, 0, 8, 1, 0,                      TP_SX, 0x28, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB2*/        {TP_SX, 0x27, 0, 8, 1, 0,                      TP_SX, 0x27, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB2_23*/     {TP_SX, 0x26, 0, 8, 1, 0,                      TP_SX, 0x26, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB4*/        {TP_SX, 0x25, 0, 8, 1, 0,                      TP_SX, 0x25, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB8*/        {TP_SX, 0x24, 0, 8, 1, 0,                      TP_SX, 0x24, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB5_13*/     {TP_SX, 0x23, 0, 8, 1, 0,                      TP_SX, 0x23, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB16*/       {TP_SX, 0x22, 0, 8, 1, 0,                      TP_SX, 0x22, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*PED_EXP */    {TP_CC, 11, 0, 127, 1, SEND_BOTH,              TP_CC, 11, 0, 127, 2, SEND_BOTH,               TP_CC, 11, 0, 127, 0, SEND_BOTH}, //volume
 /*CHOVIB_ON*/   {TP_NO, 0x00, 0, 0, 0, 0,                      TP_NO, 0x00, 0, 0, 0, 0,                       TP_NO, 0x00, 0, 0, 0, 0},
-/*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
-/*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
-/*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
-/*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
-/*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_CC, 80, 0, 127, 1, IS_TOGGLE}, //leslie OFF
-/*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
-/*PED_SWITCH*/  {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,   TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_ALL,    TP_NO, 0,  0, 127, 1, 0},
+/*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
+/*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 80, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_CC, 80, 0, 127, 0, IS_TOGGLE + SEND_BOTH}, //leslie OFF
+/*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 81, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_NO, 0,  0, 127, 0, 0},
+/*PED_SWITCH*/  {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 81, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_CC, 81, 0, 127, 0, IS_TOGGLE + SEND_BOTH},
 },//                 UPPER                                        LOWER                                    ALTERNATE
 {//PIN            Type Prm Min Max Ch Behaviour                 Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 84, 0, 127, 1, 0}, // REV LEVEL
@@ -122,7 +122,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, 0}, // VIB TYPE
 /*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
-/*PED_EXP */    {TP_CC,  7, 0, 127, 1, IS_GLOBAL,              TP_CC,  7, 0, 127, 1, IS_GLOBAL,               TP_NO, 0x00, 0, 8, 1, 0},
+/*PED_EXP */    {TP_CC,  7, 0, 127, 1, IS_GLOBAL,              TP_CC,  7, 0, 127, 1, IS_GLOBAL,               TP_CC, 7,  0, 127, 1, IS_GLOBAL}, // Volume
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
 /*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
 /*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
@@ -227,8 +227,8 @@ const byte SEND_NOTE_OFF = 0; // don't send also the note off control when sendi
 
 byte btn_default[BTN_LED_COUNT+1][STATUSES_COUNT] = {
                           //ALT UP LOW
-    /*PEDAL TO LOWER */ 	{1, 0, 1},  /*CHOVIB_ON*/
-    /*preset */           	{0, 1, 0},  /*PERC_ON*/
+    /*PEDAL TO LOWER */ 	{1, 1, 0},  /*CHOVIB_ON*/
+    /*preset */           	{0, 1, 1},  /*PERC_ON*/
     /*preset */           	{1, 0, 0},  /*PERC_SOFT*/
     /*preset */            	{0, 0, 0},  /*PERC_FAST*/
     /*preset */            	{0, 0, 0},  /*PERC_3RD*/
@@ -464,47 +464,6 @@ void setLeds(){
 
 }
 
-void getAnalogData() {
-  for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
-    // update the ResponsiveAnalogRead object every loop
-    drwb[drwb_scanned].update();
-    if( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
-      // if the repsonsive value has changed, go
-      if (drwb[drwb_scanned].hasChanged()) {
-        analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
-        if (analogData[drwb_scanned] != analogDataLag[drwb_scanned]) {
-          analogDataLag[drwb_scanned] = analogData[drwb_scanned];
-          Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
-
-          // check if this drawbar is dedicated to the VIB/CHO control
-          if ( STATUS == VIBCHO_SEL_STATUS && drwb_scanned == VIBCHO_SEL_DRWB ){
-            Serial.println (String("This DWB controls VIBCHO selection") );
-			setVibchoType( analogData[drwb_scanned] );
-          }
-          else{
-                sendAnalogMidi( analogData[drwb_scanned], drwb_scanned );
-            }
-        }
-      }
-    }
-  }
-}
-
-void sendAnalogMidi ( byte value, byte control ){
-  // sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
-
-  if ( ( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +BEHAV] & SEND_ALL ) == SEND_ALL  && STATUS != ST_ALT ){
-        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[ST_UP]  +TYPE], PRESETS[curr_preset][control][STATUS_IDX[ST_UP]  +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_UP]  +CHAN] );
-        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[ST_LOW] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[ST_LOW] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_LOW] +CHAN] );
-  }
-  else if ( ( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && STATUS != ST_ALT) {
-        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +CHAN] );
-  }
-  else {
-    sendMidi( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[STATUS] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[STATUS] +CHAN] );
-  }
-}
-
 void setVibchoType( byte CCvalue ){
 	// calculate which Led turn on based on the Drawbar value
 	byte vibcho_led_on =  map(CCvalue, 0, 127, 0, 5);
@@ -518,6 +477,31 @@ void setVibchoType( byte CCvalue ){
 	}
 }
 
+void getAnalogData() {
+  for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
+    // update the ResponsiveAnalogRead object every loop
+    drwb[drwb_scanned].update();
+    if( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
+      // if the repsonsive value has changed, go
+      if (drwb[drwb_scanned].hasChanged()) {
+        analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
+        if (analogData[drwb_scanned] != analogDataLag[drwb_scanned]) {
+          analogDataLag[drwb_scanned] = analogData[drwb_scanned];
+          Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
+          // check if this drawbar is dedicated to the VIB/CHO control
+          if ( STATUS == VIBCHO_SEL_STATUS && drwb_scanned == VIBCHO_SEL_DRWB ){
+            Serial.println (String("This DWB controls VIBCHO selection") );
+			setVibchoType( analogData[drwb_scanned] );
+          }
+          else{
+                sendAnalogMidi( analogData[drwb_scanned], drwb_scanned, STATUS );
+        	}
+        }
+      }
+    }
+  }
+}
+
 void syncAnalogData() {
   Serial.println (String("SYNC DWB") );
   for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
@@ -527,25 +511,44 @@ void syncAnalogData() {
       analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
       analogDataLag[drwb_scanned] = analogData[drwb_scanned];
       Serial.println (String("DWB synced: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
-      //sendMidi( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE], PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +PARAM], analogData[drwb_scanned], drwb_scanned, PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +CHAN] );
-      sendAnalogMidi( analogData[drwb_scanned], drwb_scanned );
+      sendAnalogMidi( analogData[drwb_scanned], drwb_scanned, STATUS );
     }
   }
   // show a led animation to give a feedback about the correct update
   ledCarousel();
 }
 
+void sendAnalogMidi ( byte value, byte control, byte curr_status ){
+  if ( ( PRESETS[curr_preset][control][STATUS_IDX[curr_status] +BEHAV] & SEND_BOTH ) == SEND_BOTH  ){
+        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[curr_status]  +TYPE], PRESETS[curr_preset][control][STATUS_IDX[curr_status]  +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_UP]  +CHAN] );
+        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[curr_status] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_LOW] +CHAN] );
+  }
+  else if ( ( PRESETS[curr_preset][control][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL ) {
+        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +CHAN] );
+  }
+  else {
+    sendMidi( PRESETS[curr_preset][control][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[curr_status] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[curr_status] +CHAN] );
+  }
+}
+
 void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
     byte btn_index = btn_scanned + BTN_IDX_START;
-	if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_ALL ) == SEND_ALL  && curr_status != ST_ALT ){
-          sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
-          sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
-          setLedState(ST_UP, btn_scanned +1,  btn_val);
-          setLedState(ST_LOW, btn_scanned +1, btn_val);
-          btn_state[ST_UP][btn_scanned] = btn_val;
-          btn_state[ST_LOW][btn_scanned] = btn_val;
+	if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_BOTH ) == SEND_BOTH  ){
+          sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
+          sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
+		  if( curr_status == ST_ALT ){
+			  setLedState(curr_status, btn_scanned +1,  btn_val);
+			  btn_state[curr_status][btn_scanned] = btn_val;
+		  }
+		  else{
+			  setLedState(ST_UP, btn_scanned +1,  btn_val);
+			  setLedState(ST_LOW, btn_scanned +1, btn_val);
+			  btn_state[ST_UP][btn_scanned] = btn_val;
+			  btn_state[ST_LOW][btn_scanned] = btn_val;
+		  }
+
     }
-    else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL && curr_status != ST_ALT) {
+    else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL ) {
           sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
           setLedState(ST_UP, btn_scanned +1, btn_val);
           setLedState(ST_LOW, btn_scanned +1, btn_val);
@@ -555,6 +558,7 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
     else {
       sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
       setLedState(curr_status, btn_scanned +1, btn_val);
+	  btn_state[curr_status][btn_scanned] = btn_val;
     }
     Serial.println(String("new btn_val: ") + btn_val + String(" Status: ") + curr_status);
 }
