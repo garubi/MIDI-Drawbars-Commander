@@ -579,7 +579,7 @@ void getDigitalData() {
       // Pulsnte PREMUTO
       if (btn[btn_scanned].fell()) {
         //se il pulsante è un preset...
-		if(isPresetButton( btn_scanned, STATUS ))
+		if(isPresetButton( btn_scanned, STATUS )) {
         	changePreset(  btn_scanned  );
         }
         else{
@@ -617,7 +617,7 @@ void getDigitalData() {
             }
           }
         }
-      }
+    }
       // Pulsante rilasciato
       else {
         // reagisce solo se questo pulsante non è TOGGLE
@@ -629,7 +629,7 @@ void getDigitalData() {
 
     } // fine btn scanned.updated
   }
-//}
+}
 
 
 void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
