@@ -159,6 +159,7 @@ const byte STATUS_IDX[] =  // the column number in the PRESETS array where the p
  {
   12, 0, 6
  };
+const byte STATUSES_COUNT = sizeof(STATUS_IDX) / sizeof(STATUS_IDX[0]);
 
 /* *************************************************************************
  *  Drawbars initialization
@@ -188,7 +189,7 @@ const byte VIBCHO_SEL_DRWB = 6; // which Drawbar is used to select the vib/cho t
  *  Buttons initialization
  */
 // Creates an array and fills it with Bounce objects. see https://forum.arduino.cc/index.php?topic=266132.msg2071306#msg2071306
-byte btn_state[3][BTN_COUNT] = {};
+byte btn_state[STATUSES_COUNT][BTN_COUNT] = {};
 Bounce * btn = new Bounce[BTN_COUNT] ;
 Bounce btn_alt = Bounce() ;
 
@@ -206,7 +207,7 @@ const byte BTN_PRST_COUNT = 4; // the number of presets selectors (even if inact
 Adafruit_MCP23017 led;
 
 // An array that store the state of the buttons leds (including the Alt btn/led).
-byte ledState[3][BTN_LED_COUNT+1] = {};
+byte ledState[STATUSES_COUNT][BTN_LED_COUNT+1] = {};
 long led_alt_on_time;
 byte led_alt_blink_status;
 byte old_vibcho_led; // the previous selected vibrato type's led
@@ -219,7 +220,7 @@ byte old_preset_led; // the previous selected preset's led
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 const byte SEND_NOTE_OFF = 0; // don't send also the note off control when sending note on = 0;
 
-byte btn_default[BTN_LED_COUNT+1][3] = {
+byte btn_default[BTN_LED_COUNT+1][STATUSES_COUNT] = {
                           //ALT UP LOW
     /*PEDAL TO LOWER */ 	{1, 0, 1},  /*CHOVIB_ON*/
     /*preset */           	{0, 1, 0},  /*PERC_ON*/
@@ -339,7 +340,6 @@ void changePreset( byte btn_scanned ){
 
 void resetToDefaultData(){
 
-  for (byte st = 0; st < 3; st++){
       for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
 			// RESET ALL BUTTONS to 0 - except for the preset buttons
             updateBtn( btn_scanned, 0, st );
@@ -347,6 +347,7 @@ void resetToDefaultData(){
 			//Set the default for this button
 			updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
       }
+for (byte st = 0; st < STATUSES_COUNT; st++){
   }
 
   setVibchoType( btn_default[7][ST_ALT] );
@@ -587,7 +588,7 @@ void getDigitalData() {
   	             // btn_state[STATUS][btn_scanned] = !btn_val;
   	              btn_val = !btn_val;
               }
-  
+
               updateBtn( btn_scanned, btn_val, STATUS);
           }
           else{
