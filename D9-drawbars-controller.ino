@@ -1,7 +1,7 @@
 /*
   D9 programmable drawbars controller
 
-  ver 1.1
+  ver 1.1 - fixed-functions branch
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
