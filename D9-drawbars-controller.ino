@@ -330,8 +330,8 @@ void changePreset( byte btn_scanned ){
 	// set it only if is defined in the preset array
 	if( btn_scanned - BTN_PRST_START <= PRESET_COUNT - 1){
 		Serial.println (String("CHANGING preset"));
-		setLedState(ST_ALT, old_preset_led, 0);
-		setLedState(ST_ALT, btn_scanned +1,  !btn_state[ST_ALT][btn_scanned]);
+		setLedState(BTN_PRST_STATUS, old_preset_led, 0);
+		setLedState(BTN_PRST_STATUS, btn_scanned +1,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
 
 		// set the new preset value
 		curr_preset = btn_scanned - BTN_PRST_START;
