@@ -182,6 +182,9 @@ ResponsiveAnalogRead drwb[] {
   {DWB16, true},
   {PED_EXP, true},
 };
+
+/* declares which is the analog input that controls Vib/cho type */
+const byte VIBCHO_SEL_STATUS = ST_ALT;
 const byte VIBCHO_SEL_DRWB = 6; // which Drawbar is used to select the vib/cho type when in ALT mode?
 
 
@@ -465,7 +468,7 @@ void getAnalogData() {
           Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
 
           // check if this drawbar is dedicated to the VIB/CHO control
-          if ( STATUS == ST_ALT && drwb_scanned == VIBCHO_SEL_DRWB ){
+          if ( STATUS == VIBCHO_SEL_STATUS && drwb_scanned == VIBCHO_SEL_DRWB ){
             Serial.println (String("This DWB controls VIBCHO selection") );
 			setVibchoType( analogData[drwb_scanned] );
           }
@@ -502,8 +505,7 @@ void setVibchoType( byte CCvalue ){
 		Serial.println (String("SET VIB/CHO to ") + CCvalue );
 	  setVibchoLeds( vibcho_led_on );
 	  old_vibcho_led = vibcho_led_on;
-	  // sendAnalogMidi( CCvalue, VIBCHO_SEL_DRWB ); // we could use this if we could send the STatus too
-	  sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[ST_ALT] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[ST_ALT] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[ST_ALT] +CHAN] );
+	  sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
 	}
 }
 
