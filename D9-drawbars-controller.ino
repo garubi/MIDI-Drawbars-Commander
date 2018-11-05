@@ -228,10 +228,10 @@ const byte SEND_NOTE_OFF = 0; // don't send also the note off control when sendi
 byte btn_default[BTN_LED_COUNT+1][STATUSES_COUNT] = {
                           //ALT UP LOW
     /*PEDAL TO LOWER */ 	{1, 1, 0},  /*CHOVIB_ON*/
-    /*preset */           	{0, 1, 1},  /*PERC_ON*/
+    /*preset */           	{0, 1, 0},  /*PERC_ON*/
     /*preset */           	{1, 0, 0},  /*PERC_SOFT*/
     /*preset */            	{0, 0, 0},  /*PERC_FAST*/
-    /*preset */            	{0, 0, 0},  /*PERC_3RD*/
+    /*preset */            	{0, 0, 1},  /*PERC_3RD*/
     /* leslie off */      	{1, 0, 0},  /*LSL_STOP*/
     /* rev off */         	{0, 1, 0},  /*LSL_FAST*/
 	/* vib/cho sel. value*/	{127,0,0} 	// we start with C3
@@ -356,8 +356,11 @@ for (byte st = 0; st < STATUSES_COUNT; st++){
     if ( !isPresetButton(btn_scanned, st) ){ // ci assicuriamo che non sia un pulsante dei preset
       // RESET the buttons to 0
         updateBtn( btn_scanned, 0, st );
-      //Set the default value for this button
-      updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
+
+      //Set the default value for this button, only if it's not 0 (since we havd already setto all of them to 0)
+	  if (btn_default[btn_scanned][st] > 0){
+		  updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
+	  }
     }
   }
 }
