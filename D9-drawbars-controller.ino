@@ -134,7 +134,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 }
 };
 
-const byte PRESET_COUNT = sizeof(PRESETS) / sizeof(PRESETS[0]);
+const byte PRESETS_COUNT = sizeof(PRESETS) / sizeof(PRESETS[0]);
 
 /* Array index position labels */
 const byte TYPE = 0;
@@ -328,7 +328,7 @@ void SetAltLedState( byte status, byte value ){
 void changePreset( byte btn_scanned ){
 
 	// set it only if is defined in the preset array
-	if( btn_scanned - BTN_PRST_START <= PRESET_COUNT - 1){
+	if( btn_scanned - BTN_PRST_START <= PRESETS_COUNT - 1){
 		Serial.println (String("CHANGING preset"));
 		setLedState(BTN_PRST_STATUS, old_preset_led, 0);
 		setLedState(BTN_PRST_STATUS, btn_scanned +1,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
