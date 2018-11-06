@@ -350,20 +350,26 @@ void changePreset( byte btn_scanned ){
 }
 
 void resetToDefaultData(){
-
-for (byte st = 0; st < STATUSES_COUNT; st++){
-  for (byte btn_scanned = 0; btn_scanned < BTN_COUNT; btn_scanned++) {
-    if ( !isPresetButton(btn_scanned, st) ){ // ci assicuriamo che non sia un pulsante dei preset
-      // RESET the buttons to 0
-        updateBtn( btn_scanned, 0, st );
-
-      //Set the default value for this button, only if it's not 0 (since we havd already setto all of them to 0)
-	  if (btn_default[btn_scanned][st] > 0){
-		  updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
+	Serial.println (String("Reset to default data"));
+	// SET al buttons to 0
+	for (byte st = 0; st < STATUSES_COUNT; st++){
+	  for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
+	    if ( !isPresetButton(btn_scanned, st) ){ // check that's not a Preset button
+	      updateBtn( btn_scanned, 0, st );
+	    }
 	  }
-    }
-  }
-}
+	}
+
+	//Set the default value for all buttons, only if it's not 0 (since we have already set all of them to 0)
+	for (byte st = 0; st < STATUSES_COUNT; st++){
+	  for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
+	    if ( !isPresetButton(btn_scanned, st) ){ // check that's not a Preset button
+	  	  if (st = ST_LOW && ){
+	  		  updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
+	  	 }
+	    }
+	  }
+	}
 
   setVibchoType( btn_default[7][ST_ALT] );
 }
@@ -563,7 +569,7 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
       setLedState(curr_status, btn_scanned +1, btn_val);
 	  btn_state[curr_status][btn_scanned] = btn_val;
     }
-    Serial.println(String("new btn_val: ") + btn_val + String(" Status: ") + curr_status);
+    Serial.println(String("btn_scanned: ") + btn_scanned + String("new btn_val: ") + btn_val + String(" Status: ") + curr_status);
 }
 
 void getDigitalData() {
