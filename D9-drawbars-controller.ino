@@ -61,6 +61,23 @@ const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
 const byte VIBCHO_LED_COUNT = 6; // number of leds used to show the Vibrato/Chorus selected.
 const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1; // total number of leds (buttons + vib/cho + ALT)
 
+
+/* *************************************************************************
+ *  The Controls STATUSES:
+ *  We have 3 statuses: UPPER, LOWER and the ALT
+ */
+byte STATUS;
+byte OLD_STATUS;
+
+const byte ST_ALT  = 0; // Controller status: ALTERNATE
+const byte ST_UP   = 1; // Controller status: UPPER
+const byte ST_LOW  = 2; // Controller status: LOWER
+const byte STATUS_IDX[] =  // the column number in the PRESETS array where the parameters starts for each status
+ {
+  12, 0, 6
+ };
+const byte STATUSES_COUNT = sizeof(STATUS_IDX) / sizeof(STATUS_IDX[0]);
+
 /* *************************************************************************
  *  presets
  */
@@ -159,20 +176,6 @@ byte btn_default[BTN_LED_COUNT+1][STATUSES_COUNT] = {
 	/* vib/cho sel. value*/	{127,0,0} 	// we start with C3
 };
 
-/* *************************************************************************
- *  Momentary status
- */
-byte STATUS;
-byte OLD_STATUS;
-
-const byte ST_ALT  = 0; // Controller status: ALTERNATE
-const byte ST_UP   = 1; // Controller status: UPPER
-const byte ST_LOW  = 2; // Controller status: LOWER
-const byte STATUS_IDX[] =  // the column number in the PRESETS array where the parameters starts for each status
- {
-  12, 0, 6
- };
-const byte STATUSES_COUNT = sizeof(STATUS_IDX) / sizeof(STATUS_IDX[0]);
 
 /* *************************************************************************
  *  Drawbars initialization
