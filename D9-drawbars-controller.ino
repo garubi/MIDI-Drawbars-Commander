@@ -1,7 +1,7 @@
 /*
   D9 programmable drawbars controller
 
-  ver 1.1 - fixed-functions branch
+  ver 1.1
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
@@ -65,7 +65,7 @@ const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1; // total numb
  *  presets
  */
 
-const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array start the buttons rows?
+const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array does the buttons rows starts?
 
 /*
    The multidimensional Array byte PRESETS will contains in each row:
@@ -146,6 +146,19 @@ const byte BEHAV = 5;
 
 byte curr_preset; // the currennt selected preset.
 
+// declares the default status of buttons when we switch to a new preset 
+byte btn_default[BTN_LED_COUNT+1][STATUSES_COUNT] = {
+                          //ALT UP LOW
+    /*PEDAL TO LOWER */ 	{1, 1, 0},  /*CHOVIB_ON*/
+    /*preset */           	{0, 1, 0},  /*PERC_ON*/
+    /*preset */           	{1, 0, 0},  /*PERC_SOFT*/
+    /*preset */            	{0, 0, 0},  /*PERC_FAST*/
+    /*preset */            	{0, 0, 1},  /*PERC_3RD*/
+    /* leslie off */      	{1, 0, 0},  /*LSL_STOP*/
+    /* rev off */         	{0, 1, 0},  /*LSL_FAST*/
+	/* vib/cho sel. value*/	{127,0,0} 	// we start with C3
+};
+
 /* *************************************************************************
  *  Momentary status
  */
@@ -224,18 +237,6 @@ byte old_preset_led; // the previous selected preset's led
 
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 const byte SEND_NOTE_OFF = 0; // don't send also the note off control when sending note on = 0;
-
-byte btn_default[BTN_LED_COUNT+1][STATUSES_COUNT] = {
-                          //ALT UP LOW
-    /*PEDAL TO LOWER */ 	{1, 1, 0},  /*CHOVIB_ON*/
-    /*preset */           	{0, 1, 0},  /*PERC_ON*/
-    /*preset */           	{1, 0, 0},  /*PERC_SOFT*/
-    /*preset */            	{0, 0, 0},  /*PERC_FAST*/
-    /*preset */            	{0, 0, 1},  /*PERC_3RD*/
-    /* leslie off */      	{1, 0, 0},  /*LSL_STOP*/
-    /* rev off */         	{0, 1, 0},  /*LSL_FAST*/
-	/* vib/cho sel. value*/	{127,0,0} 	// we start with C3
-};
 
 void setup()
 {
