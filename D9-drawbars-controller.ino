@@ -364,7 +364,7 @@ void resetToDefaultData(){
 	for (byte st = 0; st < STATUSES_COUNT; st++){
 	  for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
 	    if ( !isPresetButton(btn_scanned, st) ){ // check that's not a Preset button
-	  	  if (st = ST_LOW && ){
+	  	  if (btn_default[btn_scanned][st] != 0 ){
 	  		  updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
 	  	 }
 	    }
@@ -626,11 +626,11 @@ void getDigitalData() {
     }
       // Pulsante rilasciato
       else {
-        // reagisce solo se questo pulsante non è TOGGLE
-          if ( ((PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE) ){
-           Serial.println(String("Btn released - No TOOGLE - btn_val: ") + btn_val + String(" but we send !btn_val: ") + !btn_val);
+        // reagisce solo se questo pulsante non è TOGGLE e non è PRESET
+        if ( ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE) && !isPresetButton( btn_scanned, STATUS ) ){
+           Serial.println(String("Btn released - No TOOGLE & No PRESET - btn_val: ") + btn_val + String(" but we send !btn_val: ") + !btn_val);
            updateBtn( btn_scanned, !btn_val, STATUS);
-          }
+        }
       }
 
     } // fine btn scanned.updated
