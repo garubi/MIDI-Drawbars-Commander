@@ -1,7 +1,7 @@
 /*
   D9 programmable drawbars controller
 
-  ver 1.1
+  ver 1.2
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
@@ -146,7 +146,7 @@ const byte BEHAV = 5;
 
 byte curr_preset; // the currennt selected preset.
 
-// declares the default status of buttons when we switch to a new preset 
+// declares the default status of buttons when we switch to a new preset
 byte btn_default[BTN_LED_COUNT+1][STATUSES_COUNT] = {
                           //ALT UP LOW
     /*PEDAL TO LOWER */ 	{1, 1, 0},  /*CHOVIB_ON*/
