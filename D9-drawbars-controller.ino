@@ -26,6 +26,10 @@
 #include <MIDI.h>
 #include <ResponsiveAnalogRead.h>
 
+#define PRINTSTREAM_FALLBACK
+#define DEBUG_OUT Serial
+#include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
+
 /* *************************************************************************
  *  Pins assign
  */
@@ -330,10 +334,10 @@ void SetAltLedState( byte status, byte value ){
   }
 
 void changePreset( byte btn_scanned ){
-
+  DEBUGFN(NAMEDVALUE(btn_scanned));
 	// set it only if is defined in the preset array
 	if( btn_scanned - BTN_PRST_START <= PRESETS_COUNT - 1){
-		Serial.println (String("CHANGING preset"));
+    DEBUGFN("CHANGING preset");
 		setLedState(BTN_PRST_STATUS, old_preset_led, 0);
 		setLedState(BTN_PRST_STATUS, btn_scanned +1,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
 
@@ -343,18 +347,18 @@ void changePreset( byte btn_scanned ){
 		// reset all data
 		resetToDefaultData();
 
-		Serial.println (String("New preset is: ") + curr_preset );
-
+    DEBUGFN( NAMEDVALUE(curr_preset) );
 		old_preset_led = btn_scanned +1;
 	}
 	else{
-		Serial.println (String("CAN'T CHANGE preset: preset location empty"));
+		//Serial.println (String("CAN'T CHANGE preset: preset location empty"));
+    DEBUGFN("CAN'T CHANGE preset: preset location empty");
 	}
 
 }
 
 void resetToDefaultData(){
-	Serial.println (String("Reset to default data"));
+  DEBUGFN("Reset to default data");
 	// SET al buttons to 0
 	for (byte st = 0; st < STATUSES_COUNT; st++){
 	  for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
@@ -386,7 +390,8 @@ void getAltBtn(){
     if (btn_alt.fell()) {
        btnAlt_pushed = 1;
        btnAlt_DownTime = millis();
-       Serial.println (String("ALT BTN PUSHED. STATUS: ") + STATUS);
+       DEBUGFN( "ALT BTN PUSHED" );
+       DEBUGFN( NAMEDVALUE(STATUS) );
     }
     else{
       if (btnAlt_pushed == 1){
@@ -401,13 +406,14 @@ void getAltBtn(){
               STATUS = ST_UP;
               SetAltLedState( STATUS, 0);
             }
-            Serial.println (String("STATUS: ") + STATUS);
+            DEBUGFN( NAMEDVALUE(STATUS) );
         }
       }
 
       btnAlt_released = 1;
       btnAlt_pushed = 0;
-      Serial.println (String("RELEASED: ") + btnAlt_released);
+      DEBUGFN( "RELEASED: " );
+      DEBUGFN( NAMEDVALUE(btnAlt_released) );
     }
   } // ALT BTN not changed
   else{
@@ -415,21 +421,22 @@ void getAltBtn(){
       if( btn_alt.read() == 0 ){
           // se è premuto da abbastanza tempo allora passiamo a allo Status ALT
           if ((millis() - btnAlt_DownTime) > BTN_LONG_PRESS_MILLIS && btnAlt_released == 1 ) {
-            Serial.println(String("ALT BTN LONG PRESS!!:") );
+            DEBUGFN( "ALT BTN LONG PRESS!!:" );
             btnAlt_pushed = 0;
             btnAlt_released = 0;
             OLD_STATUS = STATUS;
             if ( STATUS == ST_ALT ){
               STATUS = ST_UP;
               SetAltLedState( STATUS, 0 );
-              Serial.println (String("from ALT to STATUS: ") + STATUS);
+              DEBUGFN("from ALT to STATUS: ");
+              DEBUGFN( NAMEDVALUE(STATUS) );
             }
             else {
               STATUS = ST_ALT;
               led_alt_on_time = millis();
               SetAltLedState( STATUS, 1);
               led_alt_blink_status = ledState[STATUS][LED_ALT];
-              Serial.println (String("STATUS: ") + STATUS);
+              DEBUGFN( NAMEDVALUE(STATUS) );
             }
          }
       }
@@ -442,7 +449,7 @@ void setVibchoLeds( byte ledon ){
     led.digitalWrite(old_vibcho_led + VIBCHO_LED_IDX_START, 0);
 
     // turn on the Led
-    Serial.println (String("VIB/CHO led: ") + ledon);
+    DEBUGFN( NAMEDVALUE(ledon) );
     led.digitalWrite(ledon + VIBCHO_LED_IDX_START, 1);
   }
 
@@ -463,7 +470,6 @@ void setLeds(){
     }
 
     for (byte ledto = 1; ledto <= BTN_LED_COUNT; ledto++) {
-      // Serial.println (String("Leds for status: ") + STATUS + String(" led : ") + ledto + ledState[STATUS][ledto] );
       led.digitalWrite(ledto, ledState[STATUS][ledto]);
     }
 
@@ -483,7 +489,7 @@ void setVibchoType( byte CCvalue ){
 
 	// only send if the new LED is different from the old one
 	if (vibcho_led_on != old_vibcho_led){
-		Serial.println (String("SET VIB/CHO to ") + CCvalue );
+    DEBUGFN( NAMEDVALUE(CCvalue) );
 	  setVibchoLeds( vibcho_led_on );
 	  old_vibcho_led = vibcho_led_on;
 	  sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
@@ -500,10 +506,11 @@ void getAnalogData() {
         analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
         if (analogData[drwb_scanned] != analogDataLag[drwb_scanned]) {
           analogDataLag[drwb_scanned] = analogData[drwb_scanned];
-          Serial.println (String("DWB changed: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
+          DEBUGFN( "DWB changed: " );
+          DEBUGVAL(drwb_scanned,analogData[drwb_scanned]);
           // check if this drawbar is dedicated to the VIB/CHO control
           if ( STATUS == VIBCHO_SEL_STATUS && drwb_scanned == VIBCHO_SEL_DRWB ){
-            Serial.println (String("This DWB controls VIBCHO selection") );
+            DEBUGFN("This DWB controls VIBCHO selection");
 			setVibchoType( analogData[drwb_scanned] );
           }
           else{
@@ -516,14 +523,15 @@ void getAnalogData() {
 }
 
 void syncAnalogData() {
-  Serial.println (String("SYNC DWB") );
+  DEBUGFN("SYNC DWB");
   for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
     // update the ResponsiveAnalogRead object every loop
     drwb[drwb_scanned].update();
     if( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
       analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
       analogDataLag[drwb_scanned] = analogData[drwb_scanned];
-      Serial.println (String("DWB synced: ") + drwb_scanned + String(" value: ") + analogData[drwb_scanned] );
+      DEBUGFN( "DWB synced: " );
+      DEBUGVAL(drwb_scanned,analogData[drwb_scanned]);
       sendAnalogMidi( analogData[drwb_scanned], drwb_scanned, STATUS );
     }
   }
@@ -573,7 +581,7 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
       setLedState(curr_status, btn_scanned +1, btn_val);
 	  btn_state[curr_status][btn_scanned] = btn_val;
     }
-    Serial.println(String("btn_scanned: ") + btn_scanned + String("new btn_val: ") + btn_val + String(" Status: ") + curr_status);
+    DEBUGVAL(btn_scanned,btn_val,curr_status);
 }
 
 void getDigitalData() {
@@ -595,9 +603,10 @@ void getDigitalData() {
         else{
           if( btnAlt_pushed == 0){
             // Caso "normale" il pulsante è premuto da solo
-             Serial.println(String("BTN pressed: ") + btn_scanned + String(" value: ") + btn_val );
+              DEBUGFN("BTN pressed / value: ");
+              DEBUGVAL(btn_scanned, btn_val);
               if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
-                Serial.println(String("toggle...") );
+                DEBUGFN("toggle...");
                 // il pulsante è TOGGLE
                 if ( btn_state[STATUS][btn_scanned] == 1){
                   btn_state[STATUS][btn_scanned] = 0;
@@ -609,8 +618,7 @@ void getDigitalData() {
               }
               else{
   	              //il pulsante non è TOGGLE
-                  Serial.println(String(" non toggle...") );
-                  Serial.println(String(" non preset...") );
+                  DEBUGFN("non toggle... non preset");
   	             // btn_state[STATUS][btn_scanned] = !btn_val;
   	              btn_val = !btn_val;
               }
@@ -620,7 +628,8 @@ void getDigitalData() {
           else{
             // Pulsante premuto in contemporanea all'ALT ...
             btnAlt_pushed = 0;
-            Serial.println (String("ALT + BTN: ") + btn_scanned);
+            DEBUGFN("ALT + BTN: ");
+            DEBUGVAL(btn_scanned);
             //sync analog data
             if( btn_scanned == 0 ){
               syncAnalogData();
@@ -632,7 +641,9 @@ void getDigitalData() {
       else {
         // reagisce solo se questo pulsante non è TOGGLE e non è PRESET
         if ( ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE) && !isPresetButton( btn_scanned, STATUS ) ){
-           Serial.println(String("Btn released - No TOOGLE & No PRESET - btn_val: ") + btn_val + String(" but we send !btn_val: ") + !btn_val);
+           DEBUGFN("Btn released - No TOOGLE & No PRESET...");
+           DEBUGVAL(btn_val);
+           DEBUGVAL(!btn_val);
            updateBtn( btn_scanned, !btn_val, STATUS);
         }
       }
@@ -644,8 +655,8 @@ void getDigitalData() {
 
 void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
 {
-  Serial.println(String("Send midi - Type: ") + type + String(" Par: ") + parameter + String(" value: ") + value + String(" control: ") + control );
-
+  DEBUGFN("Send midi");
+  DEBUGVAL(type,parameter,value,control);
   int SysexLenght = 0;
     switch (type) {
       case TP_ON: // Note On
@@ -694,7 +705,7 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
               usbMIDI.sendSysEx(SysexLenght, data);
           }
           else{
-            Serial.println("altro preset");
+            DEBUGFN("altro preset");
             }
 
         break;
