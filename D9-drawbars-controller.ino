@@ -232,7 +232,7 @@ const byte BTN_PRST_COUNT = 4; // the number of presets selectors (even if inact
 Adafruit_MCP23017 led;
 
 // An array that store the state of the buttons leds (including the Alt btn/led).
-byte ledState[STATUSES_COUNT][BTN_LED_COUNT+1] = {};
+byte ledState[STATUSES_COUNT] = {};
 long led_alt_on_time;
 byte led_alt_blink_status;
 byte old_vibcho_led; // the previous selected vibrato type's led
@@ -327,14 +327,16 @@ bool isPresetButton( byte btn_scanned, byte the_status ) {
 
 void setLedState( byte status, byte btn, byte value ){
   if ( btn <= BTN_LED_COUNT ){ // escludiamo di impostare lo stato per input che non hanno il led (tipo il pedale)
-    ledState[status][btn] = value;
+    //ledState[status] = value;
+	bitWrite(ledState[status], btn, value);
   }
 }
-
+/*
 void SetAltLedState( byte status, byte value ){
-  ledState[status][LED_ALT] = value;
+  //ledState[status][LED_ALT] = value;
+  bitWrite(ledState[status], LED_ALT, value);
   }
-
+*/
 void changePreset( byte btn_scanned ){
   DEBUGFN(NAMEDVALUE(btn_scanned));
 	// set it only if is defined in the preset array
@@ -401,12 +403,12 @@ void getAltBtn(){
             if ( STATUS == ST_UP && OLD_STATUS != ST_ALT){
               OLD_STATUS = STATUS;
               STATUS = ST_LOW;
-              SetAltLedState( STATUS, 1);
+              setLedState( STATUS, LED_ALT, 1);
             }
             else{
               OLD_STATUS = STATUS;
               STATUS = ST_UP;
-              SetAltLedState( STATUS, 0);
+              setLedState( STATUS, LED_ALT, 0);
             }
             DEBUGFN( NAMEDVALUE(STATUS) );
         }
@@ -421,23 +423,24 @@ void getAltBtn(){
   else{
       // se il suo stato è "premuto" ( cioè 0)... allora verifichiamo da quanto tempo è permuto
       if( btn_alt.read() == 0 ){
-          // se è premuto da abbastanza tempo allora passiamo a allo Status ALT
+          // se è premuto da abbastanza tempo allora passiamo allo Status ALT o ne usciamo
           if ((millis() - btnAlt_DownTime) > BTN_LONG_PRESS_MILLIS && btnAlt_released == 1 ) {
             DEBUGFN( "ALT BTN LONG PRESS!!:" );
             btnAlt_pushed = 0;
             btnAlt_released = 0;
             OLD_STATUS = STATUS;
-            if ( STATUS == ST_ALT ){
+            if ( STATUS == ST_ALT ){ // Siamo già in ALT quindi ne usciamo e torniamo al UP
               STATUS = ST_UP;
-              SetAltLedState( STATUS, 0 );
+              setLedState( STATUS, LED_ALT, 0 );
               DEBUGFN("from ALT to STATUS: ");
               DEBUGFN( NAMEDVALUE(STATUS) );
             }
-            else {
+            else { //entriamo nello stato ALT
               STATUS = ST_ALT;
               led_alt_on_time = millis();
-              SetAltLedState( STATUS, 1);
-              led_alt_blink_status = ledState[STATUS][LED_ALT];
+              setLedState( STATUS, LED_ALT, 1);
+              //led_alt_blink_status = ledState[STATUS][LED_ALT];
+              //led_alt_blink_status = bitRead(ledState[STATUS], LED_ALT);
               DEBUGFN( NAMEDVALUE(STATUS) );
             }
          }
@@ -459,21 +462,28 @@ void setLeds(){
 
     if ( STATUS == ST_ALT){
        //blink LED_ALT
-      if( millis()-led_alt_on_time < 500 ){
-        led.digitalWrite(LED_ALT, led_alt_blink_status);
+      if( millis()-led_alt_on_time > 500 ){
+		  bitWrite(ledState[STATUS], ST_ALT, !bitRead(ledState[STATUS], ST_ALT));
+		  //led_alt_blink_status = !led_alt_blink_status;
+          led_alt_on_time = millis();
+
       }
       else{
-        led_alt_blink_status = !led_alt_blink_status;
-        led_alt_on_time = millis();
+		  //led.digitalWrite(LED_ALT, led_alt_blink_status);
+		 // led_alt_blink_status = led_alt_blink_status;
       }
     }
+	/*
     else{
       led.digitalWrite(LED_ALT, ledState[STATUS][LED_ALT]);
     }
+	*/
 
-    for (byte ledto = 1; ledto <= BTN_LED_COUNT; ledto++) {
-      led.digitalWrite(ledto, ledState[STATUS][ledto]);
+    for (byte ledto = 0; ledto <= BTN_LED_COUNT; ledto++) {
+      led.digitalWrite(ledto, bitRead(ledState[STATUS], ledto) );
     }
+
+	//led.writeGPIOAB(ledState[STATUS]);
 
     if ( STATUS != ST_ALT ){
       //blink FAST LED_LESLIE_SP
