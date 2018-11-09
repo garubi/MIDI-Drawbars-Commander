@@ -233,6 +233,7 @@ Adafruit_MCP23017 led;
 
 // An array that store the state of the buttons leds (including the Alt btn/led).
 byte ledState[STATUSES_COUNT] = {};
+byte ledState_old[STATUSES_COUNT] = {}; // the previous leds state, to check if update the leds
 long led_alt_on_time;
 byte led_alt_blink_status;
 byte vibchoLedState; // stores the Vibrato/chorus leds state
@@ -485,7 +486,10 @@ void setLeds(){
 
     }
 
+	if( (ledState[STATUS] + vibchoLedState) != (ledState_old[STATUS] + vibchoLedState_old) ){
 		led.writeGPIOAB(ledState[STATUS] + vibchoLedState);
+		ledState_old[STATUS] = ledState[STATUS];
+	}
 }
 
 void setVibchoType( byte CCvalue ){
