@@ -61,7 +61,7 @@ const byte BTN_COUNT = 8; // configurable digital input number (less the Alterna
 const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp pedal too)
 const byte CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 const byte BTN_LED_COUNT = 7; // number of digital inputs that have leds (less the Alternate button, counted a part)
-const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
+//const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
 const byte VIBCHO_LED_COUNT = 6; // number of leds used to show the Vibrato/Chorus selected.
 const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1; // total number of leds (buttons + vib/cho + ALT)
 
@@ -235,7 +235,8 @@ Adafruit_MCP23017 led;
 byte ledState[STATUSES_COUNT] = {};
 long led_alt_on_time;
 byte led_alt_blink_status;
-byte old_vibcho_led; // the previous selected vibrato type's led
+byte vibchoLedState; // stores the Vibrato/chorus leds state
+byte vibchoLedState_old; // the previous leds state, to check if update the leds
 byte old_preset_led; // the previous selected preset's led
 
 /* *************************************************************************
@@ -284,14 +285,17 @@ void setup()
   btnAlt_released = 1;
 
   // turn off all the 6 vib/cho status leds
+  /*
   for (byte ledto = VIBCHO_LED_IDX_START; ledto < TOTAL_LED_COUNT; ledto++) {
     led.digitalWrite(ledto, 0);
  }
+ */
 
   // load the default preset
   for (byte btn_scanned = BTN_PRST_START; btn_scanned < (BTN_PRST_COUNT + BTN_PRST_START); btn_scanned++) {
       if( 0 != btn_default[btn_scanned][BTN_PRST_STATUS] ){
         changePreset(  btn_scanned  );
+		break;
       }
     }
 
@@ -448,16 +452,6 @@ void getAltBtn(){
   }
 }
 
-
-void setVibchoLeds( byte ledon ){
-    // turn off the old led
-    led.digitalWrite(old_vibcho_led + VIBCHO_LED_IDX_START, 0);
-
-    // turn on the Led
-    DEBUGFN( NAMEDVALUE(ledon) );
-    led.digitalWrite(ledon + VIBCHO_LED_IDX_START, 1);
-  }
-
 void setLeds(){
 
     if ( STATUS == ST_ALT){
@@ -478,13 +472,11 @@ void setLeds(){
       led.digitalWrite(LED_ALT, ledState[STATUS][LED_ALT]);
     }
 	*/
-
+ /*
     for (byte ledto = 0; ledto <= BTN_LED_COUNT; ledto++) {
       led.digitalWrite(ledto, bitRead(ledState[STATUS], ledto) );
     }
-
-	//led.writeGPIOAB(ledState[STATUS]);
-
+*/
     if ( STATUS != ST_ALT ){
       //blink FAST LED_LESLIE_SP
     }
@@ -493,18 +485,23 @@ void setLeds(){
 
     }
 
+		led.writeGPIOAB(ledState[STATUS] + vibchoLedState);
 }
 
 void setVibchoType( byte CCvalue ){
 	// calculate which Led turn on based on the Drawbar value
 	byte vibcho_led_on =  map(CCvalue, 0, 127, 0, 5);
+	bitWrite(vibchoLedState, vibcho_led_on, 1 );
 
-	// only send if the new LED is different from the old one
-	if (vibcho_led_on != old_vibcho_led){
-    DEBUGFN( NAMEDVALUE(CCvalue) );
-	  setVibchoLeds( vibcho_led_on );
-	  old_vibcho_led = vibcho_led_on;
-	  sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
+	// only send if the new VibCho type is different from the old one
+	if ( vibchoLedState != vibchoLedState_old ){
+    	DEBUGFN( NAMEDVALUE(CCvalue) );
+
+	  	vibchoLedState = 0; // reset the leds
+	  	bitWrite(vibchoLedState, vibcho_led_on, 1 );
+
+	  	vibchoLedState_old = vibchoLedState;
+	  	sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
 	}
 }
 
