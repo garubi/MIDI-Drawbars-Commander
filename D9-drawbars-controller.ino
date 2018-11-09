@@ -463,7 +463,7 @@ void setLeds(){
     if ( STATUS == ST_ALT){
        //blink LED_ALT
       if( millis()-led_alt_on_time > 500 ){
-		  bitWrite(ledState[STATUS], ST_ALT, !bitRead(ledState[STATUS], ST_ALT));
+		  bitWrite(ledState[STATUS], LED_ALT, !bitRead(ledState[STATUS], LED_ALT));
 		  //led_alt_blink_status = !led_alt_blink_status;
           led_alt_on_time = millis();
 
