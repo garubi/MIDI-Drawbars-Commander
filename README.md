@@ -1,4 +1,4 @@
-# D9-drawbars-controller
+# Drawbarsy-9
 
 ## Notes:
 You should use a Normally Open pedal to switch from the Leslie's speed, otherwise the "switch impulse" is sent on pedal release instead of pedal push (see issue #24)
