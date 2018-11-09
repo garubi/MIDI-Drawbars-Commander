@@ -331,6 +331,7 @@ bool isPresetButton( byte btn_scanned, byte the_status ) {
 }
 
 void setLedState( byte status, byte btn, byte value ){
+	DEBUGFN(NAMEDVALUE(btn));
   if ( btn <= BTN_LED_COUNT ){ // escludiamo di impostare lo stato per input che non hanno il led (tipo il pedale)
     //ledState[status] = value;
 	bitWrite(ledState[status], btn, value);
@@ -405,7 +406,7 @@ void getAltBtn(){
     else{
       if (btnAlt_pushed == 1){
         if ( STATUS != ST_ALT){
-            if ( STATUS == ST_UP && OLD_STATUS != ST_ALT){
+            if ( STATUS == ST_UP ){
               OLD_STATUS = STATUS;
               STATUS = ST_LOW;
               setLedState( STATUS, LED_ALT, 1);
@@ -486,10 +487,10 @@ void setLeds(){
 
     }
 
-	if( (ledState[STATUS] + vibchoLedState) != (ledState_old[STATUS] + vibchoLedState_old) ){
-		led.writeGPIOAB(ledState[STATUS] + vibchoLedState);
+	//if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
+		led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
 		ledState_old[STATUS] = ledState[STATUS];
-	}
+	//}
 }
 
 void setVibchoType( byte CCvalue ){
@@ -592,7 +593,7 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
     else {
       sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
       setLedState(curr_status, btn_scanned +1, btn_val);
-	  btn_state[curr_status][btn_scanned] = btn_val;
+	    btn_state[curr_status][btn_scanned] = btn_val;
     }
     DEBUGVAL(btn_scanned,btn_val,curr_status);
 }
