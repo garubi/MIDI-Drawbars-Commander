@@ -592,13 +592,7 @@ void getDigitalData() {
               if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
                 DEBUGFN("toggle...");
                 // il pulsante è TOGGLE
-                if ( btn_state[STATUS][btn_scanned] == 1){
-                  btn_state[STATUS][btn_scanned] = 0;
-                }
-                else{
-                  btn_state[STATUS][btn_scanned] = 1;
-                }
-                btn_val = btn_state[STATUS][btn_scanned];
+                btn_val = !btn_state[STATUS][btn_scanned];
               }
               else{
   	              //il pulsante non è TOGGLE
