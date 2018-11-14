@@ -1,4 +1,4 @@
-# Drawbarsy-9
+# MIDI Drawbars commander
 
 I'll try to setup instructions, plans, etc at: https://hackaday.io/project/162255-drawbarsy-9
 ## Notes:
