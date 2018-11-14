@@ -15,8 +15,6 @@
 */
 
 /* TODO
- *  get rid of btn_scanned +1 moving the +1 in the setLeds() function. Also consider the opportunity of using directly BTN_IND_START
- *  create the setButton(btn_index) function. inside set the button subtracting BTN_IND_START
  *  reduce code repetition when controlling for IS_GLOBAL and IS_ALL in both analog and digital input
  *  */
 
@@ -334,8 +332,8 @@ void changePreset( byte btn_scanned ){
 	// set it only if is defined in the preset array
 	if( btn_scanned - BTN_PRST_START <= PRESETS_COUNT - 1){
     	DEBUGFN("CHANGING preset");
-		setLedState(BTN_PRST_STATUS, old_preset_led, 0);
-		setLedState(BTN_PRST_STATUS, btn_scanned +1,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
+		setBtnLedState(BTN_PRST_STATUS, old_preset_led, 0);
+		setBtnLedState(BTN_PRST_STATUS, btn_scanned,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
 
 		// set the new preset value
 		curr_preset = btn_scanned - BTN_PRST_START;
@@ -344,7 +342,7 @@ void changePreset( byte btn_scanned ){
 		resetToDefaultData();
 
     	DEBUGFN( NAMEDVALUE(curr_preset) );
-		old_preset_led = btn_scanned +1;
+		old_preset_led = btn_scanned;
 	}
 	else{
     DEBUGFN("CAN'T CHANGE preset: preset location empty");
@@ -394,12 +392,12 @@ void getAltBtn(){
             if ( STATUS == ST_UP ){
               OLD_STATUS = STATUS;
               STATUS = ST_LOW;
-              setLedState( STATUS, LED_ALT, 1);
+              setAltLedState( STATUS, 1);
             }
             else{
               OLD_STATUS = STATUS;
               STATUS = ST_UP;
-              setLedState( STATUS, LED_ALT, 0);
+              setAltLedState( STATUS, 0);
             }
             DEBUGFN( NAMEDVALUE(STATUS) );
         }
@@ -422,19 +420,26 @@ void getAltBtn(){
             OLD_STATUS = STATUS;
             if ( STATUS == ST_ALT ){ // Siamo già in ALT quindi ne usciamo e torniamo al UP
               STATUS = ST_UP;
-              setLedState( STATUS, LED_ALT, 0 );
+              setAltLedState( STATUS, 0 );
               DEBUGFN("from ALT to STATUS: ");
               DEBUGFN( NAMEDVALUE(STATUS) );
             }
             else { //entriamo nello stato ALT
               STATUS = ST_ALT;
               led_alt_on_time = millis();
-              setLedState( STATUS, LED_ALT, 1);
+              setAltLedState( STATUS, 1);
               DEBUGFN( NAMEDVALUE(STATUS) );
             }
          }
       }
   }
+}
+void setBtnLedState( byte status, byte btn, byte value ){
+	byte btnled = btn + 1;
+	setLedState( status, btnled, value );
+}
+void setAltLedState( byte status, byte value ){
+	setLedState( status, LED_ALT, value );
 }
 
 void setLedState( byte status, byte btn, byte value ){
@@ -550,12 +555,12 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
           sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
           sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
 		  if( curr_status == ST_ALT ){
-			  setLedState(curr_status, btn_scanned +1,  btn_val);
+			  setBtnLedState(curr_status, btn_scanned,  btn_val);
 			  btn_state[curr_status][btn_scanned] = btn_val;
 		  }
 		  else{
-			  setLedState(ST_UP, btn_scanned +1,  btn_val);
-			  setLedState(ST_LOW, btn_scanned +1, btn_val);
+			  setBtnLedState(ST_UP, btn_scanned,  btn_val);
+			  setBtnLedState(ST_LOW, btn_scanned, btn_val);
 			  btn_state[ST_UP][btn_scanned] = btn_val;
 			  btn_state[ST_LOW][btn_scanned] = btn_val;
 		  }
@@ -563,14 +568,14 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
     }
     else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL ) {
           sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
-          setLedState(ST_UP, btn_scanned +1, btn_val);
-          setLedState(ST_LOW, btn_scanned +1, btn_val);
+          setBtnLedState(ST_UP, btn_scanned, btn_val);
+          setBtnLedState(ST_LOW, btn_scanned, btn_val);
           btn_state[ST_UP][btn_scanned] = btn_val;
           btn_state[ST_LOW][btn_scanned] = btn_val;
     }
     else {
       sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
-      setLedState(curr_status, btn_scanned +1, btn_val);
+      setBtnLedState(curr_status, btn_scanned, btn_val);
 	    btn_state[curr_status][btn_scanned] = btn_val;
     }
     DEBUGVAL(btn_scanned,btn_val,curr_status);
