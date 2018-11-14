@@ -458,13 +458,7 @@ void setLeds(){
       }
     }
 
-	//if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
-
-	/* drop the ALT_LED bit when do the check, because for every STATUS the ALT_LED is alway unchanged */
-	byte btnLedState = ledState[STATUS] >> 1;
-	byte btnLedState_old = ledState_old[STATUS] >> 1;
-
-	if( ( vibchoLedState != vibchoLedState_old ) || (btnLedState != btnLedState_old) ){
+	if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
 		DEBUGFN( vibchoLedState );
 		DEBUGFN(vibchoLedState_old );
 		DEBUGFN("change LEDS");
