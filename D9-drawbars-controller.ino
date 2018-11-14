@@ -238,7 +238,7 @@ long led_alt_on_time;
 byte vibchoLedState; // stores the Vibrato/chorus leds state
 byte vibchoLedState_old; // the previous leds state, to check if we have to update the leds register
 byte old_preset_led; // the previous selected preset's led
-
+byte vibcho_led_on_old;
 /* *************************************************************************
  *  MIDI initialization
  */
@@ -453,29 +453,37 @@ void setLeds(){
       }
     }
 
+	//if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
 
-  if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
-    DEBUGFN( word(vibchoLedState,ledState[STATUS]) );
-    DEBUGFN(word(vibchoLedState_old,ledState_old[STATUS]) );
-    DEBUGFN("change LEDS");
-	led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
-	ledState_old[STATUS] = ledState[STATUS];
-    vibchoLedState_old = vibchoLedState;
+	/* drop the ALT_LED bit when do the check, because for every STATUS the ALT_LED is alway unchanged */
+	byte btnLedState = ledState[STATUS] >> 1;
+	byte btnLedState_old = ledState_old[STATUS] >> 1;
+
+	if( ( vibchoLedState != vibchoLedState_old ) || (btnLedState != btnLedState_old) ){
+		DEBUGFN( vibchoLedState );
+		DEBUGFN(vibchoLedState_old );
+		DEBUGFN("change LEDS");
+		led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
+		ledState_old[STATUS] = ledState[STATUS];
+		vibchoLedState_old = vibchoLedState;
+		//DEBUGFN(vibchoLedState_old );
 	}
 }
 
 void setVibchoType( byte CCvalue ){
 	// calculate which Led turn on based on the Drawbar value
 	byte vibcho_led_on =  map(CCvalue, 0, 127, 0, 5);
-  	byte vibchoLedState = 0; // reset the leds
-	bitWrite(vibchoLedState, vibcho_led_on, 1 );
+  //	byte vibchoLedState = 0; // reset the leds
+	// bitWrite(vibchoLedState, vibcho_led_on, 1 );
 
 	// only send if the new VibCho type is different from the old one
-	if ( vibchoLedState != vibchoLedState_old ){
+	if ( vibcho_led_on != vibcho_led_on_old ){
+    vibcho_led_on_old = vibcho_led_on;
+	//if ( vibchoLedState != vibchoLedState_old ){
     	DEBUGFN( NAMEDVALUE(CCvalue) );
       	DEBUGFN( NAMEDVALUE(vibchoLedState) );
-	  	//vibchoLedState = 0; // reset the leds
-	  	//bitWrite(vibchoLedState, vibcho_led_on, 1 );
+	  	vibchoLedState = 0; // reset the leds
+	  	bitWrite(vibchoLedState, vibcho_led_on, 1 );
 	  	sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
 	}
 }
