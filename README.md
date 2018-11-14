@@ -1,7 +1,7 @@
 # MIDI Drawbars commander
 
-I'll try to setup instructions, plans, etc at: https://hackaday.io/project/162255-drawbarsy-9
-## Notes:
+I'll try to setup instructions, plans, etc at: https://hackaday.io/project/162255-midi-drawbars-commander
+
 You should use a Normally Open pedal to switch from the Leslie's speed, otherwise the "switch impulse" is sent on pedal release instead of pedal push (see issue #24)
 
 ## Changelog:
