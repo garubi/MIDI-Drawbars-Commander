@@ -453,15 +453,20 @@ void setLeds(){
       }
     }
 
+	//if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
 
-  if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
-    DEBUGFN( vibchoLedState );
-    DEBUGFN(vibchoLedState_old );
-    DEBUGFN("change LEDS");
-	led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
-	ledState_old[STATUS] = ledState[STATUS];
-    vibchoLedState_old = vibchoLedState;
-    //DEBUGFN(vibchoLedState_old );
+	/* drop the ALT_LED bit when do the check, because for every STATUS the ALT_LED is alway unchanged */
+	byte btnLedState = ledState[STATUS] >> 1;
+	byte btnLedState_old = ledState_old[STATUS] >> 1;
+
+	if( ( vibchoLedState != vibchoLedState_old ) || (btnLedState != btnLedState_old) ){
+		DEBUGFN( vibchoLedState );
+		DEBUGFN(vibchoLedState_old );
+		DEBUGFN("change LEDS");
+		led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
+		ledState_old[STATUS] = ledState[STATUS];
+		vibchoLedState_old = vibchoLedState;
+		//DEBUGFN(vibchoLedState_old );
 	}
 }
 
