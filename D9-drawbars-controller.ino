@@ -220,7 +220,7 @@ static unsigned long BTN_LONG_PRESS_MILLIS = 1300;
 const byte BTN_PRST_STATUS = ST_ALT; // the status that contains the preset buttons
 const byte BTN_PRST_START = 1; // the btn at wich the preset selectors starts
 const byte BTN_PRST_COUNT = 4; // the number of presets selectors (even if inactive!!)
-
+byte pedalAlias[STATUSES_COUNT]; //if the switch pedal send the same controls of a buttons, here stores the reference to that button
 /* *************************************************************************
  *  LEDs initialization
  */
@@ -308,6 +308,32 @@ void loop() {
 
   /* MIDI merge and thru */
   MidiMerge();
+
+}
+
+void setPedalAlias(){ //call this on changePreset();
+	byte pedidx = 17;
+	for (byte st = 0; st < STATUSES_COUNT; st++){
+		for (byte btn_index = BTN_IDX_START; btn_index < BTN_LED_COUNT + BTN_IDX_START; btn_index++) {
+			if(
+				( PRESETS[curr_preset][pedidx][STATUS_IDX[st] +TYPE] == PRESETS[curr_preset][btn_index][STATUS_IDX[st] +TYPE] ) &&
+				( PRESETS[curr_preset][pedidx][STATUS_IDX[st] +PARAM] == PRESETS[curr_preset][btn_index][STATUS_IDX[st] +PARAM] ) &&
+				( PRESETS[curr_preset][pedidx][STATUS_IDX[st] +CHAN] == PRESETS[curr_preset][btn_index][STATUS_IDX[st] +CHAN] )
+			 ){
+				pedalAlias[st]=btn_index;
+			}
+			/*
+			PRESETS[curr_preset][btn_index][STATUS_IDX[st] +BEHAV]
+			PRESETS[curr_preset][pedidx][STATUS_IDX[st] +BEHAV]
+			const byte TYPE = 0;
+			const byte PARAM = 1;
+			const byte MIN = 2;
+			const byte MAX = 3;
+			const byte CHAN = 4;
+			const byte BEHAV = 5;
+			*/
+		}
+	}
 
 }
 
@@ -592,7 +618,7 @@ void getDigitalData() {
   	             // btn_state[STATUS][btn_scanned] = !btn_val;
   	              btn_val = !btn_val;
               }
-
+			  //if is_pedal && pedalAlias[STATUS] > 0 --> updateBtn( pedalAlias[STATUS], btn_val, STATUS);
               updateBtn( btn_scanned, btn_val, STATUS);
           }
           else{
@@ -614,6 +640,7 @@ void getDigitalData() {
            DEBUGFN("Btn released - No TOOGLE & No PRESET...");
            DEBUGVAL(btn_val);
            DEBUGVAL(!btn_val);
+		   //if is_pedal && pedalAlias[STATUS] > 0 --> updateBtn( pedalAlias[STATUS], !btn_val, STATUS);
            updateBtn( btn_scanned, !btn_val, STATUS);
         }
       }
