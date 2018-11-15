@@ -390,7 +390,7 @@ void getAltBtn(){
     }
     else{
       if (btnAlt_pushed == 1){
-        if ( STATUS != ST_ALT){
+        if ( STATUS != ST_ALT){            
             if ( STATUS == ST_UP ){
               OLD_STATUS = STATUS;
               STATUS = ST_LOW;
@@ -401,10 +401,10 @@ void getAltBtn(){
               STATUS = ST_UP;
               setLedState( STATUS, LED_ALT, 0);
             }
+            bitWrite(vibchoLedState, 7, 1 );
             DEBUGFN( NAMEDVALUE(STATUS) );
         }
       }
-
       btnAlt_released = 1;
       btnAlt_pushed = 0;
       DEBUGFN( "RELEASED: " );
@@ -432,6 +432,7 @@ void getAltBtn(){
               setLedState( STATUS, LED_ALT, 1);
               DEBUGFN( NAMEDVALUE(STATUS) );
             }
+            bitWrite(vibchoLedState, 7, 1 );
          }
       }
   }
@@ -453,15 +454,15 @@ void setLeds(){
       }
     }
 
-
-  if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
-    DEBUGFN( vibchoLedState );
-    DEBUGFN(vibchoLedState_old );
-    DEBUGFN("change LEDS");
-	led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
-	ledState_old[STATUS] = ledState[STATUS];
-    vibchoLedState_old = vibchoLedState;
-    //DEBUGFN(vibchoLedState_old );
+	if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
+		DEBUGFN( vibchoLedState );
+		DEBUGFN(vibchoLedState_old );
+		DEBUGFN("change LEDS");
+		led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
+		ledState_old[STATUS] = ledState[STATUS];
+    bitWrite(vibchoLedState, 7, 0 );
+		vibchoLedState_old = vibchoLedState;
+		//DEBUGFN(vibchoLedState_old );
 	}
 }
 
