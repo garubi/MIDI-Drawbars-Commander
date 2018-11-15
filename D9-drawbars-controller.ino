@@ -390,7 +390,7 @@ void getAltBtn(){
     }
     else{
       if (btnAlt_pushed == 1){
-        if ( STATUS != ST_ALT){            
+        if ( STATUS != ST_ALT){
             if ( STATUS == ST_UP ){
               OLD_STATUS = STATUS;
               STATUS = ST_LOW;
