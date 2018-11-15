@@ -27,7 +27,7 @@
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-//#define DEBUG_OUT Serial
+#define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 /* *************************************************************************
@@ -61,10 +61,8 @@ const byte BTN_COUNT = 8; // configurable digital input number (less the Alterna
 const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp pedal too)
 const byte CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 const byte BTN_LED_COUNT = 7; // number of digital inputs that have leds (less the Alternate button, counted a part)
-const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
 const byte VIBCHO_LED_COUNT = 6; // number of leds used to show the Vibrato/Chorus selected.
 const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1; // total number of leds (buttons + vib/cho + ALT)
-
 
 /* *************************************************************************
  *  The Controls STATUSES:
@@ -232,12 +230,13 @@ const byte BTN_PRST_COUNT = 4; // the number of presets selectors (even if inact
 Adafruit_MCP23017 led;
 
 // An array that store the state of the buttons leds (including the Alt btn/led).
-byte ledState[STATUSES_COUNT][BTN_LED_COUNT+1] = {};
+byte ledState[STATUSES_COUNT] = {};
+byte ledState_old[STATUSES_COUNT] = {}; // the previous leds state, to check if we have to update the leds register
 long led_alt_on_time;
-byte led_alt_blink_status;
-byte old_vibcho_led; // the previous selected vibrato type's led
+byte vibchoLedState; // stores the Vibrato/chorus leds state
+byte vibchoLedState_old; // the previous leds state, to check if we have to update the leds register
 byte old_preset_led; // the previous selected preset's led
-
+byte vibcho_led_on_old;
 /* *************************************************************************
  *  MIDI initialization
  */
@@ -283,15 +282,11 @@ void setup()
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
 
-  // turn off all the 6 vib/cho status leds
-  for (byte ledto = VIBCHO_LED_IDX_START; ledto < TOTAL_LED_COUNT; ledto++) {
-    led.digitalWrite(ledto, 0);
- }
-
   // load the default preset
   for (byte btn_scanned = BTN_PRST_START; btn_scanned < (BTN_PRST_COUNT + BTN_PRST_START); btn_scanned++) {
       if( 0 != btn_default[btn_scanned][BTN_PRST_STATUS] ){
         changePreset(  btn_scanned  );
+		break;
       }
     }
 
@@ -325,21 +320,11 @@ bool isPresetButton( byte btn_scanned, byte the_status ) {
 	return false;
 }
 
-void setLedState( byte status, byte btn, byte value ){
-  if ( btn <= BTN_LED_COUNT ){ // escludiamo di impostare lo stato per input che non hanno il led (tipo il pedale)
-    ledState[status][btn] = value;
-  }
-}
-
-void SetAltLedState( byte status, byte value ){
-  ledState[status][LED_ALT] = value;
-  }
-
 void changePreset( byte btn_scanned ){
-  DEBUGFN(NAMEDVALUE(btn_scanned));
+  	DEBUGFN(NAMEDVALUE(btn_scanned));
 	// set it only if is defined in the preset array
 	if( btn_scanned - BTN_PRST_START <= PRESETS_COUNT - 1){
-    DEBUGFN("CHANGING preset");
+    	DEBUGFN("CHANGING preset");
 		setLedState(BTN_PRST_STATUS, old_preset_led, 0);
 		setLedState(BTN_PRST_STATUS, btn_scanned +1,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
 
@@ -349,12 +334,11 @@ void changePreset( byte btn_scanned ){
 		// reset all data
 		resetToDefaultData();
 
-    DEBUGFN( NAMEDVALUE(curr_preset) );
+    	DEBUGFN( NAMEDVALUE(curr_preset) );
 		old_preset_led = btn_scanned +1;
 	}
 	else{
-		//Serial.println (String("CAN'T CHANGE preset: preset location empty"));
-    DEBUGFN("CAN'T CHANGE preset: preset location empty");
+    	DEBUGFN("CAN'T CHANGE preset: preset location empty");
 	}
 
 }
@@ -398,20 +382,20 @@ void getAltBtn(){
     else{
       if (btnAlt_pushed == 1){
         if ( STATUS != ST_ALT){
-            if ( STATUS == ST_UP && OLD_STATUS != ST_ALT){
+            if ( STATUS == ST_UP ){
               OLD_STATUS = STATUS;
               STATUS = ST_LOW;
-              SetAltLedState( STATUS, 1);
+              setLedState( STATUS, LED_ALT, 1);
             }
             else{
               OLD_STATUS = STATUS;
               STATUS = ST_UP;
-              SetAltLedState( STATUS, 0);
+              setLedState( STATUS, LED_ALT, 0);
             }
+            bitWrite(vibchoLedState, 7, 1 ); // Set the Flag to tell tha we need to trigger an update to leds because STATUS has changed
             DEBUGFN( NAMEDVALUE(STATUS) );
         }
       }
-
       btnAlt_released = 1;
       btnAlt_pushed = 0;
       DEBUGFN( "RELEASED: " );
@@ -421,80 +405,65 @@ void getAltBtn(){
   else{
       // se il suo stato è "premuto" ( cioè 0)... allora verifichiamo da quanto tempo è permuto
       if( btn_alt.read() == 0 ){
-          // se è premuto da abbastanza tempo allora passiamo a allo Status ALT
+          // se è premuto da abbastanza tempo allora passiamo allo Status ALT o ne usciamo
           if ((millis() - btnAlt_DownTime) > BTN_LONG_PRESS_MILLIS && btnAlt_released == 1 ) {
             DEBUGFN( "ALT BTN LONG PRESS!!:" );
             btnAlt_pushed = 0;
             btnAlt_released = 0;
             OLD_STATUS = STATUS;
-            if ( STATUS == ST_ALT ){
+            if ( STATUS == ST_ALT ){ // Siamo già in ALT quindi ne usciamo e torniamo al UP
               STATUS = ST_UP;
-              SetAltLedState( STATUS, 0 );
+              setLedState( STATUS, LED_ALT, 0 );
               DEBUGFN("from ALT to STATUS: ");
               DEBUGFN( NAMEDVALUE(STATUS) );
             }
-            else {
+            else { //entriamo nello stato ALT
               STATUS = ST_ALT;
               led_alt_on_time = millis();
-              SetAltLedState( STATUS, 1);
-              led_alt_blink_status = ledState[STATUS][LED_ALT];
+              setLedState( STATUS, LED_ALT, 1);
               DEBUGFN( NAMEDVALUE(STATUS) );
             }
+            bitWrite(vibchoLedState, 7, 1 );  // Set the Flag to tell tha we need to trigger an update to leds because STATUS has changed
          }
       }
   }
 }
 
-
-void setVibchoLeds( byte ledon ){
-    // turn off the old led
-    led.digitalWrite(old_vibcho_led + VIBCHO_LED_IDX_START, 0);
-
-    // turn on the Led
-    DEBUGFN( NAMEDVALUE(ledon) );
-    led.digitalWrite(ledon + VIBCHO_LED_IDX_START, 1);
+void setLedState( byte status, byte btn, byte value ){
+  if ( btn <= BTN_LED_COUNT ){ // escludiamo di impostare lo stato per input che non hanno il led (tipo il pedale)
+    bitWrite(ledState[status], btn, value);
   }
+}
 
 void setLeds(){
 
     if ( STATUS == ST_ALT){
        //blink LED_ALT
-      if( millis()-led_alt_on_time < 500 ){
-        led.digitalWrite(LED_ALT, led_alt_blink_status);
-      }
-      else{
-        led_alt_blink_status = !led_alt_blink_status;
+      if( millis()-led_alt_on_time > 500 ){
+		    bitWrite(ledState[STATUS], LED_ALT, !bitRead(ledState[STATUS], LED_ALT));
         led_alt_on_time = millis();
       }
     }
-    else{
-      led.digitalWrite(LED_ALT, ledState[STATUS][LED_ALT]);
-    }
 
-    for (byte ledto = 1; ledto <= BTN_LED_COUNT; ledto++) {
-      led.digitalWrite(ledto, ledState[STATUS][ledto]);
-    }
-
-    if ( STATUS != ST_ALT ){
-      //blink FAST LED_LESLIE_SP
-    }
-    else{
-      //blink SLOW LED_LESLIE_SP
-
-    }
-
+	if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
+		DEBUGFN("change LEDS");
+		led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
+		ledState_old[STATUS] = ledState[STATUS];
+    	bitWrite(vibchoLedState, 7, 0 );  // Reset the Flag
+		vibchoLedState_old = vibchoLedState;
+	}
 }
 
 void setVibchoType( byte CCvalue ){
 	// calculate which Led turn on based on the Drawbar value
 	byte vibcho_led_on =  map(CCvalue, 0, 127, 0, 5);
 
-	// only send if the new LED is different from the old one
-	if (vibcho_led_on != old_vibcho_led){
-    DEBUGFN( NAMEDVALUE(CCvalue) );
-	  setVibchoLeds( vibcho_led_on );
-	  old_vibcho_led = vibcho_led_on;
-	  sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
+	// only send if the new VibCho type is different from the old one
+	if ( vibcho_led_on != vibcho_led_on_old ){
+    	vibcho_led_on_old = vibcho_led_on;
+	  	vibchoLedState = 0; // reset the leds
+	  	bitWrite(vibchoLedState, vibcho_led_on, 1 );
+	  	sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
 	}
 }
 
@@ -581,7 +550,7 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
     else {
       sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
       setLedState(curr_status, btn_scanned +1, btn_val);
-	  btn_state[curr_status][btn_scanned] = btn_val;
+	    btn_state[curr_status][btn_scanned] = btn_val;
     }
     DEBUGVAL(btn_scanned,btn_val,curr_status);
 }
