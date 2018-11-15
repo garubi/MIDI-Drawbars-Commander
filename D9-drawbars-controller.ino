@@ -333,7 +333,7 @@ void changePreset( byte btn_scanned ){
 		resetToDefaultData();
 
     	DEBUGFN( NAMEDVALUE(curr_preset) );
-		old_preset_led = btn_scanned +1;
+		old_preset_led = btn_scanned;
 	}
 	else{
     	DEBUGFN("CAN'T CHANGE preset: preset location empty");
