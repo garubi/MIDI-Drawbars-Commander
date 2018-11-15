@@ -61,7 +61,6 @@ const byte BTN_COUNT = 8; // configurable digital input number (less the Alterna
 const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp pedal too)
 const byte CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 const byte BTN_LED_COUNT = 7; // number of digital inputs that have leds (less the Alternate button, counted a part)
-//const byte VIBCHO_LED_IDX_START = BTN_LED_COUNT + 1;
 const byte VIBCHO_LED_COUNT = 6; // number of leds used to show the Vibrato/Chorus selected.
 const byte TOTAL_LED_COUNT = BTN_LED_COUNT + VIBCHO_LED_COUNT + 1; // total number of leds (buttons + vib/cho + ALT)
 
@@ -234,7 +233,6 @@ Adafruit_MCP23017 led;
 byte ledState[STATUSES_COUNT] = {};
 byte ledState_old[STATUSES_COUNT] = {}; // the previous leds state, to check if we have to update the leds register
 long led_alt_on_time;
-//byte led_alt_blink_status;
 byte vibchoLedState; // stores the Vibrato/chorus leds state
 byte vibchoLedState_old; // the previous leds state, to check if we have to update the leds register
 byte old_preset_led; // the previous selected preset's led
@@ -283,13 +281,6 @@ void setup()
   STATUS = ST_UP;
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
-
-  // turn off all the 6 vib/cho status leds
-  /*
-  for (byte ledto = VIBCHO_LED_IDX_START; ledto < TOTAL_LED_COUNT; ledto++) {
-    led.digitalWrite(ledto, 0);
- }
- */
 
   // load the default preset
   for (byte btn_scanned = BTN_PRST_START; btn_scanned < (BTN_PRST_COUNT + BTN_PRST_START); btn_scanned++) {
@@ -347,7 +338,7 @@ void changePreset( byte btn_scanned ){
 		old_preset_led = btn_scanned +1;
 	}
 	else{
-    DEBUGFN("CAN'T CHANGE preset: preset location empty");
+    	DEBUGFN("CAN'T CHANGE preset: preset location empty");
 	}
 
 }
@@ -401,7 +392,7 @@ void getAltBtn(){
               STATUS = ST_UP;
               setLedState( STATUS, LED_ALT, 0);
             }
-            bitWrite(vibchoLedState, 7, 1 );
+            bitWrite(vibchoLedState, 7, 1 ); // Set the Flag to tell tha we need to trigger an update to leds because STATUS has changed
             DEBUGFN( NAMEDVALUE(STATUS) );
         }
       }
@@ -432,7 +423,7 @@ void getAltBtn(){
               setLedState( STATUS, LED_ALT, 1);
               DEBUGFN( NAMEDVALUE(STATUS) );
             }
-            bitWrite(vibchoLedState, 7, 1 );
+            bitWrite(vibchoLedState, 7, 1 );  // Set the Flag to tell tha we need to trigger an update to leds because STATUS has changed
          }
       }
   }
@@ -455,29 +446,21 @@ void setLeds(){
     }
 
 	if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
-		DEBUGFN( vibchoLedState );
-		DEBUGFN(vibchoLedState_old );
 		DEBUGFN("change LEDS");
 		led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
 		ledState_old[STATUS] = ledState[STATUS];
-    bitWrite(vibchoLedState, 7, 0 );
+    	bitWrite(vibchoLedState, 7, 0 );  // Reset the Flag
 		vibchoLedState_old = vibchoLedState;
-		//DEBUGFN(vibchoLedState_old );
 	}
 }
 
 void setVibchoType( byte CCvalue ){
 	// calculate which Led turn on based on the Drawbar value
 	byte vibcho_led_on =  map(CCvalue, 0, 127, 0, 5);
-  //	byte vibchoLedState = 0; // reset the leds
-	// bitWrite(vibchoLedState, vibcho_led_on, 1 );
 
 	// only send if the new VibCho type is different from the old one
 	if ( vibcho_led_on != vibcho_led_on_old ){
-    vibcho_led_on_old = vibcho_led_on;
-	//if ( vibchoLedState != vibchoLedState_old ){
-    	DEBUGFN( NAMEDVALUE(CCvalue) );
-      	DEBUGFN( NAMEDVALUE(vibchoLedState) );
+    	vibcho_led_on_old = vibcho_led_on;
 	  	vibchoLedState = 0; // reset the leds
 	  	bitWrite(vibchoLedState, vibcho_led_on, 1 );
 	  	sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
