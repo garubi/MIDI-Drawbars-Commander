@@ -101,7 +101,14 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array does 
 		const byte IS_TOGGLE = 1; // is a pushbutton (momentary) or is toggle?
 		const byte IS_GLOBAL = 2; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
 		const byte SEND_BOTH = 4; // send the value set in this STATUS to both the Upper and Lower channels
-
+/*
+	We can set the Pedal Switch as an alias of another button
+	 (i.e. when we press the pedal, the script acts as we pressed the associated button: sends out the buttons values and turn on/off the respective LED )
+	To set the Pedals as an alias: put in the Pedal UP Status the MIN, MAX, CHAN to 0 and put in PARAM the number of the aliased button.
+	ES:   {TP_ON,  5, 0, 0, 0, 0,    TP_NO,  0, 0, 0, 0, 0 ,   TP_NO,  0, 0, 0, 0, 0 },
+	*
+	NOTE that the switch pedal don't do anything when we are in ST_ALT
+*/
 /*****************************
  * PRESETS array
  * 0: Factory preset for Roland FA 06/07/07
@@ -127,7 +134,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 80, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_CC, 80, 0, 127, 0, IS_TOGGLE + SEND_BOTH}, //leslie OFF
 /*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 81, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_NO, 0,  0, 127, 0, 0},
-/*PED_SWITCH*/  {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 81, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_CC, 81, 0, 127, 0, IS_TOGGLE + SEND_BOTH},
+/*PED_SWITCH*/  {TP_ON,  5, 0, 0, 0, IS_TOGGLE + SEND_BOTH,    TP_ON,  5, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_ON,  5, 0,   0, 0, 0},
 },//                 UPPER                                        LOWER                                    ALTERNATE
 {//PIN            Type Prm Min Max Ch Behaviour                 Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 84, 0, 127, 1, 0}, // REV LEVEL
@@ -147,7 +154,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
 /*LSL_FAST*/    {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
-/*PED_SWITCH*/  {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0, 127, 1, 0},
+/*PED_SWITCH*/  {TP_ON,  5, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_ON,  5, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_ON,  5,  0, 127, 1, 0},
 }
 };
 
@@ -220,7 +227,8 @@ static unsigned long BTN_LONG_PRESS_MILLIS = 1300;
 const byte BTN_PRST_STATUS = ST_ALT; // the status that contains the preset buttons
 const byte BTN_PRST_START = 1; // the btn at wich the preset selectors starts
 const byte BTN_PRST_COUNT = 4; // the number of presets selectors (even if inactive!!)
-byte pedalAlias[STATUSES_COUNT]; //if the switch pedal send the same controls of a buttons, here stores the reference to that button
+const byte BTN_PED= 6;
+
 /* *************************************************************************
  *  LEDs initialization
  */
@@ -311,32 +319,6 @@ void loop() {
 
 }
 
-void setPedalAlias(){ //call this on changePreset();
-	byte pedidx = 17;
-	for (byte st = 0; st < STATUSES_COUNT; st++){
-		for (byte btn_index = BTN_IDX_START; btn_index < BTN_LED_COUNT + BTN_IDX_START; btn_index++) {
-			if(
-				( PRESETS[curr_preset][pedidx][STATUS_IDX[st] +TYPE] == PRESETS[curr_preset][btn_index][STATUS_IDX[st] +TYPE] ) &&
-				( PRESETS[curr_preset][pedidx][STATUS_IDX[st] +PARAM] == PRESETS[curr_preset][btn_index][STATUS_IDX[st] +PARAM] ) &&
-				( PRESETS[curr_preset][pedidx][STATUS_IDX[st] +CHAN] == PRESETS[curr_preset][btn_index][STATUS_IDX[st] +CHAN] )
-			 ){
-				pedalAlias[st]=btn_index;
-			}
-			/*
-			PRESETS[curr_preset][btn_index][STATUS_IDX[st] +BEHAV]
-			PRESETS[curr_preset][pedidx][STATUS_IDX[st] +BEHAV]
-			const byte TYPE = 0;
-			const byte PARAM = 1;
-			const byte MIN = 2;
-			const byte MAX = 3;
-			const byte CHAN = 4;
-			const byte BEHAV = 5;
-			*/
-		}
-	}
-
-}
-
 bool isPresetButton( byte btn_scanned, byte the_status ) {
 	if( the_status == BTN_PRST_STATUS && (btn_scanned >= BTN_PRST_START && btn_scanned <= (BTN_PRST_COUNT + BTN_PRST_START -1) )  ){
 		return true;
@@ -357,6 +339,14 @@ void changePreset( byte btn_scanned ){
 
 		// reset all data
 		resetToDefaultData();
+
+		// Check if the pedal is aliased
+		if( PRESETS[curr_preset][BTN_PED][STATUS_IDX[ST_UP] + MIX ] == 0 && PRESETS[curr_preset][BTN_PED][STATUS_IDX[ST_UP] + MAX ] == 0 && PRESETS[curr_preset][BTN_PED][STATUS_IDX[ST_UP] + CHAN ] == 0){
+			isPedalAliased = true;
+		}
+		else {
+			isPedalAliased = false;
+		}
 
     	DEBUGFN( NAMEDVALUE(curr_preset) );
 		old_preset_led = btn_scanned;
@@ -593,6 +583,9 @@ void getDigitalData() {
     byte btn_val = 0;
     byte btn_index = btn_scanned + BTN_IDX_START;
 
+	// don't do anything we ar in the AlT STATUS and the pedal switch is pressed
+	if( STATUS == ST_ALT && btn_scanned = PED_BTN ){ continue; }
+
     if (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO && btn[btn_scanned].update()) {
       btn_val = btn[btn_scanned].read();
 
@@ -607,6 +600,13 @@ void getDigitalData() {
             // Caso "normale" il pulsante è premuto da solo
               DEBUGFN("BTN pressed / value: ");
               DEBUGVAL(btn_scanned, btn_val);
+
+			  // if the Pedal is aliased, we use the settings of the relative button
+			  if( isPedalAliased == true ){
+				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
+				  btn_index = btn_scanned + BTN_IDX_START;
+			  }
+
               if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
                 DEBUGFN("toggle...");
                 // il pulsante è TOGGLE
@@ -618,7 +618,6 @@ void getDigitalData() {
   	             // btn_state[STATUS][btn_scanned] = !btn_val;
   	              btn_val = !btn_val;
               }
-			  //if is_pedal && pedalAlias[STATUS] > 0 --> updateBtn( pedalAlias[STATUS], btn_val, STATUS);
               updateBtn( btn_scanned, btn_val, STATUS);
           }
           else{
@@ -636,12 +635,20 @@ void getDigitalData() {
       // Pulsante rilasciato
       else {
         // reagisce solo se questo pulsante non è TOGGLE e non è PRESET
-        if ( ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE) && !isPresetButton( btn_scanned, STATUS ) ){
-           DEBUGFN("Btn released - No TOOGLE & No PRESET...");
-           DEBUGVAL(btn_val);
-           DEBUGVAL(!btn_val);
-		   //if is_pedal && pedalAlias[STATUS] > 0 --> updateBtn( pedalAlias[STATUS], !btn_val, STATUS);
-           updateBtn( btn_scanned, !btn_val, STATUS);
+        if ( !isPresetButton( btn_scanned, STATUS ) ){
+		  // if the Pedal is aliased, we use the settings of the relative button
+		  if( isPedalAliased == true ){
+			  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
+			  btn_index = btn_scanned + BTN_IDX_START;
+		  }
+
+			if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE){
+	           DEBUGFN("Btn released - No TOOGLE & No PRESET...");
+	           DEBUGVAL(btn_val);
+	           DEBUGVAL(!btn_val);
+			   //if is_pedal && pedalAlias > 0 --> btn_scanned = pedalAlias, btn_index = btn_scanned + BTN_IDX_START
+	           updateBtn( btn_scanned, !btn_val, STATUS);
+	   		}
         }
       }
 
