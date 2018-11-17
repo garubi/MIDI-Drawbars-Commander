@@ -134,7 +134,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 80, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_CC, 80, 0, 127, 0, IS_TOGGLE + SEND_BOTH}, //leslie OFF
 /*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 81, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_NO, 0,  0, 127, 0, 0},
-/*PED_SWITCH*/  {TP_ON,  5, 0, 0, 0, IS_TOGGLE + SEND_BOTH,    TP_ON,  5, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_ON,  5, 0,   0, 0, 0},
+/*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + SEND_BOTH,    TP_ON,  5, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_ON,  5, 0,   0, 0, 0},
 },//                 UPPER                                        LOWER                                    ALTERNATE
 {//PIN            Type Prm Min Max Ch Behaviour                 Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 84, 0, 127, 1, 0}, // REV LEVEL
@@ -154,7 +154,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
 /*LSL_FAST*/    {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
-/*PED_SWITCH*/  {TP_ON,  5, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_ON,  5, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_ON,  5,  0, 127, 1, 0},
+/*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + IS_GLOBAL,  TP_ON,  5, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_ON,  5,  0, 127, 1, 0},
 }
 };
 
@@ -227,8 +227,8 @@ static unsigned long BTN_LONG_PRESS_MILLIS = 1300;
 const byte BTN_PRST_STATUS = ST_ALT; // the status that contains the preset buttons
 const byte BTN_PRST_START = 1; // the btn at wich the preset selectors starts
 const byte BTN_PRST_COUNT = 4; // the number of presets selectors (even if inactive!!)
-const byte BTN_PED= 6;
-
+const byte BTN_PED= 7;
+byte isPedalAliased;
 /* *************************************************************************
  *  LEDs initialization
  */
@@ -341,14 +341,14 @@ void changePreset( byte btn_scanned ){
 		resetToDefaultData();
 
 		// Check if the pedal is aliased
-		if( PRESETS[curr_preset][BTN_PED][STATUS_IDX[ST_UP] + MIX ] == 0 && PRESETS[curr_preset][BTN_PED][STATUS_IDX[ST_UP] + MAX ] == 0 && PRESETS[curr_preset][BTN_PED][STATUS_IDX[ST_UP] + CHAN ] == 0){
+		if( PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MIN ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MAX ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + CHAN ] == 0){
 			isPedalAliased = true;
 		}
 		else {
 			isPedalAliased = false;
 		}
-
-    	DEBUGFN( NAMEDVALUE(curr_preset) );
+    DEBUGFN(NAMEDVALUE(isPedalAliased));
+    DEBUGFN( NAMEDVALUE(curr_preset) );
 		old_preset_led = btn_scanned;
 	}
 	else{
@@ -583,8 +583,8 @@ void getDigitalData() {
     byte btn_val = 0;
     byte btn_index = btn_scanned + BTN_IDX_START;
 
-	// don't do anything we ar in the AlT STATUS and the pedal switch is pressed
-	if( STATUS == ST_ALT && btn_scanned = PED_BTN ){ continue; }
+	// don't do anything we are in the AlT STATUS and the pedal switch is pressed
+	if( STATUS == ST_ALT && btn_scanned == BTN_PED ){ continue; }
 
     if (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO && btn[btn_scanned].update()) {
       btn_val = btn[btn_scanned].read();
@@ -602,7 +602,7 @@ void getDigitalData() {
               DEBUGVAL(btn_scanned, btn_val);
 
 			  // if the Pedal is aliased, we use the settings of the relative button
-			  if( isPedalAliased == true ){
+			  if( isPedalAliased == true && btn_scanned == BTN_PED ){
 				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
 				  btn_index = btn_scanned + BTN_IDX_START;
 			  }
@@ -637,7 +637,7 @@ void getDigitalData() {
         // reagisce solo se questo pulsante non è TOGGLE e non è PRESET
         if ( !isPresetButton( btn_scanned, STATUS ) ){
 		  // if the Pedal is aliased, we use the settings of the relative button
-		  if( isPedalAliased == true ){
+		  if( isPedalAliased == true && btn_scanned == BTN_PED ){
 			  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
 			  btn_index = btn_scanned + BTN_IDX_START;
 		  }
