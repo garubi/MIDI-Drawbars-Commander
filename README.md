@@ -4,6 +4,8 @@
 You should use a Normally Open pedal to switch from the Leslie's speed, otherwise the "switch impulse" is sent on pedal release instead of pedal push (see issue #24)
 
 ## Changelog:
+- v. 1.3.1 Let you specify that the Switch pedal has to turn on/off a "linked" button's LED: Set the Switch pedal's PARAM to the button index, and set to 0 the MIN, MAX, CHAN. 
+
 - v. 1.3 Reduce the MIDI thru latency.
 
 - v. 1.2.2 implement the new Debug library

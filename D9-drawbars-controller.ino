@@ -105,7 +105,7 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array does 
 	We can set the Pedal Switch as an alias of another button
 	 (i.e. when we press the pedal, the script acts as we pressed the associated button: sends out the buttons values and turn on/off the respective LED )
 	To set the Pedals as an alias: put in the Pedal UP Status the MIN, MAX, CHAN to 0 and put in PARAM the number of the aliased button.
-	ES:   {TP_ON,  5, 0, 0, 0, 0,    TP_NO,  0, 0, 0, 0, 0 ,   TP_NO,  0, 0, 0, 0, 0 },
+	ES:   {TP_ON,  6, 0, 0, 0, 0,    TP_NO,  0, 0, 0, 0, 0 ,   TP_NO,  0, 0, 0, 0, 0 }, // this turn on/off the button that has index = 6 (leslie fast/slow)
 	*
 	NOTE that the switch pedal don't do anything when we are in ST_ALT
 */
