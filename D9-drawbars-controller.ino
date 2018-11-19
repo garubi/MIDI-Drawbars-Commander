@@ -1,16 +1,16 @@
 /*
   D9 programmable drawbars controller
 
-  ver 1.2.2
+  ver 1.3
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
 
   Project home:
-  https://github.com/garubi/D9-drawbars-controller
+  https://github.com/garubi/MIDI-Drawbars-Commander
 
   LICENSE:
-  https://github.com/garubi/D9-drawbars-controller/blob/master/LICENSE
+  https://github.com/garubi/MIDI-Drawbars-Commander/blob/master/LICENSE
 
 */
 
