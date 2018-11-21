@@ -25,7 +25,7 @@
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-#define DEBUG_OUT Serial
+// #define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 /* *************************************************************************
