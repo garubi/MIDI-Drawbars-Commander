@@ -756,6 +756,8 @@ void MidiMerge(){
       usbMIDI.sendSysEx(SysExLength, MIDI.getSysExArray(), true, 0);
     }
     midi_activity = true;
+    
+      DEBUGFN( NAMEDVALUE(midi_activity) );
   }
 
   if (usbMIDI.read()) {
@@ -778,19 +780,22 @@ void MidiMerge(){
       MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
     }
     midi_activity = true;
+          DEBUGFN( NAMEDVALUE(midi_activity) );
   }
 
   // TODO: blink the LED when any midi_activity has happened
 
   if (midi_activity && STATUS == BTN_PRST_STATUS) {
+          DEBUGFN( NAMEDVALUE(midi_activity) );
     digitalWriteFast(BTN_PRST_START + 1 + curr_preset , 0); // LED off
-	//setBtnLedState(BTN_PRST_STATUS, curr_preset, 0);
+	setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 0);
     led_midi_on_time = millis();
   }
 
   if( (millis()-led_alt_on_time > 15) && (bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset ) == 0) ){
 	  digitalWriteFast(BTN_PRST_START + 1 + curr_preset, 1);
-	  //setBtnLedState(BTN_PRST_STATUS, curr_preset, 1);
+          DEBUGFN( "activity off" );
+	  setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
 	//led_alt_on_time = millis();
   }
 }
