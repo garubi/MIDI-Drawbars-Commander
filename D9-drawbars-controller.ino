@@ -129,10 +129,10 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*DWB16*/       {TP_SX, 0x22, 0, 8, 1, 0,                      TP_SX, 0x22, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
 /*PED_EXP */    {TP_CC, 11, 0, 127, 1, SEND_BOTH,              TP_CC, 11, 0, 127, 2, SEND_BOTH,               TP_CC, 11, 0, 127, 0, SEND_BOTH}, //volume
 /*CHOVIB_ON*/   {TP_NO, 0x00, 0, 0, 0, 0,                      TP_NO, 0x00, 0, 0, 0, 0,                       TP_NO, 0x00, 0, 0, 0, 0},
-/*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
-/*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
-/*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
-/*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_ON*/     {TP_SX, 0x2B, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2B, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_SOFT*/   {TP_SX, 0x36, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x36, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_FAST*/   {TP_SX, 0x2D, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2D, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 0, 0, 0}, // reserved to preset
+/*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 80, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_CC, 80, 0, 127, 0, IS_TOGGLE + SEND_BOTH}, //leslie OFF
 /*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 81, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_NO, 0,  0, 127, 0, 0},
 /*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + SEND_BOTH,    TP_ON,  5, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_ON,  5, 0,   0, 0, 0},
@@ -149,10 +149,10 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
 /*PED_EXP */    {TP_CC,  7, 0, 127, 1, IS_GLOBAL,              TP_CC,  7, 0, 127, 1, IS_GLOBAL,               TP_CC, 7,  0, 127, 1, IS_GLOBAL}, // Volume
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
-/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
-/*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
-/*PERC_FAST*/   {TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
-/*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_PC, 0,  0,   0, 0, 0}, // reserved to preset
+/*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0,   0, 0, 0}, // reserved to preset
+/*PERC_SOFT*/   {TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 70, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0,   0, 0, 0}, // reserved to preset
+/*PERC_FAST*/   {TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 71, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0,   0, 0, 0}, // reserved to preset
+/*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0,   0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
 /*LSL_FAST*/    {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
 /*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + IS_GLOBAL,  TP_ON,  5, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_ON,  5,  0, 127, 1, 0},
@@ -392,6 +392,7 @@ void getAltBtn(){
        btnAlt_pushed = 1;
        btnAlt_DownTime = millis();
        DEBUGFN( "ALT BTN PUSHED" );
+       DEBUGFN( NAMEDVALUE(btnAlt_pushed) );
        DEBUGFN( NAMEDVALUE(STATUS) );
     }
     else{
@@ -468,7 +469,7 @@ void setLeds(){
     }
 
 	if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
-		DEBUGFN("change LEDS");
+		//DEBUGFN("change LEDS");
 		led.writeGPIOAB(word(vibchoLedState,ledState[STATUS]));
 		ledState_old[STATUS] = ledState[STATUS];
     	bitWrite(vibchoLedState, 7, 0 );  // Reset the Flag
@@ -501,13 +502,14 @@ void getAnalogData() {
           analogDataLag[drwb_scanned] = analogData[drwb_scanned];
           DEBUGFN( "DWB changed: " );
           DEBUGVAL(drwb_scanned,analogData[drwb_scanned]);
+          
           // check if this drawbar is dedicated to the VIB/CHO control
           if ( STATUS == VIBCHO_SEL_STATUS && drwb_scanned == VIBCHO_SEL_DRWB ){
             DEBUGFN("This DWB controls VIBCHO selection");
-			setVibchoType( analogData[drwb_scanned] );
+			      setVibchoType( analogData[drwb_scanned] );
           }
           else{
-                sendAnalogMidi( analogData[drwb_scanned], drwb_scanned, STATUS );
+             sendAnalogMidi( analogData[drwb_scanned], drwb_scanned, STATUS );
         	}
         }
       }
@@ -530,9 +532,6 @@ void syncAnalogData() {
   }
   // show a led animation to give a feedback about the correct update
   ledCarousel();
-
-  // Sets the "leds are changed" bit
-   bitWrite(vibchoLedState, 7, 1 ); 
 }
 
 void sendAnalogMidi ( byte value, byte control, byte curr_status ){
@@ -587,75 +586,75 @@ void getDigitalData() {
     byte btn_val = 0;
     byte btn_index = btn_scanned + BTN_IDX_START;
 
-	// don't do anything we are in the AlT STATUS and the pedal switch is pressed
-	if( STATUS == ST_ALT && btn_scanned == BTN_PED ){ continue; }
+  	// don't do anything we are in the AlT STATUS and the pedal switch is pressed
+  	if( STATUS == ST_ALT && btn_scanned == BTN_PED ){ continue; }
 
-    if (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO && btn[btn_scanned].update()) {
+    if (btn[btn_scanned].update()) {
       btn_val = btn[btn_scanned].read();
 
       // Pulsnte PREMUTO
       if (btn[btn_scanned].fell()) {
         //se il pulsante è un preset...
-		if(isPresetButton( btn_scanned, STATUS )) {
+		    if(isPresetButton( btn_scanned, STATUS )) {
         	changePreset(  btn_scanned  );
         }
         else{
           if( btnAlt_pushed == 0){
-            // Caso "normale" il pulsante è premuto da solo
-              DEBUGFN("BTN pressed / value: ");
-              DEBUGVAL(btn_scanned, btn_val);
-
-			  // if the Pedal is aliased, we use the settings of the relative button
-			  if( isPedalAliased == true && btn_scanned == BTN_PED ){
-				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
-				  btn_index = btn_scanned + BTN_IDX_START;
-			  }
-
-              if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
-                DEBUGFN("toggle...");
-                // il pulsante è TOGGLE
-                btn_val = !btn_state[STATUS][btn_scanned];
+            if ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO ){
+              // Caso "normale" il pulsante è premuto da solo
+                DEBUGFN("BTN pressed / value: ");
+                DEBUGVAL(btn_scanned, btn_val);
+  
+      			  // if the Pedal is aliased, we use the settings of the relative button
+      			  if( isPedalAliased == true && btn_scanned == BTN_PED ){
+      				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
+      				  btn_index = btn_scanned + BTN_IDX_START;
+      			  }
+  
+                if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
+                  DEBUGFN("toggle...");
+                  // il pulsante è TOGGLE
+                  btn_val = !btn_state[STATUS][btn_scanned];
+                }
+                else{
+    	              //il pulsante non è TOGGLE
+                    DEBUGFN("non toggle... non preset");
+    	             // btn_state[STATUS][btn_scanned] = !btn_val;
+    	              btn_val = !btn_val;
+                }
+                updateBtn( btn_scanned, btn_val, STATUS);
               }
-              else{
-  	              //il pulsante non è TOGGLE
-                  DEBUGFN("non toggle... non preset");
-  	             // btn_state[STATUS][btn_scanned] = !btn_val;
-  	              btn_val = !btn_val;
-              }
-              updateBtn( btn_scanned, btn_val, STATUS);
-          }
-          else{
-            // Pulsante premuto in contemporanea all'ALT ...
-            btnAlt_pushed = 0;
-            DEBUGFN("ALT + BTN: ");
-            DEBUGVAL(btn_scanned);
-            //sync analog data
-            if( btn_scanned == 0 ){
-              syncAnalogData();
             }
-          }
+            else{
+              // Pulsante premuto in contemporanea all'ALT ...
+              btnAlt_pushed = 0;
+              DEBUGFN("ALT + BTN: ");
+              DEBUGVAL(btn_scanned);
+              //sync analog data
+              if( btn_scanned == 0 ){
+                syncAnalogData();
+              }
+            }
         }
-    }
+      }
       // Pulsante rilasciato
       else {
         // reagisce solo se questo pulsante non è TOGGLE e non è PRESET
-        if ( !isPresetButton( btn_scanned, STATUS ) ){
-		  // if the Pedal is aliased, we use the settings of the relative button
-		  if( isPedalAliased == true && btn_scanned == BTN_PED ){
-			  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
-			  btn_index = btn_scanned + BTN_IDX_START;
-		  }
-
-			if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE){
-	           DEBUGFN("Btn released - No TOOGLE & No PRESET...");
-	           DEBUGVAL(btn_val);
-	           DEBUGVAL(!btn_val);
-			   //if is_pedal && pedalAlias > 0 --> btn_scanned = pedalAlias, btn_index = btn_scanned + BTN_IDX_START
-	           updateBtn( btn_scanned, !btn_val, STATUS);
-	   		}
+        if ( !isPresetButton( btn_scanned, STATUS ) && PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO ){
+      	  // if the Pedal is aliased, we use the settings of the relative button
+      	  if( isPedalAliased == true && btn_scanned == BTN_PED ){
+      		  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
+      		  btn_index = btn_scanned + BTN_IDX_START;
+      	  }
+      
+      		if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE){
+              DEBUGFN("Btn released - No TOOGLE & No PRESET...");
+              DEBUGVAL(!btn_val);
+      		    //if is_pedal && pedalAlias > 0 --> btn_scanned = pedalAlias, btn_index = btn_scanned + BTN_IDX_START
+              updateBtn( btn_scanned, !btn_val, STATUS);
+         	}
         }
       }
-
     } // fine btn scanned.updated
   }
 }
@@ -732,6 +731,9 @@ void ledCarousel(){
       delay(100);
       led.digitalWrite(ledto, 0);
     }
+
+   // Sets the "leds are changed" bit
+   bitWrite(vibchoLedState, 7, 1 ); 
 }
 
 void MidiMerge(){
