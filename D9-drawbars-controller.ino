@@ -530,6 +530,9 @@ void syncAnalogData() {
   }
   // show a led animation to give a feedback about the correct update
   ledCarousel();
+
+  // Sets the "leds are changed" bit
+   bitWrite(vibchoLedState, 7, 1 ); 
 }
 
 void sendAnalogMidi ( byte value, byte control, byte curr_status ){
