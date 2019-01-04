@@ -25,7 +25,7 @@
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-// #define DEBUG_OUT Serial
+#define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 /* *************************************************************************
@@ -750,7 +750,7 @@ void MidiMerge(){
   // here we handle MIDI to usbMidi and usbMIDI to MIDI
 
   // code heavily derived form the Interface_3X3 example in Teensyduino
-  bool midi_activity = false;
+  static bool midi_activity = false;
 
   if (MIDI.read()) {
     // get a MIDI IN1 (Serial) message
@@ -768,9 +768,11 @@ void MidiMerge(){
       unsigned int SysExLength = data1 + data2 * 256;
       usbMIDI.sendSysEx(SysExLength, MIDI.getSysExArray(), true, 0);
     }
-    midi_activity = true;
-    
-      DEBUGFN( NAMEDVALUE(midi_activity) );
+
+   if (type != midi::ActiveSensing) {
+        midi_activity = true;
+    }
+
   }
 
   if (usbMIDI.read()) {
@@ -792,23 +794,30 @@ void MidiMerge(){
       unsigned int SysExLength = data1 + data2 * 256;
       MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
     }
-    midi_activity = true;
-          DEBUGFN( NAMEDVALUE(midi_activity) );
+
+    if (type != usbMIDI.ActiveSensing) {
+        midi_activity = true;
+    }
+
+  }
+  
+ 
+  if (STATUS == BTN_PRST_STATUS) {
+    byte midiLedStatus = bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset );
+    DEBUGFN( NAMEDVALUE(midiLedStatus) );
+
+    if (midiLedStatus != 0 && midi_activity ){
+          setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 0);
+          led_midi_on_time = millis();
+          midi_activity = false;
+      }
+      
+    if( (millis()-led_alt_on_time > 100) && (midiLedStatus == 0) ){
+     // digitalWriteFast(BTN_PRST_START + 1 + curr_preset, 1);
+            DEBUGFN( "activity off" );
+      setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
+    }  
   }
 
-  // TODO: blink the LED when any midi_activity has happened
 
-  if (midi_activity && STATUS == BTN_PRST_STATUS) {
-          DEBUGFN( NAMEDVALUE(midi_activity) );
-    digitalWriteFast(BTN_PRST_START + 1 + curr_preset , 0); // LED off
-	setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 0);
-    led_midi_on_time = millis();
-  }
-
-  if( (millis()-led_alt_on_time > 15) && (bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset ) == 0) ){
-	  digitalWriteFast(BTN_PRST_START + 1 + curr_preset, 1);
-          DEBUGFN( "activity off" );
-	  setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
-	//led_alt_on_time = millis();
-  }
 }
