@@ -632,7 +632,15 @@ void getDigitalData() {
               DEBUGVAL(btn_scanned);
               //sync analog data
               if( btn_scanned == 0 ){
+                DEBUGFN("Let's sync analog controllers");
                 syncAnalogData();
+              }
+              else if( btn_scanned == 6){
+                DEBUGFN("Let's send All sounds off");
+                // sends "All sounds off";
+                sendMidi( TP_CC, 120, 0, 0, 1);
+                // show a led animation to give a feedback about the correct update
+                ledCarousel();
               }
             }
         }
