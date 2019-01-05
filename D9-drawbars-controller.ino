@@ -25,7 +25,7 @@
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-// #define DEBUG_OUT Serial
+//S #define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 /* *************************************************************************
@@ -244,6 +244,7 @@ byte vibchoLedState; // stores the Vibrato/chorus leds state
 byte vibchoLedState_old; // the previous leds state, to check if we have to update the leds register
 byte old_preset_led; // the previous selected preset's led
 byte vibcho_led_on_old;
+long led_midi_on_time;
 /* *************************************************************************
  *  MIDI initialization
  */
@@ -460,12 +461,12 @@ void setLedState( byte status, byte btn, byte value ){
 
 void setLeds(){
 
-    if ( STATUS == ST_ALT){
-       //blink LED_ALT
-      if( millis()-led_alt_on_time > 500 ){
+    if ( STATUS == ST_ALT ){
+		//blink LED_ALT
+		if( millis()-led_alt_on_time > 500 ){
 		    bitWrite(ledState[STATUS], LED_ALT, !bitRead(ledState[STATUS], LED_ALT));
-        led_alt_on_time = millis();
-      }
+			led_alt_on_time = millis();
+		}
     }
 
 	if( word(vibchoLedState,ledState[STATUS]) != word(vibchoLedState_old,ledState_old[STATUS]) ){
@@ -749,7 +750,7 @@ void MidiMerge(){
   // here we handle MIDI to usbMidi and usbMIDI to MIDI
 
   // code heavily derived form the Interface_3X3 example in Teensyduino
-  //bool activity = false;
+  bool midi_activity = false;
 
   if (MIDI.read()) {
     // get a MIDI IN1 (Serial) message
@@ -767,7 +768,13 @@ void MidiMerge(){
       unsigned int SysExLength = data1 + data2 * 256;
       usbMIDI.sendSysEx(SysExLength, MIDI.getSysExArray(), true, 0);
     }
-    //activity = true;
+
+//DEBUGFN( NAMEDVALUE(type) );
+//DEBUGFN(NAMEDVALUE(midi::ActiveSensing));
+   if (type != midi::ActiveSensing && type != 255) {
+        midi_activity = true;
+    }
+
   }
 
   if (usbMIDI.read()) {
@@ -789,18 +796,30 @@ void MidiMerge(){
       unsigned int SysExLength = data1 + data2 * 256;
       MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
     }
-    //activity = true;
+//DEBUGFN( NAMEDVALUE(type) );
+     if (type != usbMIDI.ActiveSensing && type != 255) {
+        midi_activity = true;
+    }
+
+  }
+  
+ 
+  if (STATUS == BTN_PRST_STATUS) {
+    byte midiLedStatus = bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset );
+    //DEBUGFN( NAMEDVALUE(midiLedStatus) );
+
+    if (midiLedStatus != 0 && midi_activity ){
+          setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 0);
+          led_midi_on_time = millis();
+         // midi_activity = false;
+      }
+      
+    if( (millis()-led_midi_on_time > 100) && (midiLedStatus == 0) ){
+     // digitalWriteFast(BTN_PRST_START + 1 + curr_preset, 1);
+ //           DEBUGFN( "activity off" );
+      setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
+    }  
   }
 
-  // TODO: blink the LED when any activity has happened
-  /*
-  if (activity) {
-    digitalWriteFast(13, HIGH); // LED on
-    ledOnMillis = 0;
-  }
-  if (ledOnMillis > 15) {
-    digitalWriteFast(13, LOW);  // LED off
-  }
-  */
 
 }
