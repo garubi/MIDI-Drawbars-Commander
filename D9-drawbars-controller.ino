@@ -25,7 +25,7 @@
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-#define DEBUG_OUT Serial
+//S #define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 /* *************************************************************************
@@ -750,7 +750,7 @@ void MidiMerge(){
   // here we handle MIDI to usbMidi and usbMIDI to MIDI
 
   // code heavily derived form the Interface_3X3 example in Teensyduino
-  static bool midi_activity = false;
+  bool midi_activity = false;
 
   if (MIDI.read()) {
     // get a MIDI IN1 (Serial) message
@@ -769,7 +769,9 @@ void MidiMerge(){
       usbMIDI.sendSysEx(SysExLength, MIDI.getSysExArray(), true, 0);
     }
 
-   if (type != midi::ActiveSensing) {
+//DEBUGFN( NAMEDVALUE(type) );
+//DEBUGFN(NAMEDVALUE(midi::ActiveSensing));
+   if (type != midi::ActiveSensing && type != 255) {
         midi_activity = true;
     }
 
@@ -794,8 +796,8 @@ void MidiMerge(){
       unsigned int SysExLength = data1 + data2 * 256;
       MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
     }
-
-    if (type != usbMIDI.ActiveSensing) {
+//DEBUGFN( NAMEDVALUE(type) );
+     if (type != usbMIDI.ActiveSensing && type != 255) {
         midi_activity = true;
     }
 
@@ -804,17 +806,17 @@ void MidiMerge(){
  
   if (STATUS == BTN_PRST_STATUS) {
     byte midiLedStatus = bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset );
-    DEBUGFN( NAMEDVALUE(midiLedStatus) );
+    //DEBUGFN( NAMEDVALUE(midiLedStatus) );
 
     if (midiLedStatus != 0 && midi_activity ){
           setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 0);
           led_midi_on_time = millis();
-          midi_activity = false;
+         // midi_activity = false;
       }
       
-    if( (millis()-led_alt_on_time > 100) && (midiLedStatus == 0) ){
+    if( (millis()-led_midi_on_time > 100) && (midiLedStatus == 0) ){
      // digitalWriteFast(BTN_PRST_START + 1 + curr_preset, 1);
-            DEBUGFN( "activity off" );
+ //           DEBUGFN( "activity off" );
       setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
     }  
   }
