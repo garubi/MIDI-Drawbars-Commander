@@ -608,7 +608,7 @@ void getDigitalData() {
   
       			  // if the Pedal is aliased, we use the settings of the relative button
       			  if( isPedalAliased == true && btn_scanned == BTN_PED ){
-      				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
+      				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] + PARAM];
       				  btn_index = btn_scanned + BTN_IDX_START;
       			  }
   
