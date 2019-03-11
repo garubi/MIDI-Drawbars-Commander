@@ -4,6 +4,8 @@
 You should use a Normally Open pedal to switch from the Leslie's speed, otherwise the "switch impulse" is sent on pedal release instead of pedal push (see issue #24)
 
 ## Changelog:
+- v. 1.3.5 Fix some issues with control assign in FA preset, and a small bug in the Pedal switch control
+
 - v. 1.3.4 Blinks preset's LED on MIDI in activity
 
 - v. 1.3.3 Resolve some issues when triggering Analog Sync (press ALT + VIB ON); Implements "All sound OFF" (press ALT + FAST); Update the CC assigns in presets to reflects the final panels labelling
