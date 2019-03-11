@@ -119,10 +119,10 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 {//                 UPPER                                    LOWER                                     ALTERNATE
 {//PIN             Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour                Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_CC, 16, 0, 127, 0, SEND_BOTH}, // DRIVE
-/*DWB1_13*/     {TP_SX, 0x29, 0, 8, 1, 0,                      TP_SX, 0x29, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB1_13*/     {TP_SX, 0x29, 0, 8, 1, 0,                      TP_SX, 0x29, 0, 8, 2, 0,                       TP_CC, 91, 0, 127, 0, SEND_BOTH}, //REV LEVEL
 /*DWB1_35*/     {TP_SX, 0x28, 0, 8, 1, 0,                      TP_SX, 0x28, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
 /*DWB2*/        {TP_SX, 0x27, 0, 8, 1, 0,                      TP_SX, 0x27, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
-/*DWB2_23*/     {TP_SX, 0x26, 0, 8, 1, 0,                      TP_SX, 0x26, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
+/*DWB2_23*/     {TP_SX, 0x26, 0, 8, 1, 0,                      TP_SX, 0x26, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0}, // KeyClick
 /*DWB4*/        {TP_SX, 0x25, 0, 8, 1, 0,                      TP_SX, 0x25, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
 /*DWB8*/        {TP_SX, 0x24, 0, 8, 1, 0,                      TP_SX, 0x24, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
 /*DWB5_13*/     {TP_SX, 0x23, 0, 8, 1, 0,                      TP_SX, 0x23, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0},
