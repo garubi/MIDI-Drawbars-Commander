@@ -135,7 +135,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*PERC_3RD*/    {TP_SX, 0x2C, 0, 1, 1, IS_TOGGLE + IS_GLOBAL,  TP_SX, 0x2C, 0, 1, 2, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,    0, 0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 80, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_CC, 80, 0, 127, 0, IS_TOGGLE + SEND_BOTH}, //leslie OFF
 /*LSL_FAST*/    {TP_CC, 81, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 81, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_NO, 0,  0, 127, 0, 0},
-/*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + SEND_BOTH,    TP_ON,  5, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_ON,  5, 0,   0, 0, 0},
+/*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + SEND_BOTH,    TP_ON,  0, 0, 0, 0, 0,                         TP_ON,  0, 0,   0, 0, 0},
 },//                 UPPER                                        LOWER                                    ALTERNATE
 {//PIN            Type Prm Min Max Ch Behaviour                 Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 76, 0, 127, 1, 0}, // DRIVE
@@ -155,7 +155,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 /*PERC_3RD*/    {TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 72, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0,   0, 0, 0}, // reserved to preset
 /*LSL_STOP*/    {TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 87, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 85, 0, 127, 1, IS_TOGGLE}, // LESLIE OFF
 /*LSL_FAST*/    {TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 86, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_CC, 51, 0, 127, 1, IS_TOGGLE}, // REV OFF
-/*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + IS_GLOBAL,  TP_ON,  5, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_ON,  5,  0, 127, 1, 0},
+/*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + IS_GLOBAL,    TP_ON,  0, 0, 0, 0, 0,                         TP_ON,  0,  0, 0, 0, 0},
 }
 };
 
