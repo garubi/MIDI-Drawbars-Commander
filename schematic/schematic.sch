@@ -1,5 +1,4 @@
 EESchema Schematic File Version 4
-LIBS:midi-commander-kicad-cache
 EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
@@ -7,7 +6,7 @@ encoding utf-8
 Sheet 1 1
 Title "MIDI Drawbar Commandar"
 Date "2019-03-21"
-Rev "ver. 2.0"
+Rev "ver. 2.1"
 Comp "UBI Stage"
 Comment1 "sgaruti@gmail.com"
 Comment2 "MIDI IN revised and corrected"
