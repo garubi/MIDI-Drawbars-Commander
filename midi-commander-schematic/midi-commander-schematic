@@ -1,0 +1,35 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>KiCad BOM Example 5</title>
+    </head>
+    <body>
+    <h1>C:\Users\Stefano Garuti\Google Drive\Fai da te\UBI Stage Drawbars Commander\circuiti\midi-commander-kicad\midi-commander-kicad.sch</h1>
+    <p>21/03/2019 11:56:43</p>
+    <p>Eeschema (5.1.0)-1</p>
+    <p><b>Component Count:</b>59</p>
+    <table>
+    <tr><th style='width:640px'>Ref</th><th>Qnty</th><th>Value</th><th>Part</th><th>Footprint</th><th>Description</th><th>Vendor</th></tr>
+    <tr><td>C1</td><td>1</td><td>0.1uF</td><td>Device:C</td><td>Capacitor_THT:C_Axial_L3.8mm_D2.6mm_P7.50mm_Horizontal</td><td>Unpolarized capacitor</td><td></td></tr>
+    <tr><td>D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12, D13, D14</td><td>14</td><td>LED</td><td>Device:LED</td><td>LED_THT:LED_D1.8mm_W1.8mm_H2.4mm_Horizontal_O1.27mm_Z1.6mm</td><td>Light emitting diode</td><td></td></tr>
+    <tr><td>D15</td><td>1</td><td>1N4148</td><td>Device:D</td><td>Diode_THT:D_DO-41_SOD81_P7.62mm_Horizontal</td><td>Diode</td><td></td></tr>
+    <tr><td>J1</td><td>1</td><td>Switch Pedal Jack</td><td>Connector:AudioJack2</td><td></td><td>Audio Jack, 2 Poles (Mono / TS)</td><td></td></tr>
+    <tr><td>J2</td><td>1</td><td>MIDI OUT</td><td>Connector:DIN-5_180degree</td><td></td><td>5-pin DIN connector (5-pin DIN-5 stereo)</td><td></td></tr>
+    <tr><td>J3</td><td>1</td><td>MIDI IN</td><td>Connector:DIN-5_180degree</td><td></td><td>5-pin DIN connector (5-pin DIN-5 stereo)</td><td></td></tr>
+    <tr><td>J4</td><td>1</td><td>Expression Pedal Jack</td><td>Connector:AudioJack3</td><td></td><td>Audio Jack, 3 Poles (Stereo / TRS)</td><td></td></tr>
+    <tr><td>R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14</td><td>14</td><td>220</td><td>Device:R</td><td>Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal</td><td>Resistor</td><td></td></tr>
+    <tr><td>R15, R16</td><td>2</td><td>47</td><td>Device:R</td><td>Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal</td><td>Resistor</td><td></td></tr>
+    <tr><td>R17</td><td>1</td><td>470</td><td>Device:R</td><td>Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal</td><td>Resistor</td><td></td></tr>
+    <tr><td>R18, R19</td><td>2</td><td>4.7k</td><td>Device:R</td><td>Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal</td><td>Resistor</td><td></td></tr>
+    <tr><td>RV1, RV2, RV3, RV4, RV5, RV6, RV7, RV8, RV9</td><td>9</td><td>R_POT</td><td>Device:R_POT</td><td></td><td>Potentiometer</td><td></td></tr>
+    <tr><td>SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8</td><td>8</td><td>SW_Push</td><td>Switch:SW_Push</td><td></td><td>Push button switch, generic, two pins</td><td></td></tr>
+    <tr><td>U1</td><td>1</td><td>MCP23017_SP</td><td>Interface_Expansion:MCP23017_SP</td><td>Package_DIP:DIP-28_W7.62mm</td><td>16-bit I/O expander, I2C, interrupts, w pull-ups, SPDIP-28</td><td></td></tr>
+    <tr><td>U2</td><td>1</td><td>Teensy-LC</td><td>Teensy:Teensy-LC</td><td>Teensy:Teensy30_31_32_LC</td><td></td><td></td></tr>
+    <tr><td>U3</td><td>1</td><td>6N138</td><td>Isolator:6N138</td><td></td><td>Low Input Current high Gain Split Darlington Optocouplers, -0.5V to 7V VDD, DIP-8</td><td></td></tr><!--TABLEROW-->
+    </table>
+    </body>
+</html>
+    

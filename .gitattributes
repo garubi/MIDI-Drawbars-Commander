@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+*.pro filter=kicad_project
+*.sch filter=kicad_sch
