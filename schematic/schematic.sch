@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:schematic-cache
 EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
@@ -366,8 +367,8 @@ $Comp
 L Device:R R17
 U 1 1 5C9A6677
 P 6400 2550
-F 0 "R17" H 6470 2596 50  0000 L CNN
-F 1 "470" H 6470 2505 50  0000 L CNN
+F 0 "R17" H 6150 2600 50  0000 L CNN
+F 1 "470" H 6150 2500 50  0000 L CNN
 F 2 "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P5.08mm_Horizontal" V 6330 2550 50  0001 C CNN
 F 3 "~" H 6400 2550 50  0001 C CNN
 	1    6400 2550
@@ -1151,7 +1152,6 @@ Connection ~ 8550 3450
 Entry Wire Line
 	6150 3150 6250 3250
 NoConn ~ 6150 3350
-NoConn ~ 6600 2300
 NoConn ~ 6150 3750
 $Comp
 L power:+3.3V #PWR?
@@ -1591,6 +1591,38 @@ Wire Wire Line
 	3450 6200 3950 6200
 Wire Bus Line
 	3350 6800 1850 6800
+$Comp
+L Device:R R20
+U 1 1 5C9BFF99
+P 6600 2550
+F 0 "R20" H 6670 2596 50  0000 L CNN
+F 1 "1K" H 6670 2505 50  0000 L CNN
+F 2 "" V 6530 2550 50  0001 C CNN
+F 3 "~" H 6600 2550 50  0001 C CNN
+	1    6600 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5C9C15DB
+P 6600 2700
+F 0 "#PWR?" H 6600 2450 50  0001 C CNN
+F 1 "GND" H 6605 2527 50  0000 C CNN
+F 2 "" H 6600 2700 50  0001 C CNN
+F 3 "" H 6600 2700 50  0001 C CNN
+	1    6600 2700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6600 2300 6600 2400
+Wire Notes Line
+	6500 2350 6500 2700
+Wire Notes Line
+	7200 2700 7200 2350
+Wire Notes Line
+	7200 2350 6500 2350
+Wire Notes Line
+	6500 2700 7200 2700
 Wire Bus Line
 	1850 3050 1850 3950
 Wire Bus Line
@@ -1611,4 +1643,6 @@ Wire Bus Line
 	3700 3050 3700 3850
 Wire Bus Line
 	3350 5400 3350 6800
+Text Notes 6700 2450 0    50   Italic 0
+Not required.
 $EndSCHEMATC
