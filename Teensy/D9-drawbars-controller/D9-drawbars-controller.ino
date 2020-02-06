@@ -140,13 +140,13 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 {//PIN            Type Prm Min Max Ch Behaviour                 Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 76, 0, 127, 1, 0}, // DRIVE
 /*DWB1_13*/     {TP_CC, 19, 0, 127, 1, 0,                      TP_CC, 28, 0, 127, 1, 0,                       TP_CC, 84, 0, 127, 1, 0}, // REV LEVEL
-/*DWB1_35*/     {TP_CC, 18, 0, 127, 1, 0,                      TP_CC, 27, 0, 127, 1, 0,                       TP_CC, 83, 0, 127, 1, 0}, // REV SIZE
-/*DWB2*/        {TP_CC, 17, 0, 127, 1, 0,                      TP_CC, 26, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
-/*DWB2_23*/     {TP_CC, 16, 0, 127, 1, 0,                      TP_CC, 25, 0, 127, 1, 0,                       TP_CC, 75, 0, 127, 1, 0}, // KEY CLICK
-/*DWB4*/        {TP_CC, 15, 0, 127, 1, 0,                      TP_CC, 24, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
-/*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 23, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, 0}, // VIB TYPE
-/*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 22, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
-/*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 21, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
+/*DWB1_35*/     {TP_CC, 18, 0, 127, 1, 0,                      TP_CC, 105, 0, 127, 1, 0,                       TP_CC, 83, 0, 127, 1, 0}, // REV SIZE
+/*DWB2*/        {TP_CC, 17, 0, 127, 1, 0,                      TP_CC, 104, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
+/*DWB2_23*/     {TP_CC, 16, 0, 127, 1, 0,                      TP_CC, 103, 0, 127, 1, 0,                       TP_CC, 75, 0, 127, 1, 0}, // KEY CLICK
+/*DWB4*/        {TP_CC, 15, 0, 127, 1, 0,                      TP_CC, 102, 0, 127, 1, 0,                       TP_NO,  0, 0, 127, 1, 0},
+/*DWB8*/        {TP_CC, 14, 0, 127, 1, 0,                      TP_CC, 101, 0, 127, 1, 0,                       TP_CC, 73, 0, 127, 1, 0}, // VIB TYPE
+/*DWB5_13*/     {TP_CC, 13, 0, 127, 1, 0,                      TP_CC, 100, 0, 127, 1, 0,                       TP_CC, 35, 0, 127, 1, 0}, // PEDAL 8
+/*DWB16*/       {TP_CC, 12, 0, 127, 1, 0,                      TP_CC, 99, 0, 127, 1, 0,                       TP_CC, 33, 0, 127, 1, 0}, // PEDAL 16
 /*PED_EXP */    {TP_CC,  7, 0, 127, 1, IS_GLOBAL,              TP_CC,  7, 0, 127, 1, IS_GLOBAL,               TP_CC, 7,  0, 127, 1, IS_GLOBAL}, // Volume
 /*CHOVIB_ON*/   {TP_CC, 31, 0, 127, 1, IS_TOGGLE,              TP_CC, 30, 0, 127, 1, IS_TOGGLE,               TP_CC, 55, 0, 127, 1, IS_TOGGLE}, // PEDAL TO LOWER
 /*PERC_ON*/     {TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,  TP_CC, 66, 0, 127, 1, IS_TOGGLE + IS_GLOBAL,   TP_NO, 0,  0,   0, 0, 0}, // reserved to preset
@@ -503,7 +503,7 @@ void getAnalogData() {
           analogDataLag[drwb_scanned] = analogData[drwb_scanned];
           DEBUGFN( "DWB changed: " );
           DEBUGVAL(drwb_scanned,analogData[drwb_scanned]);
-          
+
           // check if this drawbar is dedicated to the VIB/CHO control
           if ( STATUS == VIBCHO_SEL_STATUS && drwb_scanned == VIBCHO_SEL_DRWB ){
             DEBUGFN("This DWB controls VIBCHO selection");
@@ -605,13 +605,13 @@ void getDigitalData() {
               // Caso "normale" il pulsante è premuto da solo
                 DEBUGFN("BTN pressed / value: ");
                 DEBUGVAL(btn_scanned, btn_val);
-  
+
       			  // if the Pedal is aliased, we use the settings of the relative button
       			  if( isPedalAliased == true && btn_scanned == BTN_PED ){
       				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] + PARAM];
       				  btn_index = btn_scanned + BTN_IDX_START;
       			  }
-  
+
                 if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
                   DEBUGFN("toggle...");
                   // il pulsante è TOGGLE
@@ -655,7 +655,7 @@ void getDigitalData() {
       		  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
       		  btn_index = btn_scanned + BTN_IDX_START;
       	  }
-      
+
       		if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE){
               DEBUGFN("Btn released - No TOOGLE & No PRESET...");
               DEBUGVAL(!btn_val);
@@ -742,7 +742,7 @@ void ledCarousel(){
     }
 
    // Sets the "leds are changed" bit
-   bitWrite(vibchoLedState, 7, 1 ); 
+   bitWrite(vibchoLedState, 7, 1 );
 }
 
 void MidiMerge(){
@@ -802,8 +802,8 @@ void MidiMerge(){
     }
 
   }
-  
- 
+
+
   if (STATUS == BTN_PRST_STATUS) {
     byte midiLedStatus = bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset );
     //DEBUGFN( NAMEDVALUE(midiLedStatus) );
@@ -813,12 +813,12 @@ void MidiMerge(){
           led_midi_on_time = millis();
          // midi_activity = false;
       }
-      
+
     if( (millis()-led_midi_on_time > 100) && (midiLedStatus == 0) ){
      // digitalWriteFast(BTN_PRST_START + 1 + curr_preset, 1);
  //           DEBUGFN( "activity off" );
       setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
-    }  
+    }
   }
 
 
