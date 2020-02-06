@@ -1,7 +1,7 @@
 /*
   D9 programmable drawbars controller
 
-  ver 1.3.5
+  ver 1.3.6 
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
