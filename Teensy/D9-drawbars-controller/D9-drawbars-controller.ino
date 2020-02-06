@@ -1,10 +1,7 @@
 /*
   D9 programmable drawbars controller
 
-  ver 1.3.5
-
-  Created 2018
-  By Stefano Garuti stefano@garuti.it
+  (c) 2018 - 2020  Stefano Garuti stefano@garuti.it
 
   Project home:
   https://github.com/garubi/MIDI-Drawbars-Commander
@@ -28,6 +25,7 @@
 //S #define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
+String version = "1.3.5-sysEx";
 /* *************************************************************************
  *  Pins assign
  */
@@ -503,7 +501,7 @@ void getAnalogData() {
           analogDataLag[drwb_scanned] = analogData[drwb_scanned];
           DEBUGFN( "DWB changed: " );
           DEBUGVAL(drwb_scanned,analogData[drwb_scanned]);
-          
+
           // check if this drawbar is dedicated to the VIB/CHO control
           if ( STATUS == VIBCHO_SEL_STATUS && drwb_scanned == VIBCHO_SEL_DRWB ){
             DEBUGFN("This DWB controls VIBCHO selection");
@@ -605,13 +603,13 @@ void getDigitalData() {
               // Caso "normale" il pulsante è premuto da solo
                 DEBUGFN("BTN pressed / value: ");
                 DEBUGVAL(btn_scanned, btn_val);
-  
+
       			  // if the Pedal is aliased, we use the settings of the relative button
       			  if( isPedalAliased == true && btn_scanned == BTN_PED ){
       				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] + PARAM];
       				  btn_index = btn_scanned + BTN_IDX_START;
       			  }
-  
+
                 if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
                   DEBUGFN("toggle...");
                   // il pulsante è TOGGLE
@@ -655,7 +653,7 @@ void getDigitalData() {
       		  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
       		  btn_index = btn_scanned + BTN_IDX_START;
       	  }
-      
+
       		if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE){
               DEBUGFN("Btn released - No TOOGLE & No PRESET...");
               DEBUGVAL(!btn_val);
@@ -742,7 +740,7 @@ void ledCarousel(){
     }
 
    // Sets the "leds are changed" bit
-   bitWrite(vibchoLedState, 7, 1 ); 
+   bitWrite(vibchoLedState, 7, 1 );
 }
 
 void MidiMerge(){
@@ -792,6 +790,9 @@ void MidiMerge(){
       midi::MidiType mtype = (midi::MidiType)type;
       MIDI.send(mtype, data1, data2, channel);
     } else {
+
+	// TODO: intercept the sysex specific for this devices
+	
       // SysEx messages are special.  The message length is given in data1 & data2
       unsigned int SysExLength = data1 + data2 * 256;
       MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
@@ -802,8 +803,8 @@ void MidiMerge(){
     }
 
   }
-  
- 
+
+
   if (STATUS == BTN_PRST_STATUS) {
     byte midiLedStatus = bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset );
     //DEBUGFN( NAMEDVALUE(midiLedStatus) );
@@ -813,12 +814,12 @@ void MidiMerge(){
           led_midi_on_time = millis();
          // midi_activity = false;
       }
-      
+
     if( (millis()-led_midi_on_time > 100) && (midiLedStatus == 0) ){
      // digitalWriteFast(BTN_PRST_START + 1 + curr_preset, 1);
  //           DEBUGFN( "activity off" );
       setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
-    }  
+    }
   }
 
 
