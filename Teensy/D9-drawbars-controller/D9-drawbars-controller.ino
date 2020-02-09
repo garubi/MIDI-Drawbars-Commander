@@ -98,10 +98,9 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array does 
    4) the max value to sed out
    5) the button (and associated control command) behaviour:
 */
-		const byte IS_TOGGLE = 1; // is a pushbutton (momentary) or is toggle?
-		const byte IS_GLOBAL = 2; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
-		const byte SEND_BOTH = 4; // send the value set in this STATUS to both the Upper and Lower channels
-
+		const byte IS_GLOBAL = 1; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
+		const byte SEND_BOTH = 2; // send the value set in this STATUS to both the Upper and Lower channels
+    const byte IS_TOGGLE = 4; // is a pushbutton (momentary) or is toggle?
 /*
 	We can set the Pedal Switch as an alias of another button
 	 (i.e. when we press the pedal, the script acts as we pressed the associated button: sends out the buttons values and turn on/off the respective LED )
