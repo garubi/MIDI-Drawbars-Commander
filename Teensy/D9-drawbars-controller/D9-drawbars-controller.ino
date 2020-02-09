@@ -88,10 +88,11 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array does 
    The multidimensional Array byte PRESETS will contains in each row:
    1) the type of midi message to send out:*/
 		const byte TP_NO   = 0; // Disabled
-		const byte TP_ON   = 3; // Note on
 		const byte TP_CC   = 1; // Control Change
-		const byte TP_PC   = 4; // Program CHange
 		const byte TP_SX   = 2; // System Exclusive
+    const byte TP_ON   = 3; // Note on
+    const byte TP_PC   = 4; // Program Change
+    
 /*
    2) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    3) the min value to send out
