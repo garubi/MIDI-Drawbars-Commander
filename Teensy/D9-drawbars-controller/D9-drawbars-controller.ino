@@ -19,6 +19,7 @@
  *  */
 
 #include <Wire.h>
+#include <Eeprom24C32_64.h> // https://github.com/jlesech/Eeprom24C32_64
 #include <Adafruit_MCP23017.h>
 #include <Bounce2.h> // https://github.com/thomasfredericks/Bounce2/wiki
 #include <MIDI.h>
@@ -27,6 +28,14 @@
 #define PRINTSTREAM_FALLBACK
 //S #define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
+
+/* ************************************************************************
+ *  Instatiate the I2C eeprom 
+ */
+#define EEPROM_ADDRESS 0x51
+static Eeprom24C32_64 eeprom(EEPROM_ADDRESS);
+const word ACTIVE_PRST_ID_ADDR = 0;
+
 
 /* *************************************************************************
  *  Pins assign
@@ -55,7 +64,7 @@ const byte LSL_STOP = 3;
 const byte LSL_FAST = 2;
 const byte LED_ALT = 0;
 
-const byte BTN_COUNT = 8; // configurable digital input number (less the Alternate button, counted a part) include the pedal input
+const byte BTN_COUNT = 8; // configurable digital input number (less the Alternate button, counted apart) include the pedal input
 const byte DRWB_COUNT = 10; // configurable number of drawbars used (add the exp pedal too)
 const byte CONTROLS_NUM = BTN_COUNT + DRWB_COUNT;
 const byte BTN_LED_COUNT = 7; // number of digital inputs that have leds (less the Alternate button, counted a part)
@@ -169,21 +178,7 @@ const byte MAX = 3;
 const byte CHAN = 4;
 const byte BEHAV = 5;
 
-byte curr_preset; // the currennt selected preset.
-
-// declares the default status of buttons when we switch to a new preset
-byte btn_default[BTN_LED_COUNT+1][STATUSES_COUNT] = {
-                          //ALT UP LOW
-    /*PEDAL TO LOWER */ 	{1, 1, 0},  /*CHOVIB_ON*/
-    /*preset */           	{0, 1, 0},  /*PERC_ON*/
-    /*preset */           	{1, 0, 0},  /*PERC_SOFT*/
-    /*preset */            	{0, 0, 0},  /*PERC_FAST*/
-    /*preset */            	{0, 0, 1},  /*PERC_3RD*/
-    /* leslie off */      	{1, 0, 0},  /*LSL_STOP*/
-    /* rev off */         	{0, 1, 0},  /*LSL_FAST*/
-	/* vib/cho sel. value*/	{127,0,0} 	// we start with C3
-};
-
+byte curr_preset = 5; // the currennt selected preset. We start with 5 that's
 
 /* *************************************************************************
  *  Drawbars initialization
@@ -230,18 +225,21 @@ const byte BTN_PRST_START = 1; // the btn at wich the preset selectors starts
 const byte BTN_PRST_COUNT = 4; // the number of presets selectors (even if inactive!!)
 const byte BTN_PED= 7;
 byte isPedalAliased;
+
 /* *************************************************************************
  *  LEDs initialization
  */
 // Controls LEDs attacched to MCP23017
 Adafruit_MCP23017 led;
 
-// An array that store the state of the buttons leds (including the Alt btn/led).
-byte ledState[STATUSES_COUNT] = {};
+
+byte ledState[STATUSES_COUNT] = {}; // An array that store the state of the buttons leds (including the Alt btn/led).
 byte ledState_old[STATUSES_COUNT] = {}; // the previous leds state, to check if we have to update the leds register
 long led_alt_on_time;
+
 byte vibchoLedState; // stores the Vibrato/chorus leds state
 byte vibchoLedState_old; // the previous leds state, to check if we have to update the leds register
+
 byte old_preset_led; // the previous selected preset's led
 byte vibcho_led_on_old;
 long led_midi_on_time;
@@ -256,7 +254,10 @@ void setup()
 {
   Serial.begin(38400);
   MIDI.begin(MIDI_CHANNEL_OMNI);
-
+  
+  // Initialize EEPROM library.
+  eeprom.initialize();
+    
   // set ALT button as input Pullup and attach debouncer
   pinMode(BTN_ALT, INPUT_PULLUP);
   btn_alt.attach(BTN_ALT);
@@ -290,13 +291,8 @@ void setup()
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
 
-  // load the default preset
-  for (byte btn_scanned = BTN_PRST_START; btn_scanned < (BTN_PRST_COUNT + BTN_PRST_START); btn_scanned++) {
-      if( 0 != btn_default[btn_scanned][BTN_PRST_STATUS] ){
-        changePreset(  btn_scanned  );
-		break;
-      }
-    }
+  curr_preset = eep_read_curr_preset_id(); // load the last used preset from memory.
+  load_preset(curr_preset );
 
   syncAnalogData();
 }
@@ -321,6 +317,40 @@ void loop() {
 
 }
 
+void load_preset( byte preset_id ){
+  byte btn_scanned = btn_scanned  + BTN_PRST_START;
+  DEBUGFN(NAMEDVALUE(btn_scanned));
+  setBtnLedState(BTN_PRST_STATUS, old_preset_led, 0);
+  setBtnLedState(BTN_PRST_STATUS, btn_scanned,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
+      
+  // reset all data
+  DEBUGFN("Reset btns and leds data");
+  // SET al buttons to 0
+  for (byte st = 0; st < STATUSES_COUNT; st++){
+    for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
+      if ( !isPresetButton(btn_scanned, st) ){ // check that's not a Preset button
+        updateBtn( btn_scanned, 0, st );
+      }
+    }
+  }
+  // setVibchoType( btn_default[7][ST_ALT] );
+
+  /* **************************************
+   *  TODO: implement load from eeprom the preset's parameters
+   */
+   
+  // Check if the pedal is aliased
+  if( PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MIN ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MAX ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + CHAN ] == 0){
+    isPedalAliased = true;
+  }
+  else {
+    isPedalAliased = false;
+  }
+  DEBUGFN( NAMEDVALUE( isPedalAliased ) );
+
+  old_preset_led = btn_scanned;
+}
+
 bool isPresetButton( byte btn_scanned, byte the_status ) {
 	if( the_status == BTN_PRST_STATUS && (btn_scanned >= BTN_PRST_START && btn_scanned <= (BTN_PRST_COUNT + BTN_PRST_START -1) )  ){
 		return true;
@@ -328,60 +358,26 @@ bool isPresetButton( byte btn_scanned, byte the_status ) {
 	return false;
 }
 
-void changePreset( byte btn_scanned ){
-  	DEBUGFN(NAMEDVALUE(btn_scanned));
-	// set it only if is defined in the preset array
-	if( btn_scanned - BTN_PRST_START <= PRESETS_COUNT - 1){
-    	DEBUGFN("CHANGING preset");
-		setBtnLedState(BTN_PRST_STATUS, old_preset_led, 0);
-		setBtnLedState(BTN_PRST_STATUS, btn_scanned,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
+void changePreset( byte preset_id ){
+  if( preset_id == curr_preset) return;
+	
+	if( preset_id <= PRESETS_COUNT - 1){ // set it only if is defined in the preset array
+    DEBUGFN("CHANGING preset");
 
-		// set the new preset value
-		curr_preset = btn_scanned - BTN_PRST_START;
-
-		// reset all data
-		resetToDefaultData();
-
-		// Check if the pedal is aliased
-		if( PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MIN ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MAX ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + CHAN ] == 0){
-			isPedalAliased = true;
-		}
-		else {
-			isPedalAliased = false;
-		}
-    DEBUGFN(NAMEDVALUE(isPedalAliased));
+    load_preset( preset_id );
+    
+    // set the new preset id value
+    curr_preset = preset_id;
+    
+    // save it in memory
+    eep_store_curr_preset_id();
+   
     DEBUGFN( NAMEDVALUE(curr_preset) );
-		old_preset_led = btn_scanned;
+
 	}
 	else{
     	DEBUGFN("CAN'T CHANGE preset: preset location empty");
 	}
-
-}
-
-void resetToDefaultData(){
-  DEBUGFN("Reset to default data");
-	// SET al buttons to 0
-	for (byte st = 0; st < STATUSES_COUNT; st++){
-	  for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
-	    if ( !isPresetButton(btn_scanned, st) ){ // check that's not a Preset button
-	      updateBtn( btn_scanned, 0, st );
-	    }
-	  }
-	}
-
-	//Set the default value for all buttons, only if it's not 0 (since we have already set all of them to 0)
-	for (byte st = 0; st < STATUSES_COUNT; st++){
-	  for (byte btn_scanned = 0; btn_scanned < BTN_LED_COUNT; btn_scanned++) {
-	    if ( !isPresetButton(btn_scanned, st) ){ // check that's not a Preset button
-	  	  if (btn_default[btn_scanned][st] != 0 ){
-	  		  updateBtn( btn_scanned, btn_default[btn_scanned][st], st );
-	  	 }
-	    }
-	  }
-	}
-
-  setVibchoType( btn_default[7][ST_ALT] );
 }
 
 void getAltBtn(){
@@ -597,7 +593,7 @@ void getDigitalData() {
       if (btn[btn_scanned].fell()) {
         //se il pulsante è un preset...
 		    if(isPresetButton( btn_scanned, STATUS )) {
-        	changePreset(  btn_scanned  );
+        	changePreset(  btn_scanned  - BTN_PRST_START   );
         }
         else{
           if( btnAlt_pushed == 0){
@@ -820,6 +816,19 @@ void MidiMerge(){
       setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
     }
   }
-
-
 }
+
+// Return a byte with the last active preset (ranging from 0 to 3)
+byte eep_read_curr_preset_id(){
+    // Read a byte at address 0 in EEPROM memory.
+    byte data = eeprom.readByte(ACTIVE_PRST_ID_ADDR);
+    DEBUGFN(NAMEDVALUE(data));
+    return data;
+  }
+
+void eep_store_curr_preset_id(){
+    // Write a byte in EEPROM memory.
+    DEBUGFN(NAMEDVALUE(curr_preset));
+    eeprom.writeByte(ACTIVE_PRST_ID_ADDR, curr_preset);
+    delay(10);
+  }
