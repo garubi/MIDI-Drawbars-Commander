@@ -26,7 +26,7 @@
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-//S #define DEBUG_OUT Serial
+#define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 /* ************************************************************************
@@ -168,6 +168,7 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 }
 };
 
+byte preset[CONTROLS_NUM][18]={};
 const byte PRESETS_COUNT = sizeof(PRESETS) / sizeof(PRESETS[0]);
 
 /* Array index position labels */
@@ -178,7 +179,7 @@ const byte MAX = 3;
 const byte CHAN = 4;
 const byte BEHAV = 5;
 
-byte curr_preset = 5; // the currennt selected preset. We start with 5 that's
+byte curr_preset; // the currennt selected preset. 
 
 /* *************************************************************************
  *  Drawbars initialization
@@ -335,10 +336,8 @@ void load_preset( byte preset_id ){
   }
   // setVibchoType( btn_default[7][ST_ALT] );
 
-  /* **************************************
-   *  TODO: implement load from eeprom the preset's parameters
-   */
-   
+  eep_load_preset_params( preset_id ); // Load the preset's parameters
+   //NAMEDVALUE(preset);
   // Check if the pedal is aliased
   if( PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MIN ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MAX ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + CHAN ] == 0){
     isPedalAliased = true;
@@ -808,7 +807,7 @@ void MidiMerge(){
   }
 }
 
-// Return a byte with the last active preset (ranging from 0 to 3)
+// Return a byte with the last active preset
 byte eep_read_curr_preset_id(){
     // Read a byte at address 0 in EEPROM memory.
     byte data = eeprom.readByte(ACTIVE_PRST_ID_ADDR);
@@ -822,3 +821,12 @@ void eep_store_curr_preset_id(){
     eeprom.writeByte(ACTIVE_PRST_ID_ADDR, curr_preset);
     delay(10);
   }
+
+void eep_load_preset_params( byte preset_id ){
+  for (byte st = 0; st < CONTROLS_NUM; st++){
+    for (byte te = 0; te < 18; te++) {
+      preset[st][te] = PRESETS[preset_id ][st][te];
+    }
+  }
+    
+}
