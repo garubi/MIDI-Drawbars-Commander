@@ -318,7 +318,7 @@ void loop() {
 }
 
 void load_preset( byte preset_id ){
-  byte btn_scanned = btn_scanned  + BTN_PRST_START;
+  byte btn_scanned = preset_id  + BTN_PRST_START;
   DEBUGFN(NAMEDVALUE(btn_scanned));
   setBtnLedState(BTN_PRST_STATUS, old_preset_led, 0);
   setBtnLedState(BTN_PRST_STATUS, btn_scanned,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
@@ -356,28 +356,6 @@ bool isPresetButton( byte btn_scanned, byte the_status ) {
 		return true;
 	}
 	return false;
-}
-
-void changePreset( byte preset_id ){
-  if( preset_id == curr_preset) return;
-	
-	if( preset_id <= PRESETS_COUNT - 1){ // set it only if is defined in the preset array
-    DEBUGFN("CHANGING preset");
-
-    load_preset( preset_id );
-    
-    // set the new preset id value
-    curr_preset = preset_id;
-    
-    // save it in memory
-    eep_store_curr_preset_id();
-   
-    DEBUGFN( NAMEDVALUE(curr_preset) );
-
-	}
-	else{
-    	DEBUGFN("CAN'T CHANGE preset: preset location empty");
-	}
 }
 
 void getAltBtn(){
@@ -593,7 +571,19 @@ void getDigitalData() {
       if (btn[btn_scanned].fell()) {
         //se il pulsante è un preset...
 		    if(isPresetButton( btn_scanned, STATUS )) {
-        	changePreset(  btn_scanned  - BTN_PRST_START   );
+           byte preset_id = btn_scanned  - BTN_PRST_START;
+            if( preset_id != curr_preset && preset_id <= PRESETS_COUNT - 1){ // change preset only if the new one is different from the previous ande if is defined in the preset array
+              DEBUGFN("CHANGING preset");
+              load_preset( preset_id );
+              // set the new preset id value
+              curr_preset = preset_id;
+              // save it in memory
+              eep_store_curr_preset_id();
+              DEBUGFN( NAMEDVALUE(curr_preset) );
+            }
+            else{
+                DEBUGFN("CAN'T CHANGE preset: preset location empty");
+              }
         }
         else{
           if( btnAlt_pushed == 0){
