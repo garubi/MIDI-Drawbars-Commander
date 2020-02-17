@@ -339,7 +339,7 @@ void load_preset( byte preset_id ){
   eep_load_preset_params( preset_id ); // Load the preset's parameters
    //NAMEDVALUE(preset);
   // Check if the pedal is aliased
-  if( PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MIN ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MAX ] == 0 && PRESETS[curr_preset][BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + CHAN ] == 0){
+  if( preset[BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MIN ] == 0 && preset[BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MAX ] == 0 && preset[BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + CHAN ] == 0){
     isPedalAliased = true;
   }
   else {
@@ -460,7 +460,7 @@ void setVibchoType( byte CCvalue ){
     	vibcho_led_on_old = vibcho_led_on;
 	  	vibchoLedState = 0; // reset the leds
 	  	bitWrite(vibchoLedState, vibcho_led_on, 1 );
-	  	sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
+	  	sendMidi( preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
 	}
 }
 
@@ -468,7 +468,7 @@ void getAnalogData() {
   for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
     // update the ResponsiveAnalogRead object every loop
     drwb[drwb_scanned].update();
-    if( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
+    if( preset[drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
       // if the repsonsive value has changed, go
       if (drwb[drwb_scanned].hasChanged()) {
         analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
@@ -496,7 +496,7 @@ void syncAnalogData() {
   for (int drwb_scanned = 0; drwb_scanned < DRWB_COUNT; drwb_scanned++) {
     // update the ResponsiveAnalogRead object every loop
     drwb[drwb_scanned].update();
-    if( PRESETS[curr_preset][drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
+    if( preset[drwb_scanned][STATUS_IDX[STATUS] +TYPE] != TP_NO ){
       analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
       analogDataLag[drwb_scanned] = analogData[drwb_scanned];
       DEBUGFN( "DWB synced: " );
@@ -509,23 +509,23 @@ void syncAnalogData() {
 }
 
 void sendAnalogMidi ( byte value, byte control, byte curr_status ){
-  if ( ( PRESETS[curr_preset][control][STATUS_IDX[curr_status] +BEHAV] & SEND_BOTH ) == SEND_BOTH  ){
-        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[curr_status]  +TYPE], PRESETS[curr_preset][control][STATUS_IDX[curr_status]  +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_UP]  +CHAN] );
-        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[curr_status] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_LOW] +CHAN] );
+  if ( ( preset[control][STATUS_IDX[curr_status] +BEHAV] & SEND_BOTH ) == SEND_BOTH  ){
+        sendMidi( preset[control][STATUS_IDX[curr_status]  +TYPE], preset[control][STATUS_IDX[curr_status]  +PARAM], value, control, preset[control][STATUS_IDX[ST_UP]  +CHAN] );
+        sendMidi( preset[control][STATUS_IDX[curr_status] +TYPE], preset[control][STATUS_IDX[curr_status] +PARAM], value, control, preset[control][STATUS_IDX[ST_LOW] +CHAN] );
   }
-  else if ( ( PRESETS[curr_preset][control][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL ) {
-        sendMidi( PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[ST_UP] +CHAN] );
+  else if ( ( preset[control][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL ) {
+        sendMidi( preset[control][STATUS_IDX[ST_UP] +TYPE], preset[control][STATUS_IDX[ST_UP] +PARAM], value, control, preset[control][STATUS_IDX[ST_UP] +CHAN] );
   }
   else {
-    sendMidi( PRESETS[curr_preset][control][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][control][STATUS_IDX[curr_status] +PARAM], value, control, PRESETS[curr_preset][control][STATUS_IDX[curr_status] +CHAN] );
+    sendMidi( preset[control][STATUS_IDX[curr_status] +TYPE], preset[control][STATUS_IDX[curr_status] +PARAM], value, control, preset[control][STATUS_IDX[curr_status] +CHAN] );
   }
 }
 
 void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
     byte btn_index = btn_scanned + BTN_IDX_START;
-	if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_BOTH ) == SEND_BOTH  ){
-          sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
-          sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_LOW] +CHAN] );
+	if ( ( preset[btn_index][STATUS_IDX[curr_status] +BEHAV] & SEND_BOTH ) == SEND_BOTH  ){
+          sendMidi( preset[btn_index][STATUS_IDX[curr_status] +TYPE], preset[btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, preset[btn_index][STATUS_IDX[ST_UP] +CHAN] );
+          sendMidi( preset[btn_index][STATUS_IDX[curr_status] +TYPE], preset[btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, preset[btn_index][STATUS_IDX[ST_LOW] +CHAN] );
 		  if( curr_status == ST_ALT ){
 			  setBtnLedState(curr_status, btn_scanned,  btn_val);
 			  btn_state[curr_status][btn_scanned] = btn_val;
@@ -538,15 +538,15 @@ void updateBtn( byte btn_scanned, byte btn_val, byte curr_status ){
 		  }
 
     }
-    else if ( ( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL ) {
-          sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] +CHAN] );
+    else if ( ( preset[btn_index][STATUS_IDX[curr_status] +BEHAV] & IS_GLOBAL ) == IS_GLOBAL ) {
+          sendMidi( preset[btn_index][STATUS_IDX[ST_UP] +TYPE], preset[btn_index][STATUS_IDX[ST_UP] +PARAM], btn_val * 127, btn_index, preset[btn_index][STATUS_IDX[ST_UP] +CHAN] );
           setBtnLedState(ST_UP, btn_scanned, btn_val);
           setBtnLedState(ST_LOW, btn_scanned, btn_val);
           btn_state[ST_UP][btn_scanned] = btn_val;
           btn_state[ST_LOW][btn_scanned] = btn_val;
     }
     else {
-      sendMidi( PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +TYPE], PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, PRESETS[curr_preset][btn_index][STATUS_IDX[curr_status] +CHAN] );
+      sendMidi( preset[btn_index][STATUS_IDX[curr_status] +TYPE], preset[btn_index][STATUS_IDX[curr_status] +PARAM], btn_val * 127, btn_index, preset[btn_index][STATUS_IDX[curr_status] +CHAN] );
       setBtnLedState(curr_status, btn_scanned, btn_val);
 	    btn_state[curr_status][btn_scanned] = btn_val;
     }
@@ -586,18 +586,18 @@ void getDigitalData() {
         }
         else{
           if( btnAlt_pushed == 0){
-            if ( PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO ){
+            if ( preset[btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO ){
               // Caso "normale" il pulsante è premuto da solo
                 DEBUGFN("BTN pressed / value: ");
                 DEBUGVAL(btn_scanned, btn_val);
 
       			  // if the Pedal is aliased, we use the settings of the relative button
       			  if( isPedalAliased == true && btn_scanned == BTN_PED ){
-      				  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[ST_UP] + PARAM];
+      				  btn_scanned = preset[btn_index][STATUS_IDX[ST_UP] + PARAM];
       				  btn_index = btn_scanned + BTN_IDX_START;
       			  }
 
-                if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
+                if ( (preset[btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
                   DEBUGFN("toggle...");
                   // il pulsante è TOGGLE
                   btn_val = !btn_state[STATUS][btn_scanned];
@@ -634,14 +634,14 @@ void getDigitalData() {
       // Pulsante rilasciato
       else {
         // reagisce solo se questo pulsante non è TOGGLE e non è PRESET
-        if ( !isPresetButton( btn_scanned, STATUS ) && PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO ){
+        if ( !isPresetButton( btn_scanned, STATUS ) && preset[btn_index][STATUS_IDX[STATUS] + TYPE] != TP_NO ){
       	  // if the Pedal is aliased, we use the settings of the relative button
       	  if( isPedalAliased == true && btn_scanned == BTN_PED ){
-      		  btn_scanned = PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] + PARAM];
+      		  btn_scanned = preset[btn_index][STATUS_IDX[STATUS] + PARAM];
       		  btn_index = btn_scanned + BTN_IDX_START;
       	  }
 
-      		if ( (PRESETS[curr_preset][btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE){
+      		if ( (preset[btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE){
               DEBUGFN("Btn released - No TOOGLE & No PRESET...");
               DEBUGVAL(!btn_val);
       		    //if is_pedal && pedalAlias > 0 --> btn_scanned = pedalAlias, btn_index = btn_scanned + BTN_IDX_START
@@ -691,8 +691,8 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
               data[8] = partsB[channel - 1];
               data[10] = parameter;
               data[11] = value;
-              if ( PRESETS[curr_preset][control][STATUS_IDX[STATUS] +MAX] != 127 || PRESETS[curr_preset][control][STATUS_IDX[STATUS] +MIN] != 0 ) {
-                data[11] = map(value, 0, 127, PRESETS[curr_preset][control][STATUS_IDX[STATUS] +MIN], PRESETS[curr_preset][control][STATUS_IDX[STATUS] +MAX]);
+              if ( preset[control][STATUS_IDX[STATUS] +MAX] != 127 || preset[control][STATUS_IDX[STATUS] +MIN] != 0 ) {
+                data[11] = map(value, 0, 127, preset[control][STATUS_IDX[STATUS] +MIN], preset[control][STATUS_IDX[STATUS] +MAX]);
               }
 
               /*
