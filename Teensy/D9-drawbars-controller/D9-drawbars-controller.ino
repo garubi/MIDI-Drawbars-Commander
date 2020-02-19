@@ -93,6 +93,17 @@ const byte STATUSES_COUNT = sizeof(STATUS_IDX) / sizeof(STATUS_IDX[0]);
 
 const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array does the buttons rows starts?
 
+/* Parameters position */
+const byte TYPE = 0;
+const byte PARAM = 1;
+const byte MIN = 2;
+const byte MAX = 3;
+const byte CHAN = 4;
+const byte BEHAV = 5;
+/* Parametes count */
+const byte PARAMS_NUM_PER_STATUS = 6;
+const byte PARAMS_NUM_PER_CTRL = 6 * STATUSES_COUNT;
+
 /*
    The multidimensional Array byte PRESETS will contains in each row:
    1) the type of midi message to send out:*/
@@ -124,7 +135,7 @@ const byte BTN_IDX_START = DRWB_COUNT; // at wich row of the presets array does 
  * 0: Factory preset for Roland FA 06/07/07
  * 1: Factory preset for GSi Gemini expander
  */
-const byte PRESETS[][CONTROLS_NUM][18]=
+const byte PRESETS[][CONTROLS_NUM][PARAMS_NUM_PER_CTRL]=
 {//                 UPPER                                    LOWER                                     ALTERNATE
 {//PIN             Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour                Type Prm Min Max Ch Behaviour
 /*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_CC, 16, 0, 127, 0, SEND_BOTH}, // DRIVE
@@ -168,18 +179,10 @@ const byte PRESETS[][CONTROLS_NUM][18]=
 }
 };
 
-byte preset[CONTROLS_NUM][18]={};
+byte preset[CONTROLS_NUM][PARAMS_NUM_PER_CTRL]={};
 const byte PRESETS_COUNT = sizeof(PRESETS) / sizeof(PRESETS[0]);
 
-/* Array index position labels */
-const byte TYPE = 0;
-const byte PARAM = 1;
-const byte MIN = 2;
-const byte MAX = 3;
-const byte CHAN = 4;
-const byte BEHAV = 5;
-
-byte curr_preset; // the currennt selected preset. 
+byte curr_preset_id; // the currennt selected preset. 
 
 /* *************************************************************************
  *  Drawbars initialization
@@ -292,10 +295,42 @@ void setup()
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
 
-  curr_preset = eep_read_curr_preset_id(); // load the last used preset from memory.
-  load_preset(curr_preset );
+  // To reset to factory presets keep pressed the ALT button while turning on the device
+  // then press the "leslie fast" button
+  btn_alt.update();
+  long reset_btn_on_time = millis();
+  byte reset_btn_led = 1;
+  byte im_resetting = false;
+  while (btn_alt.read() == 0){
+    led.digitalWrite(0, 1); // turn on the ALT_BTN
+    
+    //now blink btn[6]
+    if( millis()-reset_btn_on_time > 200 && !im_resetting ){
+        led.digitalWrite(7, !reset_btn_led);
+        reset_btn_led = !reset_btn_led;
+      reset_btn_on_time = millis();
+    }
+      
+     btn_alt.update(); // does the ALT button chaged?
+     btn[6].update(); // does the Reset button changed?
+    
+    if (btn[6].fell()){ // the reset button was pressed: let's start the reset procedure
+       DEBUGFN("factory restore should go here");
+       led.digitalWrite(7, HIGH); //keep the led to signal that the reset procedure is starting
+       im_resetting = true; //don't blonk animore
+
+       /* **************************************
+        *  TODO: Write the presets to the eprom
+        */
+    }
+  }
+
+  curr_preset_id = eep_read_curr_preset_id(); // load the last used preset from memory.
+  load_preset( curr_preset_id );
 
   syncAnalogData();
+
+
 }
 
 void loop() {
@@ -571,14 +606,14 @@ void getDigitalData() {
         //se il pulsante è un preset...
 		    if(isPresetButton( btn_scanned, STATUS )) {
            byte preset_id = btn_scanned  - BTN_PRST_START;
-            if( preset_id != curr_preset && preset_id <= PRESETS_COUNT - 1){ // change preset only if the new one is different from the previous ande if is defined in the preset array
+            if( preset_id != curr_preset_id && preset_id <= PRESETS_COUNT - 1){ // change preset only if the new one is different from the previous ande if is defined in the preset array
               DEBUGFN("CHANGING preset");
               load_preset( preset_id );
               // set the new preset id value
-              curr_preset = preset_id;
+              curr_preset_id = preset_id;
               // save it in memory
               eep_store_curr_preset_id();
-              DEBUGFN( NAMEDVALUE(curr_preset) );
+              DEBUGFN( NAMEDVALUE(curr_preset_id) );
             }
             else{
                 DEBUGFN("CAN'T CHANGE preset: preset location empty");
@@ -677,7 +712,7 @@ void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
         usbMIDI.sendProgramChange(value, channel);
         break;
       case TP_SX: // SysEx
-        if (curr_preset == 0) {
+        if (curr_preset_id == 0) {
           /**
            * è il preset per Roland FA 06/07/08
            */
@@ -790,19 +825,19 @@ void MidiMerge(){
 
 
   if (STATUS == BTN_PRST_STATUS) {
-    byte midiLedStatus = bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset );
+    byte midiLedStatus = bitRead(ledState[BTN_PRST_STATUS], BTN_PRST_START + 1 + curr_preset_id );
     //DEBUGFN( NAMEDVALUE(midiLedStatus) );
 
     if (midiLedStatus != 0 && midi_activity ){
-          setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 0);
+          setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset_id, 0);
           led_midi_on_time = millis();
          // midi_activity = false;
       }
 
     if( (millis()-led_midi_on_time > 100) && (midiLedStatus == 0) ){
-     // digitalWriteFast(BTN_PRST_START + 1 + curr_preset, 1);
+     // digitalWriteFast(BTN_PRST_START + 1 + curr_preset_id, 1);
  //           DEBUGFN( "activity off" );
-      setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset, 1);
+      setBtnLedState(BTN_PRST_STATUS, BTN_PRST_START + curr_preset_id, 1);
     }
   }
 }
@@ -817,14 +852,14 @@ byte eep_read_curr_preset_id(){
 
 void eep_store_curr_preset_id(){
     // Write a byte in EEPROM memory.
-    DEBUGFN(NAMEDVALUE(curr_preset));
-    eeprom.writeByte(ACTIVE_PRST_ID_ADDR, curr_preset);
+    DEBUGFN(NAMEDVALUE(curr_preset_id));
+    eeprom.writeByte(ACTIVE_PRST_ID_ADDR, curr_preset_id);
     delay(10);
   }
 
 void eep_load_preset_params( byte preset_id ){
   for (byte st = 0; st < CONTROLS_NUM; st++){
-    for (byte te = 0; te < 18; te++) {
+    for (byte te = 0; te < PARAMS_NUM_PER_CTRL; te++) {
       preset[st][te] = PRESETS[preset_id ][st][te];
     }
   }
