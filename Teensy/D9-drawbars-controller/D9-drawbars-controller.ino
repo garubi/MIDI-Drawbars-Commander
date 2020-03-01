@@ -1,7 +1,7 @@
 /*
   D9 programmable drawbars controller
 
-  ver 1.3.6 
+  ver 1.3.6 - 24C64-design
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
@@ -30,7 +30,7 @@
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 /* ************************************************************************
- *  Instatiate the I2C eeprom 
+ *  Instatiate the I2C eeprom
  */
 #define EEPROM_ADDRESS 0x51
 static Eeprom24C32_64 eeprom(EEPROM_ADDRESS);
@@ -112,7 +112,7 @@ const byte PARAMS_NUM_PER_CTRL = 6 * STATUSES_COUNT;
 		const byte TP_SX   = 2; // System Exclusive
     const byte TP_ON   = 3; // Note on
     const byte TP_PC   = 4; // Program Change
-    
+
 /*
    2) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    3) the min value to send out
@@ -182,7 +182,7 @@ const byte PRESETS[][CONTROLS_NUM][PARAMS_NUM_PER_CTRL]=
 byte preset[CONTROLS_NUM][PARAMS_NUM_PER_CTRL]={};
 const byte PRESETS_COUNT = sizeof(PRESETS) / sizeof(PRESETS[0]);
 
-byte curr_preset_id; // the currennt selected preset. 
+byte curr_preset_id; // the currennt selected preset.
 
 /* *************************************************************************
  *  Drawbars initialization
@@ -258,10 +258,10 @@ void setup()
 {
   Serial.begin(38400);
   MIDI.begin(MIDI_CHANNEL_OMNI);
-  
+
   // Initialize EEPROM library.
   eeprom.initialize();
-    
+
   // set ALT button as input Pullup and attach debouncer
   pinMode(BTN_ALT, INPUT_PULLUP);
   btn_alt.attach(BTN_ALT);
@@ -303,17 +303,17 @@ void setup()
   byte im_resetting = false;
   while (btn_alt.read() == 0){
     led.digitalWrite(0, 1); // turn on the ALT_BTN
-    
+
     //now blink btn[6]
     if( millis()-reset_btn_on_time > 200 && !im_resetting ){
         led.digitalWrite(7, !reset_btn_led);
         reset_btn_led = !reset_btn_led;
       reset_btn_on_time = millis();
     }
-      
+
      btn_alt.update(); // does the ALT button chaged?
      btn[6].update(); // does the Reset button changed?
-    
+
     if (btn[6].fell()){ // the reset button was pressed: let's start the reset procedure
        DEBUGFN("factory restore should go here");
        led.digitalWrite(7, HIGH); //keep the led to signal that the reset procedure is starting
@@ -358,7 +358,7 @@ void load_preset( byte preset_id ){
   DEBUGFN(NAMEDVALUE(btn_scanned));
   setBtnLedState(BTN_PRST_STATUS, old_preset_led, 0);
   setBtnLedState(BTN_PRST_STATUS, btn_scanned,  !btn_state[BTN_PRST_STATUS][btn_scanned]);
-      
+
   // reset all data
   DEBUGFN("Reset btns and leds data");
   // SET al buttons to 0
@@ -863,5 +863,5 @@ void eep_load_preset_params( byte preset_id ){
       preset[st][te] = PRESETS[preset_id ][st][te];
     }
   }
-    
+
 }
