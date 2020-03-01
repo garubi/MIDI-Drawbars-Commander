@@ -34,7 +34,8 @@
  */
 #define EEPROM_ADDRESS 0x51
 static Eeprom24C32_64 eeprom(EEPROM_ADDRESS);
-const word ACTIVE_PRST_ID_ADDR = 0;
+const word EEP_ACTIVE_PRST_ID_ADDR = 0;
+const word EEP_PRSTS_START_ADDR = 10; // we let some byte free just in case we need to stroe other small pieces of global configuration... 
 
 
 /* *************************************************************************
@@ -183,6 +184,7 @@ byte preset[CONTROLS_NUM][PARAMS_NUM_PER_CTRL]={};
 const byte PRESETS_COUNT = sizeof(PRESETS) / sizeof(PRESETS[0]);
 
 byte curr_preset_id; // the currennt selected preset.
+const int EEP_PARAMS_SPACE_SIZE = PRESETS_COUNT * CONTROLS_NUM * PARAMS_NUM_PER_CTRL;
 
 /* *************************************************************************
  *  Drawbars initialization
@@ -296,11 +298,15 @@ void setup()
   btnAlt_released = 1;
 
   // To reset to factory presets keep pressed the ALT button while turning on the device
-  // then press the "leslie fast" button
+  // then press the "leslie fast" button (the last one on the right)
   btn_alt.update();
   long reset_btn_on_time = millis();
   byte reset_btn_led = 1;
   byte im_resetting = false;
+
+  int counter = 0;
+  //byte parameter[EEP_PARAMS_SPACE_SIZE] = {};
+  
   while (btn_alt.read() == 0){
     led.digitalWrite(0, 1); // turn on the ALT_BTN
 
@@ -315,13 +321,34 @@ void setup()
      btn[6].update(); // does the Reset button changed?
 
     if (btn[6].fell()){ // the reset button was pressed: let's start the reset procedure
-       DEBUGFN("factory restore should go here");
-       led.digitalWrite(7, HIGH); //keep the led to signal that the reset procedure is starting
-       im_resetting = true; //don't blonk animore
+       //DEBUGFN("factory restore should go here");
+       led.digitalWrite(7, HIGH); //keep the led on to signal that the reset procedure is starting
+       im_resetting = true; //don't blink animore
+
+       
 
        /* **************************************
         *  TODO: Write the presets to the eprom
+        * 1: read the hardcoded presets
+        * 2: put them on the eeprom 
         */
+        for(byte prs = 0; prs < PRESETS_COUNT; prs++){
+          for (byte st = 0; st < CONTROLS_NUM; st++){
+              for (byte te = 0; te < PARAMS_NUM_PER_CTRL; te++) {
+                //parameter[counter] = PRESETS[prs][st][te];
+                eeprom.writeByte(EEP_PRSTS_START_ADDR + counter, PRESETS[prs][st][te]);
+                //NAMEDVALUE(EEP_PRSTS_START_ADDR + counter)
+                //NAMEDVALUE(PRESETS[prs][st][te])
+                counter++;
+              }
+            }          
+        }
+        // write it
+        //eeprom.writeBytes(EEP_PRSTS_START_ADDR, EEP_PARAMS_SPACE_SIZE, parameter);
+
+       // turn the led off when the write procedure finish
+       led.digitalWrite(7, LOW); 
+       //im_resetting = true; //don't blink animore
     }
   }
 
@@ -372,6 +399,7 @@ void load_preset( byte preset_id ){
   // setVibchoType( btn_default[7][ST_ALT] );
 
   eep_load_preset_params( preset_id ); // Load the preset's parameters
+  
    //NAMEDVALUE(preset);
   // Check if the pedal is aliased
   if( preset[BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MIN ] == 0 && preset[BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + MAX ] == 0 && preset[BTN_PED+BTN_IDX_START][STATUS_IDX[ST_UP] + CHAN ] == 0){
@@ -845,7 +873,7 @@ void MidiMerge(){
 // Return a byte with the last active preset
 byte eep_read_curr_preset_id(){
     // Read a byte at address 0 in EEPROM memory.
-    byte data = eeprom.readByte(ACTIVE_PRST_ID_ADDR);
+    byte data = eeprom.readByte(EEP_ACTIVE_PRST_ID_ADDR);
     DEBUGFN(NAMEDVALUE(data));
     return data;
   }
@@ -853,15 +881,30 @@ byte eep_read_curr_preset_id(){
 void eep_store_curr_preset_id(){
     // Write a byte in EEPROM memory.
     DEBUGFN(NAMEDVALUE(curr_preset_id));
-    eeprom.writeByte(ACTIVE_PRST_ID_ADDR, curr_preset_id);
+    eeprom.writeByte(EEP_ACTIVE_PRST_ID_ADDR, curr_preset_id);
     delay(10);
   }
 
 void eep_load_preset_params( byte preset_id ){
+
+  // Read the whole preset's memory space
+  int single_param_space_size = CONTROLS_NUM * PARAMS_NUM_PER_CTRL;
+  //byte parameters[single_param_space_size] = {0};  
+  int address = EEP_PRSTS_START_ADDR + (preset_id * single_param_space_size);
+  
+  int counter = 0;
+  
+  //eeprom.readBytes(address, single_param_space_size, parameters);
+
+  // Assign the bytes to the preset matrix;
   for (byte st = 0; st < CONTROLS_NUM; st++){
     for (byte te = 0; te < PARAMS_NUM_PER_CTRL; te++) {
-      preset[st][te] = PRESETS[preset_id ][st][te];
+     // preset[st][te] = PRESETS[preset_id ][st][te];
+    preset[st][te] = eeprom.readByte( address + counter );
+    Serial.print(preset[st][te]);
+
+    // preset[st][te] = parameters[counter];
+     counter++;
     }
   }
-
 }
