@@ -288,12 +288,59 @@ void setup()
   OLD_STATUS = ST_LOW;
   btnAlt_released = 1;
 
-  // load the default preset
-  for (byte btn_scanned = BTN_PRST_START; btn_scanned < (BTN_PRST_COUNT + BTN_PRST_START); btn_scanned++) {
-      if( 0 != btn_default[btn_scanned][BTN_PRST_STATUS] ){
-        changePreset(  btn_scanned  );
-		break;
-      }
+  Serial.print('Version eeprom');
+  // To reset to factory presets keep pressed the ALT button while turning on the device
+  // then press the "leslie fast" button (the last one on the right)
+  btn_alt.update();
+  long reset_btn_on_time = millis();
+  byte reset_btn_led = 1;
+  byte im_resetting = false;
+
+  int counter = 0;
+  //byte parameter[EEP_PARAMS_SPACE_SIZE] = {};
+
+  while (btn_alt.read() == 0){
+    led.digitalWrite(0, 1); // turn on the ALT_BTN
+
+    //now blink btn[6]
+    if( millis()-reset_btn_on_time > 200 && !im_resetting ){
+        led.digitalWrite(7, !reset_btn_led);
+        reset_btn_led = !reset_btn_led;
+      reset_btn_on_time = millis();
+    }
+
+     btn_alt.update(); // does the ALT button chaged?
+     btn[6].update(); // does the Reset button changed?
+
+    if (btn[6].fell()){ // the reset button was pressed: let's start the reset procedure
+       //DEBUGFN("factory restore should go here");
+       led.digitalWrite(7, HIGH); //keep the led on to signal that the reset procedure is starting
+       im_resetting = true; //don't blink animore
+
+
+
+       /* **************************************
+        *  TODO: Write the presets to the eprom
+        * 1: read the hardcoded presets
+        * 2: put them on the eeprom
+        */
+        for(byte prs = 0; prs < PRESETS_COUNT; prs++){
+          for (byte st = 0; st < CONTROLS_NUM; st++){
+              for (byte te = 0; te < PARAMS_NUM_PER_CTRL; te++) {
+                //parameter[counter] = PRESETS[prs][st][te];
+                eeprom.writeByte(EEP_PRSTS_START_ADDR + counter, PRESETS[prs][st][te]);
+                //NAMEDVALUE(EEP_PRSTS_START_ADDR + counter)
+                //NAMEDVALUE(PRESETS[prs][st][te])
+                counter++;
+              }
+            }
+        }
+        // write it
+        //eeprom.writeBytes(EEP_PRSTS_START_ADDR, EEP_PARAMS_SPACE_SIZE, parameter);
+
+       // turn the led off when the write procedure finish
+       led.digitalWrite(7, LOW);
+       //im_resetting = true; //don't blink animore
     }
 
   syncAnalogData();
@@ -792,7 +839,7 @@ void MidiMerge(){
     } else {
 
 	// TODO: intercept the sysex specific for this devices
-	
+
       // SysEx messages are special.  The message length is given in data1 & data2
       unsigned int SysExLength = data1 + data2 * 256;
       MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
@@ -823,4 +870,33 @@ void MidiMerge(){
   }
 
 
+void eep_store_curr_preset_id(){
+    // Write a byte in EEPROM memory.
+    DEBUGFN(NAMEDVALUE(curr_preset_id));
+    eeprom.writeByte(EEP_ACTIVE_PRST_ID_ADDR, curr_preset_id);
+    delay(10);
+  }
+
+void eep_load_preset_params( byte preset_id ){
+
+  // Read the whole preset's memory space
+  int single_param_space_size = CONTROLS_NUM * PARAMS_NUM_PER_CTRL;
+  //byte parameters[single_param_space_size] = {0};
+  int address = EEP_PRSTS_START_ADDR + (preset_id * single_param_space_size);
+
+  int counter = 0;
+
+  //eeprom.readBytes(address, single_param_space_size, parameters);
+
+  // Assign the bytes to the preset matrix;
+  for (byte st = 0; st < CONTROLS_NUM; st++){
+    for (byte te = 0; te < PARAMS_NUM_PER_CTRL; te++) {
+     // preset[st][te] = PRESETS[preset_id ][st][te];
+    preset[st][te] = eeprom.readByte( address + counter );
+   // Serial.print(preset[st][te]);
+
+    // preset[st][te] = parameters[counter];
+     counter++;
+    }
+  }
 }
