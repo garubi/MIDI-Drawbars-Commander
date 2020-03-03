@@ -1,6 +1,7 @@
 /*
   D9 programmable drawbars controller
 
+
   ver 1.3.6 - 24C64-design
 
   Created 2018
@@ -28,6 +29,9 @@
 #define PRINTSTREAM_FALLBACK
 #define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
+
+
+String version = "1.3.5-sysEx";
 
 /* ************************************************************************
  *  Instatiate the I2C eeprom
@@ -660,6 +664,7 @@ void getDigitalData() {
       				  btn_index = btn_scanned + BTN_IDX_START;
       			  }
 
+
                 if ( (preset[btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE )== IS_TOGGLE){
                   DEBUGFN("toggle...");
                   // il pulsante è TOGGLE
@@ -703,6 +708,7 @@ void getDigitalData() {
       		  btn_scanned = preset[btn_index][STATUS_IDX[STATUS] + PARAM];
       		  btn_index = btn_scanned + BTN_IDX_START;
       	  }
+
 
       		if ( (preset[btn_index][STATUS_IDX[STATUS] +BEHAV] & IS_TOGGLE) != IS_TOGGLE){
               DEBUGFN("Btn released - No TOOGLE & No PRESET...");
@@ -840,6 +846,9 @@ void MidiMerge(){
       midi::MidiType mtype = (midi::MidiType)type;
       MIDI.send(mtype, data1, data2, channel);
     } else {
+
+	// TODO: intercept the sysex specific for this devices
+	
       // SysEx messages are special.  The message length is given in data1 & data2
       unsigned int SysExLength = data1 + data2 * 256;
       MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
