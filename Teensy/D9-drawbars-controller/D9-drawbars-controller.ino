@@ -2,7 +2,7 @@
   D9 programmable drawbars controller
 
 
-  ver 1.3.6 - 24C64-design
+  ver 1.3.6 - sysex config
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
@@ -18,10 +18,10 @@
 /* TODO
  *  reduce code repetition when controlling for IS_GLOBAL and IS_ALL in both analog and digital input
  *  */
-
-const byte VERSION_MAJOR = 0;
-const byte VERION_MINOR = 1;
-const byte VERSION_PATCH = 0;
+String version = "1.3.6-sysEx";
+const byte VERSION_MAJOR = 1;
+const byte VERION_MINOR = 3;
+const byte VERSION_PATCH = 6;
 
 #include <Wire.h>
 #include <Eeprom24C32_64.h> // https://github.com/jlesech/Eeprom24C32_64
@@ -68,7 +68,7 @@ const uint8_t X_CMD_SAVE_PRESET= 0x7F; // Save the Preset to the non volative me
  */
  const uint8_t X_OK = 0x00;
  const uint8_t X_ERROR = 0x01; // Something went wrong
-String version = "1.3.5-sysEx";
+
 
 /* ************************************************************************
  *  Instatiate the I2C eeprom
