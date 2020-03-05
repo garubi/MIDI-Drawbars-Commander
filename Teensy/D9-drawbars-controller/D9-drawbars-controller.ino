@@ -27,11 +27,11 @@
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-#define DEBUG_OUT Serial
+// #define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 
-String version = "1.3.5-sysEx";
+String version = "1.3.6 - 24C64-design";
 
 /* ************************************************************************
  *  Instatiate the I2C eeprom
