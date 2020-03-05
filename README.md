@@ -1,7 +1,19 @@
 # MIDI Drawbars Commander
 
-## Notes:
-You should use a Normally Open pedal to switch from the Leslie's speed, otherwise the "switch impulse" is sent on pedal release instead of pedal push (see issue #24)
+## Pedals:
+### Expression pedal
+Any "standard" expression pedal compatible with the Roland EV5 will do.
+
+### Switch pedal (leslie speed)
+You should use a Normally Open non latching (momentary) pedal to toggle the Leslie's speed, otherwise the "switch impulse" is sent on pedal release instead of pedal push (see issue #24)
+
+## Factory restore
+You can restore the presets factory defaults with the following procedure
+- **turn off** the MIDI Drawbars Comamnder (i.e. detach from the USB cable)
+- **press and hold the *ALT* button while turning on the Commander** (i.e. attach the USB cable). This will boot the Commander in *Reset mode*. The "*Leslie fast*" button's led will start blinking
+- **while holding the *ALT* button, press the blinking "*Leslie fast*" button** to wipe the memory and reload the factory presets. The led will stop blink.
+- **TODO: how to know when the restore finish?**
+- Now **release the *ALT* button**: the Commander will exit from the *Reset mode* and it's ready to perform using the default parameters.
 
 ## Changelog:
 - v. 1.3.5 Fix some issues with control assign in FA preset, and a small bug in the Pedal switch control
