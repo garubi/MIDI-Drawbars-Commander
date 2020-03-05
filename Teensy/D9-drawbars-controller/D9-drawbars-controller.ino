@@ -15,6 +15,10 @@
  *  reduce code repetition when controlling for IS_GLOBAL and IS_ALL in both analog and digital input
  *  */
 
+const byte VERSION_MAJOR = 0;
+const byte VERION_MINOR = 1;
+const byte VERSION_PATCH = 0;
+
 #include <Wire.h>
 #include <Adafruit_MCP23017.h>
 #include <Bounce2.h> // https://github.com/thomasfredericks/Bounce2/wiki
@@ -22,10 +26,44 @@
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-//S #define DEBUG_OUT Serial
+#define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
-String version = "1.3.5-sysEx";
+
+/* ************************************************************************
+ *  SysEX implementation
+ *
+ *  Format for the requests and the reply:
+ *  F0 X_MANID1 X_MANID2 X_PRODID ACTION OBJECT vv F7
+ */
+const uint8_t X_MANID1 = 0x37; // Manufacturer ID 1
+const uint8_t X_MANID2 = 0x72; // Manufacturer ID 2
+const uint8_t X_PRODID = 0x09; // Product ID
+
+/*
+ * Where ACTION is
+ */
+const uint8_t X_REQ = 0x00; // Request
+const uint8_t X_REP = 0x01; // Replay
+
+ /*
+ * Where OBJECT is:
+ */
+const uint8_t X_FW_VER 			= 0x01; // Firmware version. Replay vv is VERSION_MAJOR VERSION_MINOR VERSION_PATCH.
+const uint8_t X_ACTIVE_PRESET 	= 0x02; // The active preset. Replay vv is byte) Active preset id [0-3].
+const uint8_t X_CTRL_INFO 		= 0x03; // Reply with info about the controls: 1) Number of presets slots (PRESETS_COUNT), 2) Buttons number (BTN_COUNT), 3) Drawbars number (DRWB_COUNT)
+
+const uint8_t X_REQ_CTRL_PARAMS = 0x10; // Current settings for a control: PRESET_ID CTRL_ID. Reply vv is: PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_Behaviour LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_Behaviour ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_Behaviour
+const uint8_t X_SET_CTRL_PARAMS = 0x11; // Send the settings for a control (but doesn't save it): PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_Behaviour LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_Behaviour ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_Behaviour. Reply vv is 0 if is all right, an Error code if something went wrog
+
+const uint8_t X_CMD_SAVE_PRESET= 0x7F; // Save the Preset to the non volative memory: vv is PRESET_ID. Reply vv is 0 if all went ok, an error code if someting wen wrong
+
+/*
+ * REPLY CODES
+ */
+ const uint8_t X_OK = 0x00;
+ const uint8_t X_ERROR = 0x01; // Something went wrong
+
 /* *************************************************************************
  *  Pins assign
  */
@@ -546,12 +584,12 @@ void getAnalogData() {
         analogData[drwb_scanned] = drwb[drwb_scanned].getValue() >> 3;
         if (analogData[drwb_scanned] != analogDataLag[drwb_scanned]) {
           analogDataLag[drwb_scanned] = analogData[drwb_scanned];
-          DEBUGFN( "DWB changed: " );
-          DEBUGVAL(drwb_scanned,analogData[drwb_scanned]);
+          //DEBUGFN( "DWB changed: " );
+          //DEBUGVAL(drwb_scanned,analogData[drwb_scanned]);
 
           // check if this drawbar is dedicated to the VIB/CHO control
           if ( STATUS == VIBCHO_SEL_STATUS && drwb_scanned == VIBCHO_SEL_DRWB ){
-            DEBUGFN("This DWB controls VIBCHO selection");
+            //DEBUGFN("This DWB controls VIBCHO selection");
 			      setVibchoType( analogData[drwb_scanned] );
           }
           else{
@@ -716,8 +754,8 @@ void getDigitalData() {
 
 void sendMidi( int type, byte parameter, byte value, byte control, byte channel)
 {
-  DEBUGFN("Send midi");
-  DEBUGVAL(type,parameter,value,control);
+  //DEBUGFN("Send midi");
+  //DEBUGVAL(type,parameter,value,control);
   int SysexLenght = 0;
     switch (type) {
       case TP_ON: // Note On
@@ -837,12 +875,51 @@ void MidiMerge(){
       midi::MidiType mtype = (midi::MidiType)type;
       MIDI.send(mtype, data1, data2, channel);
     } else {
+<<<<<<< Updated upstream
 
 	// TODO: intercept the sysex specific for this devices
 
       // SysEx messages are special.  The message length is given in data1 & data2
       unsigned int SysExLength = data1 + data2 * 256;
       MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
+=======
+      // we received SysEx
+     uint8_t* sysex_message = usbMIDI.getSysExArray();
+     DEBUGVAL(sysex_message[1]) ;
+     DEBUGVAL(sysex_message[2]) ;
+     DEBUGVAL(sysex_message[3]) ;
+
+    if ( sysex_message[1] == X_MANID1 && sysex_message[2] == X_MANID2 && sysex_message[3] == X_PRODID2 && sysex_message[4] == X_REQ){
+      // The SysEx is for internal use of Drawbar Commander
+      DEBUGFN("SYSEX for us ;-) ");
+      DEBUGVAL(sysex_message[5]) ;
+        switch( sysex_message[5]){
+          case X_FW_VER: // request version
+              uint8_t rp[8] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_FW_VER, VERSION_MAJOR, VERION_MINOR, VERSION_PATCH };
+             usbMIDI.sendSysEx(8, rp, false);
+          break;
+          case X_ACTIVE_PRESET: // request active preset
+              uint8_t rp[6] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_ACTIVE_PRESET, curr_preset };
+             usbMIDI.sendSysEx(6, rp, false);
+          break;
+          case X_REQ_CTRL_PARAMS: // request active preset
+		  	var preset_id = sysex_message[6];
+		  	var control_id = sysex_message[7];
+
+            uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, preset_id, control_id};
+			for (byte ctrl = 0; ctrl < CONTROLS_NUM; ctrl++) {
+				rp[8+ctrl] = PRESETS[preset_id][control_id][ctrl];
+			}
+            usbMIDI.sendSysEx(7 + CONTROLS_NUM, rp, false);
+          break;
+        }
+      }
+      else{
+            // SysEx messages are special.  The message length is given in data1 & data2
+            unsigned int SysExLength = data1 + data2 * 256;
+            MIDI.sendSysEx(SysExLength, usbMIDI.getSysExArray(), true);
+        }
+>>>>>>> Stashed changes
     }
 //DEBUGFN( NAMEDVALUE(type) );
      if (type != usbMIDI.ActiveSensing && type != 255) {
