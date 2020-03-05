@@ -1,2 +1,6 @@
 *.hex
 *.bak
+*.csv
+*.tsv
+*.xml
+fp-info-cache
