@@ -2,7 +2,7 @@
   D9 programmable drawbars controller
 
 
-  ver 1.3.6 - sysex config
+  ver 0.1.2 - sysex config
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
@@ -18,10 +18,9 @@
 /* TODO
  *  reduce code repetition when controlling for IS_GLOBAL and IS_ALL in both analog and digital input
  *  */
-String version = "1.3.6-sysEx";
-const byte VERSION_MAJOR = 1;
-const byte VERION_MINOR = 3;
-const byte VERSION_PATCH = 6;
+const byte VERSION_MAJOR = 0;
+const byte VERION_MINOR = 1;
+const byte VERSION_PATCH = 2;
 
 #include <Wire.h>
 #include <Eeprom24C32_64.h> // https://github.com/jlesech/Eeprom24C32_64
@@ -31,7 +30,7 @@ const byte VERSION_PATCH = 6;
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-#define DEBUG_OUT Serial
+// #define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 
