@@ -923,28 +923,34 @@ void MidiMerge(){
      DEBUGVAL(sysex_message[2]) ;
      DEBUGVAL(sysex_message[3]) ;
 
-    if ( sysex_message[1] == X_MANID1 && sysex_message[2] == X_MANID2 && sysex_message[3] == X_PRODID2 && sysex_message[4] == X_REQ){
+    if ( sysex_message[1] == X_MANID1 && sysex_message[2] == X_MANID2 && sysex_message[3] == X_PRODID && sysex_message[4] == X_REQ){
       // The SysEx is for internal use of Drawbar Commander
       DEBUGFN("SYSEX for us ;-) ");
       DEBUGVAL(sysex_message[5]) ;
         switch( sysex_message[5]){
           case X_FW_VER: // request version
+             {
               uint8_t rp[8] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_FW_VER, VERSION_MAJOR, VERION_MINOR, VERSION_PATCH };
-             usbMIDI.sendSysEx(8, rp, false);
+                           usbMIDI.sendSysEx(8, rp, false);
+             }
           break;
           case X_ACTIVE_PRESET: // request active preset
-              uint8_t rp[6] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_ACTIVE_PRESET, curr_preset };
-             usbMIDI.sendSysEx(6, rp, false);
+              {
+               uint8_t rp[6] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_ACTIVE_PRESET, curr_preset_id };
+              usbMIDI.sendSysEx(6, rp, false);
+              }
           break;
           case X_REQ_CTRL_PARAMS: // request active preset
-		  	var preset_id = sysex_message[6];
-		  	var control_id = sysex_message[7];
+          {
+		    	//byte preset_id = sysex_message[6];
+		      //	byte control_id = sysex_message[7];
 
-            uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, preset_id, control_id};
-			for (byte ctrl = 0; ctrl < CONTROLS_NUM; ctrl++) {
-				rp[8+ctrl] = PRESETS[preset_id][control_id][ctrl];
-			}
-            usbMIDI.sendSysEx(7 + CONTROLS_NUM, rp, false);
+            //        uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, preset_id, control_id};
+        		//	for (byte ctrl = 0; ctrl < CONTROLS_NUM; ctrl++) {
+        		//		rp[8+ctrl] = PRESETS[preset_id][control_id][ctrl];
+        		//	}
+           // usbMIDI.sendSysEx(7 + CONTROLS_NUM, rp, false);
+          }
           break;
         }
       }
