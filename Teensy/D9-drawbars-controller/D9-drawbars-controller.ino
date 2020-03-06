@@ -152,8 +152,8 @@ const byte PARAMS_NUM_PER_CTRL = 6 * STATUSES_COUNT;
 		const byte TP_NO   = 0; // Disabled
 		const byte TP_CC   = 1; // Control Change
 		const byte TP_SX   = 2; // System Exclusive
-    const byte TP_ON   = 3; // Note on
-    const byte TP_PC   = 4; // Program Change
+    	const byte TP_ON   = 3; // Note on
+    	const byte TP_PC   = 4; // Program Change
 
 /*
    2) the command parameter (CC number, or Note number, or SySEx parameter etc...)
@@ -163,7 +163,7 @@ const byte PARAMS_NUM_PER_CTRL = 6 * STATUSES_COUNT;
 */
 		const byte IS_GLOBAL = 1; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
 		const byte SEND_BOTH = 2; // send the value set in this STATUS to both the Upper and Lower channels
-    const byte IS_TOGGLE = 4; // is a pushbutton (momentary) or is toggle?
+    	const byte IS_TOGGLE = 4; // is a pushbutton (momentary) or is toggle?
 /*
 	We can set the Pedal Switch as an alias of another button
 	 (i.e. when we press the pedal, the script acts as we pressed the associated button: sends out the buttons values and turn on/off the respective LED )
@@ -942,14 +942,19 @@ void MidiMerge(){
           break;
           case X_REQ_CTRL_PARAMS: // request active preset
           {
-		    	//byte preset_id = sysex_message[6];
-		      //	byte control_id = sysex_message[7];
+    	    	byte preset_id = sysex_message[6];
+    	      byte control_id = sysex_message[7];
 
-            //        uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, preset_id, control_id};
-        		//	for (byte ctrl = 0; ctrl < CONTROLS_NUM; ctrl++) {
-        		//		rp[8+ctrl] = PRESETS[preset_id][control_id][ctrl];
-        		//	}
-           // usbMIDI.sendSysEx(7 + CONTROLS_NUM, rp, false);
+            uint8_t rp[7+PARAMS_NUM_PER_CTRL] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, preset_id, control_id};
+
+    			int single_param_space_size = CONTROLS_NUM * PARAMS_NUM_PER_CTRL;
+    			int address = EEP_PRSTS_START_ADDR + (preset_id * single_param_space_size) + (control_id * PARAMS_NUM_PER_CTRL);
+
+    			  for (byte te = 0; te <= PARAMS_NUM_PER_CTRL; te++) {
+    				  rp[7+te] = eeprom.readByte( address + te );
+    			  }
+
+           		usbMIDI.sendSysEx(7 + CONTROLS_NUM, rp, false);
           }
           break;
         }
