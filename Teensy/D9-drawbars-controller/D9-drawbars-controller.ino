@@ -2,7 +2,7 @@
   D9 programmable drawbars controller
 
 
-  ver 0.1.2 - sysex config
+  ver 0.1.4 - sysex config
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
@@ -20,7 +20,7 @@
  *  */
 const byte VERSION_MAJOR = 0;
 const byte VERION_MINOR = 1;
-const byte VERSION_PATCH = 2;
+const byte VERSION_PATCH = 4;
 
 #include <Wire.h>
 #include <Eeprom24C32_64.h> // https://github.com/jlesech/Eeprom24C32_64
@@ -30,15 +30,17 @@ const byte VERSION_PATCH = 2;
 #include <ResponsiveAnalogRead.h>
 
 #define PRINTSTREAM_FALLBACK
-// #define DEBUG_OUT Serial
+//#define DEBUG_OUT Serial
 #include "Debug.hpp" // https://github.com/tttapa/Arduino-Debugging
 
 
 /* ************************************************************************
  *  SysEX implementation
  *
- *  Format for the requests and the reply:
- *  F0 X_MANID1 X_MANID2 X_PRODID ACTION OBJECT vv F7
+ *  Format for the requests :
+ *  F0 X_MANID1 X_MANID2 X_PRODID X_REQ COOMAND vv F7
+ * Format for the reply
+ * F0 X_MANID1 X_MANID2 X_PRODID X_REP OBJECT (Reply COdes) vv F7
  */
 const uint8_t X_MANID1 = 0x37; // Manufacturer ID 1
 const uint8_t X_MANID2 = 0x72; // Manufacturer ID 2
@@ -51,7 +53,7 @@ const uint8_t X_REQ = 0x00; // Request
 const uint8_t X_REP = 0x01; // Replay
 
  /*
- * Where OBJECT is:
+ * Where COMMAND is:
  */
 const uint8_t X_FW_VER 			= 0x01; // Firmware version. Replay vv is VERSION_MAJOR VERSION_MINOR VERSION_PATCH.
 const uint8_t X_ACTIVE_PRESET 	= 0x02; // The active preset. Replay vv is byte) Active preset id [0-3].
@@ -59,15 +61,22 @@ const uint8_t X_CTRL_INFO 		= 0x03; // Reply with info about the controls: 1) Nu
 
 const uint8_t X_REQ_CTRL_PARAMS = 0x10; // Current settings for a control: PRESET_ID CTRL_ID. Reply vv is: PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_Behaviour LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_Behaviour ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_Behaviour
 const uint8_t X_SET_CTRL_PARAMS = 0x11; // Send the settings for a control (but doesn't save it): PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_Behaviour LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_Behaviour ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_Behaviour. Reply vv is 0 if is all right, an Error code if something went wrog
-
+const uint8_t X_SET_PARAM 		= 0x12; //Send a setting for a single parameter (but doesn't save it): PRESET_ID CTRL_ID PARAM_ID (0-18) param value;
 const uint8_t X_CMD_SAVE_PRESET= 0x7F; // Save the Preset to the non volative memory: vv is PRESET_ID. Reply vv is 0 if all went ok, an error code if someting wen wrong
 
 /*
  * REPLY CODES
  */
  const uint8_t X_OK = 0x00;
- const uint8_t X_ERROR = 0x01; // Something went wrong
+ const uint8_t X_ERROR = 0x7F; // Something went wrong
 
+/*
+ * ERROR CODES
+ */
+  const uint8_t X_ERROR_UNKNOWN = 0x7F;
+  const uint8_t X_ERROR_PRESET  = 0x10;
+  const uint8_t X_ERROR_CONTROL = 0x20;
+  const uint8_t X_ERROR_PARAM   = 0x30;
 
 /* ************************************************************************
  *  Instatiate the I2C eeprom
@@ -918,9 +927,6 @@ void MidiMerge(){
     } else {
       // we received SysEx
      uint8_t* sysex_message = usbMIDI.getSysExArray();
-     DEBUGVAL(sysex_message[1]) ;
-     DEBUGVAL(sysex_message[2]) ;
-     DEBUGVAL(sysex_message[3]) ;
 
     if ( sysex_message[1] == X_MANID1 && sysex_message[2] == X_MANID2 && sysex_message[3] == X_PRODID && sysex_message[4] == X_REQ){
       // The SysEx is for internal use of Drawbar Commander
@@ -929,33 +935,109 @@ void MidiMerge(){
         switch( sysex_message[5]){
           case X_FW_VER: // request version
              {
-              uint8_t rp[8] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_FW_VER, VERSION_MAJOR, VERION_MINOR, VERSION_PATCH };
-                           usbMIDI.sendSysEx(8, rp, false);
+              uint8_t rp[9] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_FW_VER, X_OK, VERSION_MAJOR, VERION_MINOR, VERSION_PATCH };
+                usbMIDI.sendSysEx(9, rp, false);
              }
           break;
           case X_ACTIVE_PRESET: // request active preset
               {
-               uint8_t rp[6] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_ACTIVE_PRESET, curr_preset_id };
-              usbMIDI.sendSysEx(6, rp, false);
+               uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_ACTIVE_PRESET, X_OK, curr_preset_id };
+              usbMIDI.sendSysEx(7, rp, false);
               }
           break;
-          case X_REQ_CTRL_PARAMS: // request active preset
+          case X_REQ_CTRL_PARAMS: // request the parameter for a control
           {
-    	    	byte preset_id = sysex_message[6];
-    	      byte control_id = sysex_message[7];
+      	    byte preset_id = sysex_message[6];
+      	    byte control_id = sysex_message[7];
 
-            uint8_t rp[7+PARAMS_NUM_PER_CTRL] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, preset_id, control_id};
+      			if( preset_id != curr_preset_id ){
+      				uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, X_ERROR, X_ERROR_PRESET };
+      			   usbMIDI.sendSysEx(7, rp, false);
+      			}
+            else if(control_id > CONTROLS_NUM -1 ){
+                  uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, X_ERROR, X_ERROR_CONTROL };
+                 usbMIDI.sendSysEx(7, rp, false);
+            }
+      			else{
+                uint8_t rp[8+PARAMS_NUM_PER_CTRL] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_REQ_CTRL_PARAMS, X_OK, preset_id, control_id};
 
-    			int single_param_space_size = CONTROLS_NUM * PARAMS_NUM_PER_CTRL;
-    			int address = EEP_PRSTS_START_ADDR + (preset_id * single_param_space_size) + (control_id * PARAMS_NUM_PER_CTRL);
+          			int single_param_space_size = CONTROLS_NUM * PARAMS_NUM_PER_CTRL;
+          			int address = EEP_PRSTS_START_ADDR + (preset_id * single_param_space_size) + (control_id * PARAMS_NUM_PER_CTRL);
 
-    			  for (byte te = 0; te <= PARAMS_NUM_PER_CTRL; te++) {
-    				  rp[7+te] = eeprom.readByte( address + te );
-    			  }
+          			  for (byte te = 0; te <= PARAMS_NUM_PER_CTRL; te++) {
+          				  rp[8+te] = eeprom.readByte( address + te );
+          			  }
 
-           		usbMIDI.sendSysEx(7 + CONTROLS_NUM, rp, false);
+                 		usbMIDI.sendSysEx(8 + PARAMS_NUM_PER_CTRL, rp, false);
+      			}
           }
           break;
+    		  case X_SET_CTRL_PARAMS: // set the parameters for a control
+    		  // PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_Behaviour LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_Behaviour ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_Behaviour. Reply vv is 0 if is all right, an Error code if something went wrog
+    			{
+    				//TODO: validate the inputs
+    				byte preset_id = sysex_message[6];
+    				byte control_id = sysex_message[7];
+    				if( preset_id != curr_preset_id ){
+    					uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_SET_CTRL_PARAMS, X_ERROR, X_ERROR_PRESET };
+    				   usbMIDI.sendSysEx(7, rp, false);
+    				}
+            else if(control_id > CONTROLS_NUM -1 ){
+                  uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_SET_CTRL_PARAMS, X_ERROR, X_ERROR_CONTROL };
+                 usbMIDI.sendSysEx(7, rp, false);
+            }
+    				else{
+
+    					for (byte pr = 8; pr <= PARAMS_NUM_PER_CTRL+8; pr++) {
+    					  preset[control_id][pr] = sysex_message[pr];
+    					}
+
+    					//reply
+    					uint8_t rp[8+PARAMS_NUM_PER_CTRL] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_SET_CTRL_PARAMS, X_OK, preset_id, control_id};
+    					for (byte te = 0; te <= PARAMS_NUM_PER_CTRL; te++) {
+    						rp[8+te] =  preset[control_id][te];
+    					}
+    				  	usbMIDI.sendSysEx(8 + PARAMS_NUM_PER_CTRL, rp, false);
+    				}
+
+    			}
+    			break;
+      		case X_SET_PARAM:
+      			// PRESET_ID CTRL_ID PARAM_ID (0-18) param value;
+      				{
+                DEBUGVAL(PARAMS_NUM_PER_CTRL);
+      				  byte preset_id = sysex_message[6];
+      				  byte control_id = sysex_message[7];
+      				  byte param_id = sysex_message[8];
+      				  byte param_value = sysex_message[9];
+                DEBUGVAL(param_id);
+      				  if( preset_id != curr_preset_id ){
+      					  uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_SET_PARAM, X_ERROR, X_ERROR_PRESET };
+      					 usbMIDI.sendSysEx(7, rp, false);
+      				  }
+      				  else if(control_id > CONTROLS_NUM -1 ){
+      					  uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_SET_PARAM, X_ERROR, X_ERROR_CONTROL };
+      					 usbMIDI.sendSysEx(7, rp, false);
+      				  }
+      				  else if( param_id > PARAMS_NUM_PER_CTRL -1 ){
+      					  uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_SET_PARAM, X_ERROR, X_ERROR_PARAM };
+
+      					 usbMIDI.sendSysEx(7, rp, false);
+      				  }
+      				  else{
+
+      					  //TODO: Validate param_value
+      					  preset[control_id][param_id] = param_value;
+      					  uint8_t rp[10] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_SET_PARAM, X_OK, preset_id, control_id, param_id, param_value };
+                  		usbMIDI.sendSysEx(10, rp, false);
+      				  }
+      				}
+      			break;
+      		  case X_CMD_SAVE_PRESET: // save current preset
+      			{
+
+      			}
+      			break;
         }
       }
       else{
