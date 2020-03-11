@@ -374,13 +374,6 @@ void setup()
        led.digitalWrite(7, HIGH); //keep the led on to signal that the reset procedure is starting
        im_resetting = true; //don't blink animore
 
-
-
-       /* **************************************
-        *  TODO: Write the presets to the eprom
-        * 1: read the hardcoded presets
-        * 2: put them on the eeprom
-        */
         for(byte prs = 0; prs < PRESETS_COUNT; prs++){
           for (byte st = 0; st < CONTROLS_NUM; st++){
               for (byte te = 0; te < PARAMS_NUM_PER_CTRL; te++) {
@@ -392,12 +385,11 @@ void setup()
               }
             }
         }
-        // write it
-        //eeprom.writeBytes(EEP_PRSTS_START_ADDR, EEP_PARAMS_SPACE_SIZE, parameter);
+
 
        // turn the led off when the write procedure finish
        led.digitalWrite(7, LOW);
-       //im_resetting = true; //don't blink animore
+
     }
 
      btn_alt.update(); // does the ALT button chaged?
@@ -1089,24 +1081,14 @@ void eep_store_curr_preset_id(){
 
 void eep_load_preset_params( byte preset_id ){
 
-  // Read the whole preset's memory space
   int single_param_space_size = CONTROLS_NUM * PARAMS_NUM_PER_CTRL;
-  //byte parameters[single_param_space_size] = {0};
   int address = EEP_PRSTS_START_ADDR + (preset_id * single_param_space_size);
-
   int counter = 0;
 
-  //eeprom.readBytes(address, single_param_space_size, parameters);
-
-  // Assign the bytes to the preset matrix;
   for (byte st = 0; st < CONTROLS_NUM; st++){
     for (byte te = 0; te < PARAMS_NUM_PER_CTRL; te++) {
-     // preset[st][te] = PRESETS[preset_id ][st][te];
-    preset[st][te] = eeprom.readByte( address + counter );
-    Serial.print(preset[st][te]);
-
-    // preset[st][te] = parameters[counter];
-     counter++;
+    	preset[st][te] = eeprom.readByte( address + counter );
+     	counter++;
     }
   }
 }
