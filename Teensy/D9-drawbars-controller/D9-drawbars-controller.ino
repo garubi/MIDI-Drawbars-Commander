@@ -2,7 +2,7 @@
   D9 programmable drawbars controller
 
 
-  ver 0.1.4 - sysex config
+  ver 0.1.5 - sysex config
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
@@ -20,7 +20,7 @@
  *  */
 const byte VERSION_MAJOR = 0;
 const byte VERION_MINOR = 1;
-const byte VERSION_PATCH = 4;
+const byte VERSION_PATCH = 5;
 
 #include <Wire.h>
 #include <Eeprom24C32_64.h> // https://github.com/jlesech/Eeprom24C32_64
@@ -1027,7 +1027,17 @@ void MidiMerge(){
       			break;
       		  case X_CMD_SAVE_PRESET: // save current preset
       			{
+					byte preset_id = sysex_message[6];
 
+					if( preset_id != curr_preset_id ){ // if it's not for the current preset raise an error
+						uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_CMD_SAVE_PRESET, X_ERROR, X_ERROR_PRESET };
+					   usbMIDI.sendSysEx(7, rp, false);
+					}
+					else{
+						eep_write_preset_params(preset_id);
+						uint8_t rp[7] = { X_MANID1, X_MANID2, X_PRODID, X_REP, X_CMD_SAVE_PRESET, X_OK, preset_id };
+					  usbMIDI.sendSysEx(7, rp, false);
+					}
       			}
       			break;
         }
@@ -1091,4 +1101,18 @@ void eep_load_preset_params( byte preset_id ){
      	counter++;
     }
   }
+}
+
+void eep_write_preset_params( byte preset_id ){
+  int single_param_space_size = CONTROLS_NUM * PARAMS_NUM_PER_CTRL;
+  int address = EEP_PRSTS_START_ADDR + (preset_id * single_param_space_size);
+
+  int counter = 0;
+
+	for (byte st = 0; st < CONTROLS_NUM; st++){
+		for (byte te = 0; te < PARAMS_NUM_PER_CTRL; te++) {
+		  eeprom.writeByte(address + counter, preset[st][te]);
+		  counter++;
+		}
+	}
 }
