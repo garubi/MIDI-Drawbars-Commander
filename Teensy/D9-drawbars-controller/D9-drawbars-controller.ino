@@ -73,10 +73,10 @@ const uint8_t X_CMD_SAVE_PRESET= 0x7F; // Save the Preset to the non volative me
 /*
  * ERROR CODES
  */
-  const uint8_t X_ERROR_UNKNOWN = 0x7F;
-  const uint8_t X_ERROR_PRESET  = 0x10;
-  const uint8_t X_ERROR_CONTROL = 0x20;
-  const uint8_t X_ERROR_PARAM   = 0x30;
+  const uint8_t X_ERROR_UNKNOWN = 0x7F; //127
+  const uint8_t X_ERROR_PRESET  = 0x10; //16
+  const uint8_t X_ERROR_CONTROL = 0x20; //32
+  const uint8_t X_ERROR_PARAM   = 0x30; //48
 
 /* ************************************************************************
  *  Instatiate the I2C eeprom
