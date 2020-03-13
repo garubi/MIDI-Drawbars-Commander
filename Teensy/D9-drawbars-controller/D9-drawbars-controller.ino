@@ -59,8 +59,8 @@ const uint8_t X_FW_VER 			= 0x01; // Firmware version. Replay vv is VERSION_MAJO
 const uint8_t X_ACTIVE_PRESET 	= 0x02; // The active preset. Replay vv is byte) Active preset id [0-3].
 const uint8_t X_CTRL_INFO 		= 0x03; // Reply with info about the controls: 1) Number of presets slots (PRESETS_COUNT), 2) Buttons number (BTN_COUNT), 3) Drawbars number (DRWB_COUNT)
 
-const uint8_t X_REQ_CTRL_PARAMS = 0x10; // Current settings for a control: PRESET_ID CTRL_ID. Reply vv is: PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_Behaviour LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_Behaviour ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_Behaviour
-const uint8_t X_SET_CTRL_PARAMS = 0x11; // Send the settings for a control (but doesn't save it): PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_Behaviour LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_Behaviour ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_Behaviour. Reply vv is 0 if is all right, an Error code if something went wrog
+const uint8_t X_REQ_CTRL_PARAMS = 0x10; // Current settings for a control: PRESET_ID CTRL_ID. Reply vv is: PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_behavior LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_behavior ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_behavior
+const uint8_t X_SET_CTRL_PARAMS = 0x11; // Send the settings for a control (but doesn't save it): PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_behavior LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_behavior ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_behavior. Reply vv is 0 if is all right, an Error code if something went wrog
 const uint8_t X_SET_PARAM 		= 0x12; //Send a setting for a single parameter (but doesn't save it): PRESET_ID CTRL_ID PARAM_ID (0-18) param value;
 const uint8_t X_CMD_SAVE_PRESET= 0x7F; // Save the Preset to the non volative memory: vv is PRESET_ID. Reply vv is 0 if all went ok, an error code if someting wen wrong
 
@@ -167,7 +167,7 @@ const byte PARAMS_NUM_PER_CTRL = 6 * STATUSES_COUNT;
    2) the command parameter (CC number, or Note number, or SySEx parameter etc...)
    3) the min value to send out
    4) the max value to sed out
-   5) the button (and associated control command) behaviour:
+   5) the button (and associated control command) behavior:
 */
 		const byte IS_GLOBAL = 1; // if the control sends always the same value both in Upper that in Lower state (sends what's set in the Upper one)
 		const byte SEND_BOTH = 2; // send the value set in this STATUS to both the Upper and Lower channels
@@ -187,7 +187,7 @@ const byte PARAMS_NUM_PER_CTRL = 6 * STATUSES_COUNT;
  */
 const byte PRESETS[][CONTROLS_NUM][PARAMS_NUM_PER_CTRL]=
 {//                 UPPER                                    LOWER                                     ALTERNATE
-{//PIN             Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour                Type Prm Min Max Ch Behaviour
+{//PIN             Type Prm Min Max Ch behavior                  Type Prm Min Max Ch behavior                Type Prm Min Max Ch behavior
 /*DWB1*/        {TP_SX, 0x2A, 0, 8, 1, 0,                      TP_SX, 0x2A, 0, 8, 2, 0,                       TP_CC, 16, 0, 127, 0, SEND_BOTH}, // DRIVE
 /*DWB1_13*/     {TP_SX, 0x29, 0, 8, 1, 0,                      TP_SX, 0x29, 0, 8, 2, 0,                       TP_CC, 91, 0, 127, 0, SEND_BOTH}, //REV LEVEL
 /*DWB1_35*/     {TP_SX, 0x28, 0, 8, 1, 0,                      TP_SX, 0x28, 0, 8, 2, 0,                       TP_NO, 0x00, 0, 8, 1, 0}, // rev size
@@ -207,7 +207,7 @@ const byte PRESETS[][CONTROLS_NUM][PARAMS_NUM_PER_CTRL]=
 /*LSL_FAST*/    {TP_CC, 80, 0, 127, 1, IS_TOGGLE + SEND_BOTH,  TP_CC, 80, 0, 127, 2, IS_TOGGLE + SEND_BOTH,   TP_NO, 0,  0, 127, 0, 0}, // Rev OFF
 /*PED_SWITCH*/  {TP_ON,  6, 0, 0, 0, IS_TOGGLE + SEND_BOTH,    TP_ON,  0, 0, 0, 0, 0,                         TP_ON,  0, 0,   0, 0, 0},
 },//                 UPPER                                        LOWER                                    ALTERNATE
-{//PIN            Type Prm Min Max Ch Behaviour                 Type Prm Min Max Ch Behaviour                  Type Prm Min Max Ch Behaviour
+{//PIN            Type Prm Min Max Ch behavior                 Type Prm Min Max Ch behavior                  Type Prm Min Max Ch behavior
 /*DWB1*/        {TP_CC, 20, 0, 127, 1, 0,                      TP_CC, 29, 0, 127, 1, 0,                       TP_CC, 76, 0, 127, 1, 0}, // DRIVE
 /*DWB1_13*/     {TP_CC, 19, 0, 127, 1, 0,                      TP_CC, 28, 0, 127, 1, 0,                       TP_CC, 84, 0, 127, 1, 0}, // REV LEVEL
 /*DWB1_35*/     {TP_CC, 18, 0, 127, 1, 0,                      TP_CC, 105, 0, 127, 1, 0,                       TP_CC, 83, 0, 127, 1, 0}, // REV SIZE
@@ -965,7 +965,7 @@ void MidiMerge(){
           }
           break;
     		  case X_SET_CTRL_PARAMS: // set the parameters for a control
-    		  // PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_Behaviour LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_Behaviour ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_Behaviour. Reply vv is 0 if is all right, an Error code if something went wrog
+    		  // PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_behavior LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_behavior ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_behavior. Reply vv is 0 if is all right, an Error code if something went wrog
     			{
     				//TODO: validate the inputs
     				byte preset_id = sysex_message[6];
