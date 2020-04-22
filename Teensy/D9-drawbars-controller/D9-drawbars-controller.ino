@@ -591,15 +591,33 @@ void setLeds(){
 
 void setVibchoType( byte CCvalue ){
 	// calculate which Led turn on based on the Drawbar value
-	byte vibcho_led_on =  map(CCvalue, 0, 127, 0, 5);
+  byte vibcho_led_on = 0;
+  if( CCvalue >= 0 && CCvalue < 26 ){
+    vibcho_led_on = 0;
+  }
+  else if( CCvalue >= 26 && CCvalue < 51 ){
+    vibcho_led_on = 1;
+  }
+  else if( CCvalue >= 51 && CCvalue < 77 ){
+    vibcho_led_on = 2;
+  }
+  else if( CCvalue >= 77 && CCvalue < 102 ){
+    vibcho_led_on = 3;
+  }
+  else if( CCvalue >= 102 && CCvalue < 127 ){
+    vibcho_led_on = 4;
+  }
+  else {
+    vibcho_led_on = 5;
+  }
 
-	// only send if the new VibCho type is different from the old one
 	if ( vibcho_led_on != vibcho_led_on_old ){
     	vibcho_led_on_old = vibcho_led_on;
 	  	vibchoLedState = 0; // reset the leds
 	  	bitWrite(vibchoLedState, vibcho_led_on, 1 );
-	  	sendMidi( preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
 	}
+  sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
+
 }
 
 void getAnalogData() {
