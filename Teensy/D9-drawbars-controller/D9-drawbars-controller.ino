@@ -2,7 +2,7 @@
   D9 programmable drawbars controller
 
 
-  ver 0.1.5 - sysex config
+  ver 0.1.6 - sysex config
 
   Created 2018
   By Stefano Garuti stefano@garuti.it
@@ -20,7 +20,7 @@
  *  */
 const byte VERSION_MAJOR = 0;
 const byte VERION_MINOR = 1;
-const byte VERSION_PATCH = 5;
+const byte VERSION_PATCH = 6;
 
 #include <Wire.h>
 #include <Eeprom24C32_64.h> // https://github.com/jlesech/Eeprom24C32_64
@@ -616,7 +616,7 @@ void setVibchoType( byte CCvalue ){
 	  	vibchoLedState = 0; // reset the leds
 	  	bitWrite(vibchoLedState, vibcho_led_on, 1 );
 	}
-  sendMidi( PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, PRESETS[curr_preset][VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
+  sendMidi( preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +TYPE], preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +PARAM], CCvalue, VIBCHO_SEL_DRWB, preset[VIBCHO_SEL_DRWB][STATUS_IDX[VIBCHO_SEL_STATUS] +CHAN] );
 
 }
 
