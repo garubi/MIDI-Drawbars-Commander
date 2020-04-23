@@ -57,7 +57,6 @@ const uint8_t X_REP = 0x01; // Replay
  */
 const uint8_t X_FW_VER 			= 0x01; // Firmware version. Replay vv is VERSION_MAJOR VERSION_MINOR VERSION_PATCH.
 const uint8_t X_ACTIVE_PRESET 	= 0x02; // The active preset. Replay vv is byte) Active preset id [0-3].
-const uint8_t X_CTRL_INFO 		= 0x03; // Reply with info about the controls: 1) Number of presets slots (PRESETS_COUNT), 2) Buttons number (BTN_COUNT), 3) Drawbars number (DRWB_COUNT)
 
 const uint8_t X_REQ_CTRL_PARAMS = 0x10; // Current settings for a control: PRESET_ID CTRL_ID. Reply vv is: PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_behavior LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_behavior ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_behavior
 const uint8_t X_SET_CTRL_PARAMS = 0x11; // Send the settings for a control (but doesn't save it): PRESET_ID CTRL_ID UPP_Type UPP_Prm UPP_Min UPP_Max UPP_Ch UPP_behavior LOW_Type LOW_Prm LOW_Min LOW_Max LOW_Ch LOW_behavior ALT_Type ALT_Prm ALT_Min ALT_Max ALT_Ch ALT_behavior. Reply vv is 0 if is all right, an Error code if something went wrog
