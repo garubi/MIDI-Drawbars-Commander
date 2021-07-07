@@ -6,11 +6,11 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "MIDI Drawbar Commandar"
-Date "2019-04-02"
-Rev "ver. 3.0"
+Date "2020-02-15"
+Rev "ver. 4.0"
 Comp "UBI Stage"
 Comment1 "sgaruti@gmail.com"
-Comment2 ""
+Comment2 "this version adds eeprom memory"
 Comment3 ""
 Comment4 ""
 $EndDescr
@@ -1299,9 +1299,6 @@ F 3 "~" H 3200 6150 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	2050 5350 2050 5550
-Wire Wire Line
-	950  3950 1050 3950
-Connection ~ 950  3950
 NoConn ~ 3400 6250
 NoConn ~ 3400 6150
 NoConn ~ 3400 6050
@@ -1316,24 +1313,8 @@ F 3 "" H 3400 5950 50  0001 C CNN
 	1    3400 5950
 	-1   0    0    1   
 $EndComp
-Connection ~ 850  3950
-Wire Wire Line
-	550  3950 850  3950
-Wire Wire Line
-	850  3950 950  3950
 Wire Wire Line
 	950  5850 950  5350
-$Comp
-L Interface_Expansion:MCP23017_SP U1
-U 1 1 5C8F91DE
-P 1650 4650
-F 0 "U1" V 1650 5931 50  0000 C CNN
-F 1 "MCP23017_SP" V 1800 5850 50  0000 C CNN
-F 2 "Package_DIP:DIP-28_W7.62mm" H 1850 3650 50  0001 L CNN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf" H 1850 3550 50  0001 L CNN
-	1    1650 4650
-	0    1    1    0   
-$EndComp
 NoConn ~ 1750 3950
 NoConn ~ 1850 3950
 NoConn ~ 7150 3650
@@ -1587,7 +1568,7 @@ L Connector_Generic:Conn_02x13_Counter_Clockwise J8
 U 1 1 5CA980CA
 P 1950 2950
 F 0 "J8" V 2000 2200 50  0000 C CNN
-F 1 "Teensy Digital Connector" V 1650 2300 50  0000 C CNN
+F 1 "Teensy Digital Connector" V 1900 1750 50  0000 C CNN
 F 2 "" H 1950 2950 50  0001 C CNN
 F 3 "~" H 1950 2950 50  0001 C CNN
 	1    1950 2950
@@ -1873,14 +1854,11 @@ Wire Wire Line
 Connection ~ 2450 850 
 Wire Wire Line
 	2450 850  2100 850 
-Connection ~ 1050 3950
 Wire Wire Line
 	1550 3950 1550 3850
 Connection ~ 1550 3850
 Wire Wire Line
-	2350 3950 2350 3450
-Wire Wire Line
-	2450 3350 2450 3950
+	2450 3350 2450 3850
 Wire Wire Line
 	3400 6350 3500 6350
 Wire Wire Line
@@ -1917,7 +1895,7 @@ Text Notes 8700 5700 0    50   ~ 0
 Drawbars Board
 Text Notes 2800 1500 0    50   ~ 0
 Jack pedals assembly
-Text Notes 2950 4250 0    50   ~ 0
+Text Notes 3000 5200 0    50   ~ 0
 Control Board\nButtons/Led
 $Comp
 L power:+3V3 #PWR?
@@ -1930,14 +1908,6 @@ F 3 "" H 2750 4650 50  0001 C CNN
 	1    2750 4650
 	1    0    0    -1  
 $EndComp
-Wire Bus Line
-	750  5950 1450 5950
-Wire Bus Line
-	750  6650 3500 6650
-Wire Bus Line
-	7550 3250 7550 4900
-Wire Bus Line
-	6100 4900 7550 4900
 $Comp
 L power:GND #PWR?
 U 1 1 5CACBC14
@@ -1960,4 +1930,95 @@ F 3 "" H 4750 3050 50  0001 C CNN
 	1    4750 3050
 	-1   0    0    1   
 $EndComp
+$Comp
+L Memory_EEPROM:24LC64 U4
+U 1 1 5E48F1C2
+P 3150 3750
+F 0 "U4" H 3150 3269 50  0000 C CNN
+F 1 "24LC64" H 3150 3360 50  0000 C CNN
+F 2 "" H 3150 3750 50  0001 C CNN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/21189f.pdf" H 3150 3750 50  0001 C CNN
+	1    3150 3750
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	2350 3950 2350 3750
+Connection ~ 1050 3950
+Wire Wire Line
+	950  3950 1050 3950
+Connection ~ 950  3950
+Wire Wire Line
+	850  3950 950  3950
+Wire Wire Line
+	550  3950 850  3950
+Connection ~ 850  3950
+$Comp
+L Interface_Expansion:MCP23017_SP U1
+U 1 1 5C8F91DE
+P 1650 4650
+F 0 "U1" V 1650 5931 50  0000 C CNN
+F 1 "MCP23017_SP" V 1800 5850 50  0000 C CNN
+F 2 "Package_DIP:DIP-28_W7.62mm" H 1850 3650 50  0001 L CNN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf" H 1850 3550 50  0001 L CNN
+	1    1650 4650
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2750 3850 2450 3850
+Connection ~ 2450 3850
+Wire Wire Line
+	2450 3850 2450 3950
+Wire Wire Line
+	2750 3750 2350 3750
+Connection ~ 2350 3750
+Wire Wire Line
+	2350 3750 2350 3450
+Wire Wire Line
+	3550 3850 3550 4050
+Wire Wire Line
+	3550 4050 3150 4050
+$Comp
+L power:+3V3 #PWR?
+U 1 1 5E674495
+P 3150 4050
+F 0 "#PWR?" H 3150 3900 50  0001 C CNN
+F 1 "+3V3" H 3165 4223 50  0000 C CNN
+F 2 "" H 3150 4050 50  0001 C CNN
+F 3 "" H 3150 4050 50  0001 C CNN
+	1    3150 4050
+	-1   0    0    1   
+$EndComp
+Connection ~ 3150 4050
+Wire Wire Line
+	3550 3750 3550 3650
+Wire Wire Line
+	3550 3450 3150 3450
+Connection ~ 3550 3650
+Wire Wire Line
+	3550 3650 3550 3450
+$Comp
+L power:GND #PWR?
+U 1 1 5E6D20BB
+P 3550 3450
+F 0 "#PWR?" H 3550 3200 50  0001 C CNN
+F 1 "GND" H 3555 3277 50  0000 C CNN
+F 2 "" H 3550 3450 50  0001 C CNN
+F 3 "" H 3550 3450 50  0001 C CNN
+	1    3550 3450
+	-1   0    0    1   
+$EndComp
+Connection ~ 3550 3450
+Wire Wire Line
+	2750 3650 2750 3450
+Wire Wire Line
+	2750 3450 3150 3450
+Wire Bus Line
+	750  5950 1450 5950
+Wire Bus Line
+	750  6650 3500 6650
+Wire Bus Line
+	7550 3250 7550 4900
+Wire Bus Line
+	6100 4900 7550 4900
+Connection ~ 3150 3450
 $EndSCHEMATC
